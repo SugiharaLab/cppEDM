@@ -1,10 +1,10 @@
 
 CC  = g++
 OBJ = Data.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
-      Common.o Interface.o
+      Common.o Interface.o Parameter.o
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g -Wno-pmf-conversions
+CFLAGS = -std=c++11 -g
 LFLAGS = -lstdc++ -L./
 
 all:	$(LIB)
@@ -15,7 +15,7 @@ clean:
 	rm -f $(OBJ) $(LIB) Test
 
 distclean:
-	rm -f $(OBJ) $(LIB) Test *.*~
+	rm -f $(OBJ) $(LIB) Test *~
 
 $(LIB): $(OBJ)
 
@@ -45,6 +45,9 @@ Common.o: Common.cc
 
 Interface.o: Interface.cc
 	$(CC) -c Interface.cc $(CFLAGS)
+
+Parameter.o: Parameter.cc
+	$(CC) -c Parameter.cc $(CFLAGS)
 
 Test.o: Test.cc
 	$(CC) -c Test.cc $(CFLAGS)

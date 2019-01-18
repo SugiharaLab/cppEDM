@@ -1,10 +1,10 @@
 #include "Common.h"
 
 //----------------------------------------------------------------
-// 
+// Intended to execute tests to validate the code.
+// For now, it's open for use as a library test.
 //----------------------------------------------------------------
 main( int argc, char *argv[] ) {
-
     
     try {
         // Silly example to call Tokenize in libEDM on argv
