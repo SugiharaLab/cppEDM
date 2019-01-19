@@ -14,12 +14,12 @@ struct Neighbors FindNeighbors(
     int prediction_rows = predictionRows->size();
     
 #ifdef DEBUG
-    int Ncol = data->size();
+    int Ncol = matrix->NColumns();
     cout << "Neighbors(): prediction:" << endl;
     for ( size_t row = 0; row < 5; row++ ) {
         int row_i = (*libraryRows)[row];
         for ( size_t col = 0; col < Ncol; col++ ) {
-            cout << data[row_i][col] << " "; 
+            cout << (*matrix)(row_i,col) << " "; 
         } cout << endl;
     }
 #endif
