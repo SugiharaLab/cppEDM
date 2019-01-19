@@ -34,7 +34,7 @@ NamedData ReadData( string path = "./", string fileName = "Data.csv" ) {
 
 #ifdef DEBUG
     cout << "------- ReadData() Contents of file "
-         <<  << "-------" << endl;
+         << fileName << " -------" << endl;
     for( vector< string >::iterator ci = dataLines.begin();
          ci != dataLines.end(); ++ci ) {
         cout << *ci << endl;

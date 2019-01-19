@@ -5,12 +5,34 @@
 // 
 //----------------------------------------------------------------
 struct Neighbors FindNeighbors(
-    DataBlock   *data,
-    vector<int> *libraryRows,
-    vector<int> *predictionRows )
+    Matrix<double> *matrix, // 
+    vector<int>    *libraryRows,
+    vector<int>    *predictionRows )
 {
 
-    Neighbors neighbors;
+    int library_rows    = libraryRows->size();
+    int prediction_rows = predictionRows->size();
+    
+#ifdef DEBUG
+    int Ncol = data->size();
+    cout << "Neighbors(): prediction:" << endl;
+    for ( size_t row = 0; row < 5; row++ ) {
+        int row_i = (*libraryRows)[row];
+        for ( size_t col = 0; col < Ncol; col++ ) {
+            cout << data[row_i][col] << " "; 
+        } cout << endl;
+    }
+#endif
+
+    // Identify degenerate library : prediction points by time comparison
+    //vector< double > timePred = (*data)[ *predictionRows ][ 0 ];
+    //vector< double > timeLib  = (*data)[ *libraryRows    ][ 0 ];
+    //timeIntersection = np.intersect1d( timePred, timeLib )
+    //if len( timeIntersection ) :
+    //    if args.verbose or args.warnings:
+    //      print( 'FindNeighbors(): Degenerate library and prediction data.' )
+        
+    Neighbors neighbors; // { IndexBlock neighbors; DataBlock distances; }
 
     return neighbors;
 }

@@ -7,7 +7,8 @@
 main( int argc, char *argv[] ) {
     
     try {
-        // Silly example to call Tokenize in libEDM on argv
+        // Silly call to Tokenize() in libEDM on argv
+        //--------------------------------------------------
         vector<string> args( argv, argv + argc );
         
         stringstream ssargs;
@@ -16,10 +17,23 @@ main( int argc, char *argv[] ) {
         }
         
         vector<string> tokens = Tokenize( ssargs.str() );
-        
+        cout << "Tokenize( argv ): ";
         for ( auto ai = tokens.begin(); ai != tokens.end(); ++ai ) {
             cout << *ai << " ";
         } cout << endl;
+
+        // Matrix 
+        //--------------------------------------------------
+        Matrix<double> M( 2, 3 );
+        M(0,0) = 11; M(0,1) = 22; M(0,2) = 33;
+        M(1,0) = 44; M(1,1) = 55; M(1,2) = 66;
+        cout << "M(1,1)=" << M(1,1) << " M(0,2)=" << M(0,2)<< endl;
+
+        // Now call FindNeighbors()
+        //--------------------------------------------------
+        vector<int> libraryRows    = {1,2,3};
+        vector<int> predictionRows = {4,5,6};
+        
     }
     catch (...) {
  	cout << "Exception caught in main.\n";

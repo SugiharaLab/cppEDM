@@ -8,9 +8,9 @@
 struct Neighbors; // forward declaration
 
 // Prototypes
-struct Neighbors FindNeighbors( DataBlock   *data,
-                                vector<int> *libraryRows,
-                                vector<int> *predictionRows );
+struct Neighbors FindNeighbors( Matrix<double> *matrix,
+                                vector<int>    *libraryRows,
+                                vector<int>    *predictionRows );
 
 double Distance( vector<double> *v1,
                  vector<double> *p2,

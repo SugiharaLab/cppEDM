@@ -4,7 +4,7 @@ OBJ = Data.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
       Common.o Interface.o Parameter.o
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g
+CFLAGS = -std=c++11 -g -DDEBUG
 LFLAGS = -lstdc++ -L./
 
 all:	$(LIB)
