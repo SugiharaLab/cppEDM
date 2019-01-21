@@ -1,7 +1,7 @@
 
 CC  = g++
 OBJ = Data.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
-      Common.o Interface.o Parameter.o
+      Common.o Interface.o Parameter.o DataFrame.o ReadData.o
 LIB = libEDM.a
 
 CFLAGS = -std=c++11 -g -DDEBUG
@@ -21,6 +21,9 @@ $(LIB): $(OBJ)
 
 Data.o: Data.cc
 	$(CC) -c Data.cc $(CFLAGS)
+
+ReadData.o: ReadData.cc
+	$(CC) -c ReadData.cc $(CFLAGS)
 
 Neighbors.o: Neighbors.cc
 	$(CC) -c Neighbors.cc $(CFLAGS)
@@ -52,6 +55,8 @@ Parameter.o: Parameter.cc
 Test.o: Test.cc
 	$(CC) -c Test.cc $(CFLAGS)
 
+CameronTesting.o: CameronTesting.cc DataFrame.o ReadData.o
+	$(CC) -c CameronTesting.cc $(CFLAGS)
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
 depend:

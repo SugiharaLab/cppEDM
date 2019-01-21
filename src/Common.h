@@ -9,6 +9,8 @@
 
 // Type definitions
 typedef std::map< std::string, std::vector< double > > NamedData;
+typedef std::valarray< double >                        DFContainer;
+typedef std::vector< std::string >                     ColNamesList;
 
 // Enumerations
 enum class Method { Simplex, SMap };
