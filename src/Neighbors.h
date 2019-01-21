@@ -4,22 +4,26 @@
 #include <cmath>
 
 #include "Common.h"
+#include "Parameter.h"
 
 struct Neighbors; // forward declaration
 
 // Prototypes
-struct Neighbors FindNeighbors( Matrix<double> *matrix,
-                                vector<int>    *libraryRows,
-                                vector<int>    *predictionRows );
+struct Neighbors *FindNeighbors( Matrix<double>   *matrix,
+                                 std::vector<int> *libraryRows,
+                                 std::vector<int> *predictionRows,
+                                 Parameters       *parameters );
 
-double Distance( vector<double> *v1,
-                 vector<double> *p2,
-                 DistanceMetric  metric );
+double Distance( std::valarray<double> *v1,
+                 std::valarray<double> *p2,
+                 DistanceMetric    metric );
 
 // Return structure of FindNeighbors()
 struct Neighbors {
-    IndexBlock neighbors;
-    DataBlock  distances;
+    Matrix<int>    *neighbors;
+    Matrix<double> *distances;
+    Neighbors();
+    ~Neighbors();
 };
 
 #endif

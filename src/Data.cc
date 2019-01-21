@@ -5,27 +5,28 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-NamedData ReadData( string path = "./", string fileName = "Data.csv" ) {
+NamedData ReadData( std::string path = "./",
+                    std::string fileName = "Data.csv" ) {
     
     // Create input file stream and open file for input
-    ifstream dataStrm( path + fileName );
+    std::ifstream dataStrm( path + fileName );
 
     if ( not dataStrm.is_open() ) {
-        stringstream errMsg;
+        std::stringstream errMsg;
         errMsg << "ERROR: ReadData() file " << path + fileName
-               << " is not open for reading." << endl;
-        throw runtime_error( errMsg.str() );
+               << " is not open for reading." << std::endl;
+        throw std::runtime_error( errMsg.str() );
     }
     if ( not dataStrm.good() ) {
-        stringstream errMsg;
+        std::stringstream errMsg;
         errMsg << "ERROR: ReadData() file " << path + fileName
-               << " is not ready for reading." << endl;
-        throw runtime_error( errMsg.str() );
+               << " is not ready for reading." << std::endl;
+        throw std::runtime_error( errMsg.str() );
     }
 
     // Read fileName into a vector of strings, one line per string
-    vector< string > dataLines;
-    string tmp;
+    std::vector< std::string > dataLines;
+    std::string tmp;
 
     while( getline( dataStrm, tmp ) ) {
         dataLines.push_back( tmp );
@@ -33,11 +34,11 @@ NamedData ReadData( string path = "./", string fileName = "Data.csv" ) {
     dataStrm.close();
 
 #ifdef DEBUG
-    cout << "------- ReadData() Contents of file "
-         << fileName << " -------" << endl;
-    for( vector< string >::iterator ci = dataLines.begin();
+    std::cout << "------- ReadData() Contents of file "
+         << fileName << " -------" << std::endl;
+    for( std::vector< std::string >::iterator ci = dataLines.begin();
          ci != dataLines.end(); ++ci ) {
-        cout << *ci << endl;
+        std::cout << *ci << std::endl;
     }
 #endif
 
