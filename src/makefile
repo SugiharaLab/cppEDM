@@ -10,6 +10,7 @@ LFLAGS = -lstdc++ -L./
 all:	$(LIB)
 	ar -rcs $(LIB) $(OBJ)
 	$(CC) Test.cc -o Test $(CFLAGS) $(LFLAGS) -lEDM
+	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS) -lEDM
 
 clean:
 	rm -f $(OBJ) $(LIB) Test
@@ -24,6 +25,9 @@ Data.o: Data.cc
 
 ReadData.o: ReadData.cc
 	$(CC) -c ReadData.cc $(CFLAGS)
+
+DataFrame.o: DataFrame.cc
+	$(CC) -c DataFrame.cc $(CFLAGS)
 
 Neighbors.o: Neighbors.cc
 	$(CC) -c Neighbors.cc $(CFLAGS)
@@ -55,7 +59,7 @@ Parameter.o: Parameter.cc
 Test.o: Test.cc
 	$(CC) -c Test.cc $(CFLAGS)
 
-CameronTesting.o: CameronTesting.cc DataFrame.o ReadData.o
+CameronTesting.o: CameronTesting.cc
 	$(CC) -c CameronTesting.cc $(CFLAGS)
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
@@ -63,3 +67,15 @@ depend:
 	@echo ${SRCS}
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
+
+Data.o: Data.h Common.h
+Neighbors.o: Neighbors.h Common.h Parameter.h
+Simplex.o: Common.h
+Eval.o: Common.h
+CCM.o: Common.h
+Multiview.o: Common.h
+SMap.o: Common.h
+Common.o: Common.h
+Interface.o: Common.h
+Parameter.o: Parameter.h Common.h
+DataFrame.o: DataFrame.h Common.h ReadData.cc

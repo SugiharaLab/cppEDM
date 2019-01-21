@@ -9,8 +9,6 @@
 
 // Type definitions
 typedef std::map< std::string, std::vector< double > > NamedData;
-typedef std::valarray< double >                        DFContainer;
-typedef std::vector< std::string >                     ColNamesList;
 
 // Enumerations
 enum class Method { Simplex, SMap };
@@ -57,6 +55,21 @@ public:
     std::valarray<T> row( std::size_t row ) const {
         // slice (size_t start, size_t length, size_t stride)
         return elements[ std::slice( row * n_columns, n_columns, 1 ) ];
+    }
+
+    // Insert row
+    void writeRow( size_t row, std::valarray<T> array ) {
+        size_t N = array.size();
+
+        if ( N != n_columns ) {
+            std::stringstream errMsg;
+            errMsg << "Matrix::insertRow(): row argument must be "
+                   << n_columns << ". " << N << " were provided." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        for ( size_t i = 0; i < N; i++ ) {
+            (*this)( row, i ) = array[ i ];
+        }
     }
 };
 

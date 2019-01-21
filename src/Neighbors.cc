@@ -10,8 +10,8 @@ Neighbors::Neighbors() {
     distances = NULL;
 }
 Neighbors::~Neighbors() {
-    delete neighbors;
-    delete distances;
+    if ( neighbors ) { delete neighbors; }
+    if ( distances ) { delete distances; }
 }
 
 //----------------------------------------------------------------
@@ -135,6 +135,7 @@ struct Neighbors *FindNeighbors(
         // Reset the neighbor and distance vectors
         for ( std::size_t i = 0; i < parameters->knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
+            // JP: This is dumb... don't use a hardcoded threshold.
             k_NN_distances[ i ] = 1E30;
         }
 
@@ -177,7 +178,7 @@ struct Neighbors *FindNeighbors(
             }
             
             // Find distance between the prediction vector (y)
-            // and each of the library vectors
+            // and each of the library vectors (x)
             // Exclude the 1st column (j=0) of Time
             double d_i = Distance( &x, &y, DistanceMetric::Euclidean );
 
@@ -192,8 +193,45 @@ struct Neighbors *FindNeighbors(
             }
         } // for ( row_j = 0; row_j < libraryRows->size(); row_j++ )
         
+        if ( *std::max_element( begin( k_NN_distances ),
+                                end  ( k_NN_distances ) ) > 1E29 ) {
+            std::stringstream errMsg;
+            errMsg << "FindNeighbors(): Library is too small to resolve "
+                   << parameters->knn << " knn neighbors.";
+            throw std::runtime_error( errMsg.str() );
+        }
+            
+        // Check for ties.  JP: Need to address this, not just warning
+        // First sort a copy of k_NN_neighbors so unique() will work
+        std::valarray<int> k_NN_neighborCopy( k_NN_neighbors );
+        std::sort( begin( k_NN_neighborCopy ), end( k_NN_neighborCopy ) );
+        
+        // ui is iterator to first non unique element
+        auto ui = std::unique( begin(k_NN_neighborCopy),
+                               end  (k_NN_neighborCopy) );
+        
+        if ( std::distance( begin( k_NN_neighborCopy ), ui ) !=
+             k_NN_neighborCopy.size() ) {
+            std::cout << "WARNING: FindNeighbors(): Degenerate neighbors."
+                      << std::endl;
+        }
+
+        // Write the neighbor indices and distance values
+        neighbors->neighbors->writeRow( row_i, k_NN_neighbors );
+        neighbors->distances->writeRow( row_i, k_NN_distances );
+        
     } // for ( row_i = 0; row_i < predictionRows->size(); row_i++ )
-    
+
+#ifdef DEBUG
+    std::cout << "FindNeighbors(): neighbors:distances" << std::endl;
+    for ( size_t i = 0; i < 3; i++ ) {
+        std::cout << "Row " << i << " | ";
+        for ( size_t j = 0; j < neighbors->neighbors->NColumns(); j++ ) {
+            std::cout << (*neighbors->neighbors)( i, j ) << " : ";
+            std::cout << (*neighbors->distances)( i, j ) << ",  ";
+        } std::cout << std::endl;
+    }
+#endif
     return neighbors;
 }
 
