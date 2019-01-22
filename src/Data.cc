@@ -5,12 +5,12 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-NamedData ReadData( std::string path = "./",
-                    std::string fileName = "Data.csv" ) {
+NamedData ReadData( std::string path,
+                    std::string fileName ) {
     
     // Create input file stream and open file for input
     std::ifstream dataStrm( path + fileName );
-
+    
     if ( not dataStrm.is_open() ) {
         std::stringstream errMsg;
         errMsg << "ERROR: ReadData() file " << path + fileName
@@ -23,26 +23,36 @@ NamedData ReadData( std::string path = "./",
                << " is not ready for reading." << std::endl;
         throw std::runtime_error( errMsg.str() );
     }
-
+    
     // Read fileName into a vector of strings, one line per string
     std::vector< std::string > dataLines;
     std::string tmp;
-
+    
     while( getline( dataStrm, tmp ) ) {
         dataLines.push_back( tmp );
     }
     dataStrm.close();
-
-#ifdef DEBUG
+    
+#ifdef DEBUG_ALL
     std::cout << "------- ReadData() Contents of file "
-         << fileName << " -------" << std::endl;
+              << fileName << " -------" << std::endl;
     for( std::vector< std::string >::iterator ci = dataLines.begin();
          ci != dataLines.end(); ++ci ) {
         std::cout << *ci << std::endl;
     }
 #endif
-
+    
+    // Container for data names/vectors
     NamedData data;
     
+    // Process each line in dataLines
+    for ( size_t i = 0; i < dataLines.size(); i++ ) {
+        std::vector<std::string> words = SplitString( dataLines[i] );
+        
+        for ( size_t j = 0; j < words.size(); j++ ) {
+            std::cout << words[j] << " ";
+        } std::cout << std::endl;
+    }
+        
     return data;
 }

@@ -3,4 +3,7 @@
 
 #include "Common.h"
 
+NamedData ReadData( std::string path = "./",
+                    std::string fileName = "Data.csv" );
+
 #endif
