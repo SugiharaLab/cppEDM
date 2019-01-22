@@ -4,9 +4,8 @@ int main () {
 
     //testing readData compatability
     NamedData container;
-    int val = 0;
-    DataFrame df ("../data/SampleCSV.csv",val);;
+    DataFrame df ("../data/","SampleCSV.csv");;
     std::cout<<df<<std::endl;
-    std::cout << df("hi",0)<<std::endl<<std::flush;
+    std::cout << df(0,0)<<std::endl<<std::flush;
 
 }

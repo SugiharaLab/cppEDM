@@ -19,7 +19,7 @@ class DataFrame {
     public:
 
         DataFrame () {}
-        DataFrame (const std::string filepath, int& validFile); 
+        DataFrame (const std::string filepath, const std::string fileName); 
 
         int NumColumns();
         int NumRows();

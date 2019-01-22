@@ -1,6 +1,6 @@
 /* contains the actual method implementations for the dataframe class */
 #include "DataFrame.h"
-#include "ReadData.cc"
+#include "Data.cc"
 
 #define MAX_PRINT_IDX 50
 
@@ -8,14 +8,11 @@
  * @param filepath: the path to the csv file to get data from
  * @param validFile: set to 0 if not valid file
  * */
-DataFrame::DataFrame (const std::string filepath, int& validFile) {
-    //to hold the output from the csv file
-    NamedData csvOutput;
-    //setup container map and check for bad file
-    if ( !ReadData(filepath, csvOutput) )
-        validFile = 0;
+DataFrame::DataFrame (const std::string filepath, const std::string fileName) {
+    NamedData csvOutput = ReadData(filepath, fileName);
     //for easier reference in converting
     rowSize = csvOutput.begin()->second.size();
+    std::cout<<"size of iinput is"<<csvOutput.size()<<std::endl;
     int valArrSize = rowSize * csvOutput.size();
 
     container = std::valarray< double >(valArrSize);
