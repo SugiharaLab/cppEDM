@@ -7,12 +7,16 @@
 #include <vector>
 #include <map>
 
+//prefix for columns without header titles
+#define COL_PREFIX "vec_"
+
 // Type definitions
 typedef std::map< std::string, std::vector< double > > NamedData;
 
 // Enumerations
 enum class Method { Simplex, SMap };
 enum class DistanceMetric { Euclidean, Manhattan };
+
 
 // Prototypes
 //---------------------------------------------------------
