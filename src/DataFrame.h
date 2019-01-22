@@ -18,8 +18,7 @@ class DataFrame {
 
         DataFrame (const std::string filepath, const std::string fileName); 
         
-        Matrix< double > SetupContainer 
-            (const std::string filepath, const std::string fileName);
+        Matrix< double > SetupContainer (const NamedData csvOutput);
 
         std::size_t NumColumns();
         std::size_t NumRows();

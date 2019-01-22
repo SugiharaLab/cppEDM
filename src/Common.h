@@ -37,6 +37,7 @@ class Matrix {
 public:
     Matrix( size_t rows, size_t columns ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
+    Matrix () {}
 
     // Fortran style access operators M(row,col)
     T &operator()( std::size_t row, std::size_t column ) {

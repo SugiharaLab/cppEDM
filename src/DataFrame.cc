@@ -9,10 +9,15 @@
  * @param validFile: set to 0 if not valid file
  * */
 DataFrame::DataFrame (const std::string filepath, const std::string fileName)
-    : container (SetupContainer(filepath, fileName))
 {
-    //note: we needa set up col names here instead of in setupContainer. 
-    //container = SetupContainer (filepath, fileName);
+    //csv data to setup container and columns
+    NamedData csvOutput = ReadData (filepath, fileName);
+    container = SetupContainer (csvOutput);
+    //setup columns * same order as in setup container so parallel to matrix
+    for ( NamedData::iterator iterate = csvOutput.begin(); 
+            iterate != csvOutput.end(); iterate++ ) {
+        colNames.push_back( iterate->first );
+    }
 }
 
 /* method to setup the data container
@@ -20,9 +25,7 @@ DataFrame::DataFrame (const std::string filepath, const std::string fileName)
  * @param fileName: actual name of the csv file to get
  * @return: the setup underlying container
  * */
-Matrix< double > DataFrame::SetupContainer (const std::string filepath, const std::string fileName) {
-    //get in read data and convert to matrix for container
-    NamedData csvOutput = ReadData(filepath, fileName);
+Matrix< double > DataFrame::SetupContainer (NamedData csvOutput) {
     //for easier reference in matrix construction
     const std::size_t numRows = csvOutput.begin()->second.size();
     const std::size_t numCols = csvOutput.size();
@@ -34,9 +37,6 @@ Matrix< double > DataFrame::SetupContainer (const std::string filepath, const st
     for ( NamedData::iterator iterate = csvOutput.begin(); 
             iterate != csvOutput.end(); iterate++ ) {
         size_t colIdx = std::distance(csvOutput.begin(), iterate);
-        //NOTE: for now we can setup the columns here until named columns implemented in matrix. 
-        //afterwards should be set in constructor (right?).
-        colNames.push_back( iterate->first ); 
 
         for (size_t rowIdx = 0; rowIdx < numRows; rowIdx++) {
             returnContainer(rowIdx, colIdx) = iterate->second[rowIdx];
@@ -80,9 +80,8 @@ std::ostream& operator<< (std::ostream& os, DataFrame& df){
         <<" cols:"<<df.NumColumns()<<std::endl;
     os << "still needa format so equal spacing"<<std::endl<<std::flush;
     //print names of vectors
-    //for (std::size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
-        //os << df.ColumnNames().at(colIdx) << " ";
-    std::cout<<"names is "<<df.ColumnNames().size();
+    for (std::size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
+        os << df.ColumnNames().at(colIdx) << " ";
         
     os << std::endl;
     //print vec data up to 50 points
