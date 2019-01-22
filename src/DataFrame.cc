@@ -18,7 +18,7 @@ DataFrame::DataFrame (const std::string filepath, int& validFile) {
     rowSize = csvOutput.begin()->second.size();
     int valArrSize = rowSize * csvOutput.size();
 
-    container = DFContainer(valArrSize);
+    container = std::valarray< double >(valArrSize);
     std::map<std::string,std::vector<double> >::iterator iterate = csvOutput.begin();
     //iterate over the map's vectors to create the valarray
     for ( int mapIdx = 0; iterate != csvOutput.end(); mapIdx++, iterate++ ) {
@@ -99,7 +99,7 @@ double & DataFrame::operator() (std::string colName, int rowIdx) {
     //the int position of the col
     int colPos;
     //get position to check (other operator will check validity)
-    ColNamesList::iterator colIterate = 
+    std::vector< std::string >::iterator colIterate = 
         std::find(colNames.begin(), colNames.end(), colName);
 
     colPos = std::distance(colNames.begin(), colIterate);

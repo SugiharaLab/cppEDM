@@ -10,9 +10,9 @@ class DataFrame {
     private:
 
         //underlying datastructure to the dataframe
-        DFContainer container;
+        std::valarray< double > container;
 
-        ColNamesList colNames;
+        std::vector< std::string > colNames;
 
         int rowSize;
 
@@ -23,7 +23,7 @@ class DataFrame {
 
         int NumColumns();
         int NumRows();
-        ColNamesList ColumnNames();
+        std::vector< std::string > ColumnNames();
         friend std::ostream& operator<<(std::ostream& os, DataFrame& df);
         double & operator() (int colIdx, int rowIdx);
         double & operator() (std::string colName, int rowIdx);
