@@ -84,7 +84,6 @@ NamedData ReadData( std::string path,
             data.find(colNames[colIdx])->second.push_back(rawNum);
         } 
     }
-    std::cout<<"returning size of "<<data.size();
         
     return data;
 }
