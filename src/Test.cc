@@ -8,20 +8,6 @@
 main( int argc, char *argv[] ) {
     
     try {
-        // Silly call to Tokenize() in libEDM on argv
-        //--------------------------------------------------
-        std::vector<std::string> args( argv, argv + argc );
-        
-        std::stringstream ssargs;
-        for ( auto ai = args.begin(); ai != args.end(); ++ai ) {
-            ssargs << *ai << " ";
-        }
-        
-        std::vector<std::string> tokens = Tokenize( ssargs.str() );
-        std::cout << "Tokenize( argv ): ";
-        for ( auto ai = tokens.begin(); ai != tokens.end(); ++ai ) {
-            std::cout << *ai << " ";
-        } std::cout << std::endl;
 
         //--------------------------------------------------
         // Default parameters
