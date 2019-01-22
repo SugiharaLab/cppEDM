@@ -10,25 +10,26 @@ class DataFrame {
     private:
 
         //underlying datastructure to the dataframe
-        std::valarray< double > container;
+        Matrix< double > container;
 
         std::vector< std::string > colNames;
 
-        int rowSize;
-
     public:
 
-        DataFrame () {}
         DataFrame (const std::string filepath, const std::string fileName); 
+        
+        Matrix< double > SetupContainer 
+            (const std::string filepath, const std::string fileName);
 
-        int NumColumns();
-        int NumRows();
+        std::size_t NumColumns();
+        std::size_t NumRows();
         std::vector< std::string > ColumnNames();
         friend std::ostream& operator<<(std::ostream& os, DataFrame& df);
-        double & operator() (int colIdx, int rowIdx);
-        double & operator() (std::string colName, int rowIdx);
+        double & operator() (std::size_t rowIdx, std::size_t colIdx);
+        double & operator() (std::size_t colIdx, std::string colName);
 };
 
+//probably should move this to matrix class
 //to handle out of bounds / col name not found
 struct BadColIdx : public std::exception {
    const char * what () const throw () {
