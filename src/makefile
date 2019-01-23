@@ -1,7 +1,7 @@
 
 CC  = g++
 OBJ = Data.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
-      Common.o Interface.o Parameter.o DataFrame.o ReadData.o
+	  Common.o Interface.o Parameter.o DataFrame.o ReadData.o CameronTesting.o
 LIB = libEDM.a
 
 CFLAGS = -std=c++11 -g -DDEBUG
@@ -13,7 +13,7 @@ all:	$(LIB)
 	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS) -lEDM
 
 clean:
-	rm -f $(OBJ) $(LIB) Test
+	rm -f $(OBJ) $(LIB) Test CameronTest
 
 distclean:
 	rm -f $(OBJ) $(LIB) Test *~
