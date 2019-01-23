@@ -1,12 +1,11 @@
-/* header file for the dataframe class. */
 
 #include "Common.h"
 #include "Data.h"
 
-/* this class is to provide a data storage container suited for
- * edm block and similar to the DataFrame of R/pandas py
+/* this class is to provide a data storage container for
+ * edm block and similar to the DataFrame of R/pandas
  * */
-class DataFrame {
+class DataFrame { //: public Matrix {
 
     private:
 
@@ -21,12 +20,12 @@ class DataFrame {
         
         Matrix< double > SetupContainer (const NamedData csvOutput);
 
-        std::size_t NumColumns();
-        std::size_t NumRows();
+        size_t NumColumns();
+        size_t NumRows();
         std::vector< std::string > ColumnNames();
         friend std::ostream& operator<<(std::ostream& os, DataFrame& df);
-        double & operator() (std::size_t rowIdx, std::size_t colIdx);
-        double & operator() (std::size_t colIdx, std::string colName);
+        double & operator() (size_t rowIdx, size_t colIdx);
+        double & operator() (size_t colIdx, std::string colName);
 };
 
 //probably should move this to matrix class

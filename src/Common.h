@@ -31,8 +31,8 @@ std::vector<std::string> SplitString( std::string inString,
 template <class T>
 class Matrix {
     std::valarray<T> elements;
-    std::size_t      n_columns;
-    std::size_t      n_rows;
+    size_t           n_columns;
+    size_t           n_rows;
     
 public:
     Matrix( size_t rows, size_t columns ):
@@ -40,10 +40,10 @@ public:
     Matrix () {}
 
     // Fortran style access operators M(row,col)
-    T &operator()( std::size_t row, std::size_t column ) {
+    T &operator()( size_t row, size_t column ) {
         return elements[ row * n_columns + column ];
     }
-    T operator()( std::size_t row, std::size_t column ) const {
+    T operator()( size_t row, size_t column ) const {
         return elements[ row * n_columns + column ];
     }
     
@@ -52,13 +52,13 @@ public:
     size_t size()     const { return n_rows * n_columns; }
 
     // Return column from index col
-    std::valarray<T> column( std::size_t col ) const {
+    std::valarray<T> column( size_t col ) const {
         // slice (size_t start, size_t length, size_t stride)
         return elements[ std::slice( col, n_rows, n_columns ) ];
     }
 
     // Return row from index row
-    std::valarray<T> row( std::size_t row ) const {
+    std::valarray<T> row( size_t row ) const {
         // slice (size_t start, size_t length, size_t stride)
         return elements[ std::slice( row * n_columns, n_columns, 1 ) ];
     }

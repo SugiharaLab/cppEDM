@@ -30,18 +30,18 @@ struct Neighbors *FindNeighbors(
     
 #ifdef DEBUG
     std::cout << "FindNeighbors(): library:" << std::endl;
-    for ( std::size_t row = 0; row < N_library_rows; row++ ) {
+    for ( size_t row = 0; row < N_library_rows; row++ ) {
         int row_i = (*libraryRows)[row];
         std::cout << "row " << row_i << " : ";
-        for ( std::size_t col = 0; col < N_columns; col++ ) {
+        for ( size_t col = 0; col < N_columns; col++ ) {
             std::cout << (*matrix)(row_i,col) << " "; 
         } std::cout << std::endl;
     }
     std::cout << "FindNeighbors(): prediction:" << std::endl;
-    for ( std::size_t row = 0; row < N_prediction_rows; row++ ) {
+    for ( size_t row = 0; row < N_prediction_rows; row++ ) {
         int row_i = (*predictionRows)[row];
         std::cout << "row " << row_i << " : ";
-        for ( std::size_t col = 0; col < N_columns; col++ ) {
+        for ( size_t col = 0; col < N_columns; col++ ) {
             std::cout << (*matrix)(row_i,col) << " "; 
         } std::cout << std::endl;
     }
@@ -51,7 +51,7 @@ struct Neighbors *FindNeighbors(
 
 #ifdef JP_REMOVE //----------------------------------------
     std::cout << "Neighbors(): time: ";
-    for ( std::size_t i = 0; i < time.size(); i++ ) {
+    for ( size_t i = 0; i < time.size(); i++ ) {
         cout << time[i] << " ";
     } std::cout << endl;
 #endif // JP REMOVE ---------------------------------------
@@ -59,20 +59,20 @@ struct Neighbors *FindNeighbors(
     std::valarray< double > predTime( predictionRows->size() );
     std::valarray< double > libTime ( libraryRows->size()    );
 
-    for ( std::size_t i = 0; i < predictionRows->size(); i++ ) {
+    for ( size_t i = 0; i < predictionRows->size(); i++ ) {
         predTime[ i ] = time[ (*predictionRows)[i] ];
     }
-    for ( std::size_t i = 0; i < libraryRows->size(); i++ ) {
+    for ( size_t i = 0; i < libraryRows->size(); i++ ) {
         libTime[ i ] = time[ (*libraryRows)[i] ];
     }
    
 #ifdef JP_REMOVE //----------------------------------------
     std::cout << "FindNeighbors(): libTime:  ";
-    for ( std::size_t i = 0; i < libTime.size(); i++ ) {
+    for ( size_t i = 0; i < libTime.size(); i++ ) {
         cout << libTime[i] << " ";
     } std::cout << std::endl;
     std::cout << "FindNeighbors(): predTime: ";
-    for ( std::size_t i = 0; i < predTime.size(); i++ ) {
+    for ( size_t i = 0; i < predTime.size(); i++ ) {
         std::cout << predTime[i] << " ";
     } std::cout << std::endl;
 #endif // JP REMOVE ----------------------------------------
@@ -116,7 +116,7 @@ struct Neighbors *FindNeighbors(
     // For each prediction vector (row in prediction Matrix) find the list
     // of library indices that are within k_NN points
     //-------------------------------------------------------------------
-    for ( std::size_t row_i = 0; row_i < predictionRows->size(); row_i++ ) {
+    for ( size_t row_i = 0; row_i < predictionRows->size(); row_i++ ) {
         int pred_row = (*predictionRows)[ row_i ];
         std::valarray<double> pred_row_vals = matrix->row( pred_row );
         
@@ -127,13 +127,13 @@ struct Neighbors *FindNeighbors(
 #ifdef JP_REMOVE //----------------------------------------
         std::cout << "Predict row " << pred_row << " : " ;
         std::cout << "predTime " << time[ pred_row ] << " | ";
-        for ( std::size_t i = 0; i < y.size(); i++ ) {
+        for ( size_t i = 0; i < y.size(); i++ ) {
             std::cout << y[i] << " ";
         } std::cout << std::endl;
 #endif // JP REMOVE ----------------------------------------
 
         // Reset the neighbor and distance vectors
-        for ( std::size_t i = 0; i < parameters->knn; i++ ) {
+        for ( size_t i = 0; i < parameters->knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
             // JP: This is dumb... don't use a hardcoded threshold.
             k_NN_distances[ i ] = 1E30;
@@ -142,7 +142,7 @@ struct Neighbors *FindNeighbors(
         //--------------------------------------------------------------
         // Library Rows
         //--------------------------------------------------------------
-        for ( std::size_t row_j = 0; row_j < libraryRows->size(); row_j++ ) {
+        for ( size_t row_j = 0; row_j < libraryRows->size(); row_j++ ) {
             int lib_row = (*libraryRows)[ row_j ];
             std::valarray<double> lib_row_vals = matrix->row( lib_row );
             std::valarray<double> x = lib_row_vals[std::slice(1,N_columns-1,1)];
@@ -150,7 +150,7 @@ struct Neighbors *FindNeighbors(
 #ifdef JP_REMOVE //----------------------------------------
             std::cout << "Library row " << lib_row << " : " ;
             std::cout << "libTime " << time[ lib_row ] << " | ";
-            for ( std::size_t k = 0; k < lib_row_vals.size(); k++ ) {
+            for ( size_t k = 0; k < lib_row_vals.size(); k++ ) {
                 std::cout << lib_row_vals[k] << " ";
             } std::cout << std::endl;
 #endif // JP REMOVE ----------------------------------------
@@ -186,7 +186,7 @@ struct Neighbors *FindNeighbors(
             auto max_it = std::max_element( begin( k_NN_distances ),
                                             end( k_NN_distances ) );
             if ( d_i < *max_it ) {
-                std::size_t max_i = std::distance( begin(k_NN_distances),
+                size_t max_i = std::distance( begin(k_NN_distances),
                                                    max_it );
                 k_NN_neighbors[ max_i ] = lib_row;  // Save the index
                 k_NN_distances[ max_i ] = d_i;      // Save the value
@@ -249,7 +249,7 @@ double Distance( std::valarray<double> *v1,
     if ( metric == DistanceMetric::Euclidean ) {
         // [sum_{i,j} abs(a_{i,j})^2]^{1/2}
         double sum = 0;
-        for ( std::size_t i = 0; i < v1->size(); i++ ) {
+        for ( size_t i = 0; i < v1->size(); i++ ) {
             sum += pow( abs( (*v2)[i] - (*v1)[i] ), 2 );
         }
         distance = sqrt( sum );
@@ -257,7 +257,7 @@ double Distance( std::valarray<double> *v1,
     else if ( metric == DistanceMetric::Manhattan ) {
         // max( sum( abs(x) ) )
         double sum = 0;
-        for ( std::size_t i = 0; i < v1->size(); i++ ) {
+        for ( size_t i = 0; i < v1->size(); i++ ) {
             sum += abs( (*v2)[i] - (*v1)[i] );
         }
         distance = sum;

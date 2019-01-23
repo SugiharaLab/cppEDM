@@ -1,4 +1,4 @@
-/* contains the actual method implementations for the dataframe class */
+
 #include "DataFrame.h"
 
 #define MAX_PRINT_IDX 50
@@ -7,8 +7,7 @@
  * @param filepath: the path to the csv file to get data from
  * @param validFile: set to 0 if not valid file
  * */
-DataFrame::DataFrame (const std::string filepath, const std::string fileName)
-{
+DataFrame::DataFrame (const std::string filepath, const std::string fileName) {
     //csv data to setup container and columns
     NamedData csvOutput = ReadData (filepath, fileName);
     container = SetupContainer (csvOutput);
@@ -26,8 +25,8 @@ DataFrame::DataFrame (const std::string filepath, const std::string fileName)
  * */
 Matrix< double > DataFrame::SetupContainer (NamedData csvOutput) {
     //for easier reference in matrix construction
-    const std::size_t numRows = csvOutput.begin()->second.size();
-    const std::size_t numCols = csvOutput.size();
+    const size_t numRows = csvOutput.begin()->second.size();
+    const size_t numCols = csvOutput.size();
 
     //setup matrix data
     Matrix<double> returnContainer = Matrix<double> (numRows, numCols);
@@ -48,7 +47,7 @@ Matrix< double > DataFrame::SetupContainer (NamedData csvOutput) {
 /* method to return the num columns/vectors in the dataframe
  * @return: the num columns 
  * */
-std::size_t DataFrame::NumColumns() {
+size_t DataFrame::NumColumns() {
     return container.NRows();
 }
 
@@ -56,7 +55,7 @@ std::size_t DataFrame::NumColumns() {
  * takes the first col (order not preserved though since map)
  * @return: num rows
  * */
-std::size_t DataFrame::NumRows() {
+size_t DataFrame::NumRows() {
     //get the num rows in the first val of map col
     return container.NRows();
 }
@@ -79,14 +78,14 @@ std::ostream& operator<< (std::ostream& os, DataFrame& df){
         <<" cols:"<<df.NumColumns()<<std::endl;
     os << "still needa format so equal spacing"<<std::endl<<std::flush;
     //print names of vectors
-    for (std::size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
+    for (size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
         os << df.ColumnNames().at(colIdx) << " ";
         
     os << std::endl;
     //print vec data up to 50 points
-    for (std::size_t rowIdx = 0; rowIdx < df.NumRows() && rowIdx < MAX_PRINT_IDX; rowIdx++) {
+    for (size_t rowIdx = 0; rowIdx < df.NumRows() && rowIdx < MAX_PRINT_IDX; rowIdx++) {
         //print data points from each col
-        for (std::size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
+        for (size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++)
             os << df(rowIdx,colIdx)<<" ";
         os << std::endl;
     }
@@ -98,7 +97,7 @@ std::ostream& operator<< (std::ostream& os, DataFrame& df){
  * @param colIdx: the index to access from the dataframe 
  * @return: the NumericVector column
  * */
-double & DataFrame::operator() (std::size_t rowIdx, std::size_t colIdx) {
+double & DataFrame::operator() (size_t rowIdx, size_t colIdx) {
     //handle out of bounds exception - maybe we should include this checking in matrix instead
     if (colIdx >= NumColumns())
         throw BadColIdx();
@@ -111,7 +110,7 @@ double & DataFrame::operator() (std::size_t rowIdx, std::size_t colIdx) {
  * @param colName: the name of the column to access
  * @return: the NumericVector column
  * */
-double & DataFrame::operator() (std::size_t rowIdx, std::string colName) {
+double & DataFrame::operator() (size_t rowIdx, std::string colName) {
     //the int position of the col
     int colPos;
     //get position to check (other operator will check validity)
