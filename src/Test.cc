@@ -1,6 +1,6 @@
-#include "Common.h"
+
+#include "DataFrame.h"
 #include "Neighbors.h"
-#include "Data.h"
 
 //----------------------------------------------------------------
 // Intended to execute tests to validate the code.
@@ -10,7 +10,7 @@ main( int argc, char *argv[] ) {
     
     try {
 
-        NamedData data = ReadData( "../data/", "sardine_anchovy_sst.csv" );
+        DataFrame data = DataFrame( "../data/", "sardine_anchovy_sst.csv" );
         
         //--------------------------------------------------
         // Default parameters

@@ -1,10 +1,11 @@
 
 CC  = g++
-OBJ = Data.o DataFrame.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
-	Common.o Interface.o Parameter.o
+OBJ = DataFrame.o Matrix.o Common.o Parameter.o Interface.o Neighbors.o\
+	Simplex.o Eval.o CCM.o Multiview.o SMap.o
+
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g -DDEBUG
+CFLAGS = -std=c++11 -g -DDEBUG # -DDEBUG_ALL
 LFLAGS = -lstdc++ -L./
 
 all:	$(LIB)
@@ -16,15 +17,24 @@ clean:
 	rm -f $(OBJ) $(LIB) Test CameronTesting
 
 distclean:
-	rm -f $(OBJ) $(LIB) Test  CameronTesting *~
+	rm -f $(OBJ) $(LIB) Test  CameronTesting *~ *.bak
 
 $(LIB): $(OBJ)
 
-Data.o: Data.cc
-	$(CC) -c Data.cc $(CFLAGS)
-
 DataFrame.o: DataFrame.cc
 	$(CC) -c DataFrame.cc $(CFLAGS)
+
+Matrix.o: Matrix.cc
+	$(CC) -c Matrix.cc $(CFLAGS)
+
+Common.o: Common.cc
+	$(CC) -c Common.cc $(CFLAGS)
+
+Parameter.o: Parameter.cc
+	$(CC) -c Parameter.cc $(CFLAGS)
+
+Interface.o: Interface.cc
+	$(CC) -c Interface.cc $(CFLAGS)
 
 Neighbors.o: Neighbors.cc
 	$(CC) -c Neighbors.cc $(CFLAGS)
@@ -44,15 +54,6 @@ Multiview.o: Multiview.cc
 SMap.o: SMap.cc
 	$(CC) -c SMap.cc $(CFLAGS)
 
-Common.o: Common.cc
-	$(CC) -c Common.cc $(CFLAGS)
-
-Interface.o: Interface.cc
-	$(CC) -c Interface.cc $(CFLAGS)
-
-Parameter.o: Parameter.cc
-	$(CC) -c Parameter.cc $(CFLAGS)
-
 Test.o: Test.cc
 	$(CC) -c Test.cc $(CFLAGS)
 
@@ -65,13 +66,13 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Data.o: Data.h Common.cc Common.h
-DataFrame.o: DataFrame.h Common.h Data.cc Data.h Common.cc
-Neighbors.o: Neighbors.h Common.h Parameter.h
+DataFrame.o: DataFrame.h Common.h Matrix.h
+Matrix.o: Matrix.h Common.h
+Common.o: Common.h
+Parameter.o: Parameter.h Common.h
+Interface.o: Common.h
+Neighbors.o: Neighbors.h Common.h Matrix.h Parameter.h
 Simplex.o: Common.h
 Eval.o: Common.h
 CCM.o: Common.h
 Multiview.o: Common.h
-SMap.o: Common.h
-Common.o: Common.h
-Interface.o: Common.h

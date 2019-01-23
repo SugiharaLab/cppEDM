@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "Common.h"
+#include "Matrix.h"
 #include "Parameter.h"
 
 struct Neighbors; // forward declaration
