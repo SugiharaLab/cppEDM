@@ -18,7 +18,7 @@ main( int argc, char *argv[] ) {
         Parameters *parameters = new Parameters;
         parameters->verbose = true;
         parameters->knn     = 2;
-        
+                
         //--------------------------------------------------
         // Matrix 6 rows 3 columns
         //--------------------------------------------------
@@ -60,6 +60,8 @@ void TestCode( Matrix<double> M ) {
     
         std::valarray<double> A( 99, 3 );
         M.writeRow( 0, A );
+        std::valarray<double> B( -1, 6 );
+        M.writeColumn( 1, B );
 
         // test Matrix.row() & column()
         std::cout << "Matrix:" << std::endl;

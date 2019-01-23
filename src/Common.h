@@ -77,6 +77,21 @@ public:
             (*this)( row, i ) = array[ i ];
         }
     }
+
+    // Write the array to col
+    void writeColumn( size_t col, std::valarray<T> array ) {
+        size_t N = array.size();
+
+        if ( N != n_rows ) {
+            std::stringstream errMsg;
+            errMsg << "Matrix::insertColumn(): col argument must be "
+                   << n_rows << ". " << N << " were provided." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        for ( size_t i = 0; i < N; i++ ) {
+            (*this)( i, col ) = array[ i ];
+        }
+    }
 };
 
 #endif
