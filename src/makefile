@@ -1,7 +1,7 @@
 
 CC  = g++
-OBJ = Data.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
-	  Common.o Interface.o Parameter.o DataFrame.o ReadData.o CameronTesting.o
+OBJ = Data.o DataFrame.o Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o\
+	Common.o Interface.o Parameter.o
 LIB = libEDM.a
 
 CFLAGS = -std=c++11 -g -DDEBUG
@@ -13,18 +13,15 @@ all:	$(LIB)
 	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS) -lEDM
 
 clean:
-	rm -f $(OBJ) $(LIB) Test CameronTest
+	rm -f $(OBJ) $(LIB) Test CameronTesting
 
 distclean:
-	rm -f $(OBJ) $(LIB) Test *~
+	rm -f $(OBJ) $(LIB) Test  CameronTesting *~
 
 $(LIB): $(OBJ)
 
 Data.o: Data.cc
 	$(CC) -c Data.cc $(CFLAGS)
-
-ReadData.o: ReadData.cc
-	$(CC) -c ReadData.cc $(CFLAGS)
 
 DataFrame.o: DataFrame.cc
 	$(CC) -c DataFrame.cc $(CFLAGS)
@@ -68,7 +65,8 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Data.o: Data.h Common.h
+Data.o: Data.h Common.cc Common.h
+DataFrame.o: DataFrame.h Common.h Data.cc Data.h Common.cc
 Neighbors.o: Neighbors.h Common.h Parameter.h
 Simplex.o: Common.h
 Eval.o: Common.h
@@ -77,5 +75,3 @@ Multiview.o: Common.h
 SMap.o: Common.h
 Common.o: Common.h
 Interface.o: Common.h
-Parameter.o: Parameter.h Common.h
-DataFrame.o: DataFrame.h Common.h ReadData.cc

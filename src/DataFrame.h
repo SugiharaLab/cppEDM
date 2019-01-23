@@ -1,6 +1,7 @@
 /* header file for the dataframe class. */
 
 #include "Common.h"
+#include "Data.h"
 
 /* this class is to provide a data storage container suited for
  * edm block and similar to the DataFrame of R/pandas py

@@ -1,6 +1,5 @@
 /* contains the actual method implementations for the dataframe class */
 #include "DataFrame.h"
-#include "Data.cc"
 
 #define MAX_PRINT_IDX 50
 
