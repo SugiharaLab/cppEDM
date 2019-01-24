@@ -1,6 +1,9 @@
 #ifndef DATAFRAME_H
 #define DATAFRAME_H
 
+#include <fstream>
+#include <cctype>
+
 #include "Common.h"
 #include "Matrix.h"
 
@@ -36,6 +39,8 @@ public:
     
     Matrix< double > SetupContainer (const NamedData csvInput);
 
+    Matrix< double > matrix() const { return container; }
+    
     size_t NumColumns();
     size_t NumRows();
     

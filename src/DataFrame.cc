@@ -1,7 +1,4 @@
 
-#include <fstream>
-#include <cctype>
-
 #include "DataFrame.h"
 
 //------------------------------------------------------------------

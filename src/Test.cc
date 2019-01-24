@@ -10,14 +10,18 @@ main( int argc, char *argv[] ) {
     
     try {
 
-        DataFrame data = DataFrame( "../data/", "sardine_anchovy_sst.csv" );
+        DataFrame df = DataFrame( "../data/", "sardine_anchovy_sst.csv" );
+
+        Matrix< double > matrix = df.matrix();
         
         //--------------------------------------------------
         // Default parameters
         //--------------------------------------------------
-        Parameters *parameters = new Parameters;
-        parameters->verbose = true;
-        parameters->knn     = 2;
+        Parameters parameters = Parameters();
+        parameters.verbose    = true;
+        parameters.knn        = 2;
+        parameters.library    = {0,1,2};
+        parameters.prediction = {2,3,4};
                 
         //--------------------------------------------------
         // Matrix 6 rows 3 columns
@@ -31,13 +35,9 @@ main( int argc, char *argv[] ) {
 
         // Call FindNeighbors()
         //--------------------------------------------------
-        std::vector<int> libraryRows    = {0,1,2};
-        std::vector<int> predictionRows = {2,3,4};
-
-        Neighbors *neighbors = FindNeighbors( &M,
-                                              &libraryRows,
-                                              &predictionRows,
-                                               parameters );
+        const Matrix<double> &M_ = M;
+        const Parameters     &P_ = parameters;
+        Neighbors neighbors = FindNeighbors( M_, P_ );
     }
     catch ( const std::exception& e ) {
  	std::cout << "Exception caught in main:\n";

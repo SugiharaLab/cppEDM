@@ -2,6 +2,7 @@
 #define NEIGHBORS_H
 
 #include <cmath>
+#include <iterator>
 
 #include "Common.h"
 #include "Matrix.h"
@@ -10,19 +11,17 @@
 struct Neighbors; // forward declaration
 
 // Prototypes
-struct Neighbors *FindNeighbors( Matrix<double>   *matrix,
-                                 std::vector<int> *libraryRows,
-                                 std::vector<int> *predictionRows,
-                                 Parameters       *parameters );
+struct Neighbors FindNeighbors( const Matrix<double> &matrix,
+                                const Parameters     &parameters );
 
-double Distance( std::valarray<double> *v1,
-                 std::valarray<double> *p2,
-                 DistanceMetric    metric );
+double Distance( const std::valarray<double> &v1,
+                 const std::valarray<double> &v2,
+                 DistanceMetric metric );
 
 // Return structure of FindNeighbors()
 struct Neighbors {
-    Matrix<int>    *neighbors;
-    Matrix<double> *distances;
+    Matrix<int>    neighbors;
+    Matrix<double> distances;
     Neighbors();
     ~Neighbors();
 };
