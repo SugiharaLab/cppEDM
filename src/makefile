@@ -1,6 +1,6 @@
 
 CC  = g++
-OBJ = DataFrame.o Matrix.o Common.o Parameter.o Interface.o Neighbors.o\
+OBJ = DataFrame.o Common.o Parameter.o Interface.o Neighbors.o\
 	Simplex.o Eval.o CCM.o Multiview.o SMap.o
 
 LIB = libEDM.a
@@ -23,9 +23,6 @@ $(LIB): $(OBJ)
 
 DataFrame.o: DataFrame.cc
 	$(CC) -c DataFrame.cc $(CFLAGS)
-
-Matrix.o: Matrix.cc
-	$(CC) -c Matrix.cc $(CFLAGS)
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)

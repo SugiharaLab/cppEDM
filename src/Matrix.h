@@ -17,7 +17,11 @@ class Matrix {
     size_t           n_rows;
     
 public:
-    Matrix( size_t rows, size_t columns );
+    //-----------------------------------------------------------------
+    // Constructor
+    //-----------------------------------------------------------------
+    Matrix( size_t rows, size_t columns ):
+        n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
     Matrix () {}
 
     // Operators and accessors
@@ -46,10 +50,39 @@ public:
         return elements[ std::slice( row * n_columns, n_columns, 1 ) ];
     }
 
-    // Prototypes defined in Matrix.cc
-    // Write array to row or col
-    void writeRow   ( size_t row, std::valarray<T> array );
-    void writeColumn( size_t col, std::valarray<T> array );
+    //-----------------------------------------------------------------
+    // Write array to row
+    //-----------------------------------------------------------------
+    void writeRow( size_t row, std::valarray<T> array ) {
+        size_t N = array.size();
+    
+        if ( N != n_columns ) {
+            std::stringstream errMsg;
+            errMsg << "Matrix::insertRow(): row argument must be "
+                   << n_columns << ". " << N << " were provided." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        for ( size_t i = 0; i < N; i++ ) {
+            (*this)( row, i ) = array[ i ];
+        }
+    }
+
+    //-----------------------------------------------------------------
+    // Write array to col
+    //-----------------------------------------------------------------
+    void writeColumn( size_t col, std::valarray<T> array ) {
+        size_t N = array.size();
+    
+        if ( N != n_rows ) {
+            std::stringstream errMsg;
+            errMsg << "Matrix::insertColumn(): col argument must be "
+                   << n_rows << ". " << N << " were provided." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        for ( size_t i = 0; i < N; i++ ) {
+            (*this)( i, col ) = array[ i ];
+        }
+    }
 };
 
 #endif

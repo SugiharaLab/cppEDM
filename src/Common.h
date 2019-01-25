@@ -15,6 +15,8 @@ enum class DistanceMetric { Euclidean, Manhattan };
 
 // Prototypes
 //---------------------------------------------------------
+std::string ToLower( std::string str );
+
 std::vector<std::string> SplitString( std::string inString, 
                                       std::string delimeters = "," );
 

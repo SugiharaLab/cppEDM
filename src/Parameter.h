@@ -2,6 +2,7 @@
 #define PARAMETER_H
 
 #include <algorithm>
+#include <numeric>
 
 #include "Common.h"
 
@@ -21,7 +22,7 @@ public:  // JP Should be protected with accessors...
     
     float       theta;            // S Map localization
     float       SVDSignificance;  // SVD singular value cutoff
-    std::vector<int> jacobians;        // list of column indices for Jacobians
+    std::vector<int> jacobians;   // list of column indices for Jacobians
     float       TikhonovAlpha;    // Initial alpha parameter
     float       ElasticNetAlpha;  // Initial alpha parameter
 
@@ -52,11 +53,43 @@ public:  // JP Should be protected with accessors...
     std::string blockOutputFile;
     
 public:
-    Parameters();
+    // Constructor declaration and default arguments
+    Parameters(
+        std::string method      = "simplex",
+        std::string lib         = "1 10",
+        std::string pred        = "11 20",
+        int         E           = 0,
+        int         Tp          = 0,
+        int         knn         = 0,
+        int         tau         = 1,
+        float       theta       = 0,
+        float       svdSig      = 1E-5,
+        std::string jacobians   = "",
+        float       tikhonov    = 0,
+        float       elasticNet  = 0,
+        std::string colNames    = "",
+        std::string colIndex    = "",
+        std::string targNames   = "",
+        std::string targIndex   = "",
+        bool        embedded    = false,
+        int         multi       = 0,
+        std::string libSizes    = "",
+        int         sample      = 0,
+        bool        random      = true,
+        int         seed        = -1,
+        bool        noNeighbor  = false,
+        bool        forwardTau  = false,
+        bool        verbose     = false,
+        std::string path        = "./",
+        std::string dataFile    = "",
+        std::string predictFile = "",
+        std::string SmapFile    = "",
+        std::string blockFile   = ""
+        );
     ~Parameters();
 
-    void Load();   // Populate the parameters from arguments
-    void Adjust(); // Parameter validation and index offsets
+    void Load();     // Populate the parameters from arguments
+    void Validate(); // Parameter validation and index offsets
 };
 
 #endif

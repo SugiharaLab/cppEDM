@@ -6,39 +6,49 @@
 // Intended to execute tests to validate the code.
 // For now, it's open for use as a library test.
 //----------------------------------------------------------------
-main( int argc, char *argv[] ) {
+int main( int argc, char *argv[] ) {
     
     try {
 
-        DataFrame df = DataFrame( "../data/", "sardine_anchovy_sst.csv" );
+        DataFrame df = DataFrame( "../data/", "block_3sp.csv" );
 
-        Matrix< double > matrix = df.matrix();
+        const Matrix< double > &M = df.matrix();
+
+        std::vector< std::string > colNames = df.ColumnNames();
+        std::valarray<double>      row0     = M.row( 0 );
+
+        std::cout << "Data Frame from block_3sp.csv has "
+                  << df.NumColumns() << "(" << M.NColumns() << ") and "
+                  << df.NumRows() << "(" << M.NRows() << ") rows." << std::endl;
+        std::cout << "Column Names: ";
+        for ( auto ci = colNames.begin(); ci != colNames.end(); ++ci ) {
+            std::cout << *ci << ", ";
+        } std::cout << std::endl;
+        std::cout << "Row 0: ";
+        for ( auto ri = begin(row0); ri != end(row0); ++ri ) {
+            std::cout << *ri << ", ";
+        } std::cout << std::endl;
+        
         
         //--------------------------------------------------
         // Default parameters
         //--------------------------------------------------
         Parameters parameters = Parameters();
         parameters.verbose    = true;
-        parameters.knn        = 2;
-        parameters.library    = {0,1,2};
-        parameters.prediction = {2,3,4};
-                
-        //--------------------------------------------------
-        // Matrix 6 rows 3 columns
-        //--------------------------------------------------
-        Matrix<double> M( 6, 3 );
-        for ( size_t i = 0; i < 6; i++ ) {
-            for ( size_t j = 0; j < 3; j++ ) {
-                M( i, j ) = i + j * 2;
-            }
-        }
+        parameters.embedded   = true;
+        parameters.knn        = 4;
+        parameters.Tp         = 1;
+        parameters.library    = { 1,   150 };
+        parameters.prediction = { 180, 189 };
+        
 
         // Call FindNeighbors()
         //--------------------------------------------------
-        const Matrix<double> &M_ = M;
-        const Parameters     &P_ = parameters;
-        Neighbors neighbors = FindNeighbors( M_, P_ );
+        const Parameters &params = parameters;
+        Neighbors neighbors = FindNeighbors( M, params );
+
     }
+    
     catch ( const std::exception& e ) {
  	std::cout << "Exception caught in main:\n";
         std::cout << e.what();
@@ -56,8 +66,18 @@ main( int argc, char *argv[] ) {
 
 //----------------------------------------------------------------
 //----------------------------------------------------------------
-void TestCode( Matrix<double> M ) {
+void TestCode() {
     
+        //--------------------------------------------------
+        // Matrix 6 rows 3 columns
+        //--------------------------------------------------
+        Matrix<double> M( 6, 3 );
+        for ( size_t i = 0; i < 6; i++ ) {
+            for ( size_t j = 0; j < 3; j++ ) {
+                M( i, j ) = i + j * 2;
+            }
+        }
+        
         std::valarray<double> A( 99, 3 );
         M.writeRow( 0, A );
         std::valarray<double> B( -1, 6 );

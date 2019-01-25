@@ -167,7 +167,7 @@ struct Neighbors FindNeighbors(
                                 end  ( k_NN_distances ) ) > 1E29 ) {
             std::stringstream errMsg;
             errMsg << "FindNeighbors(): Library is too small to resolve "
-                   << parameters.knn << " knn neighbors.";
+                   << parameters.knn << " knn neighbors." << std::endl;
             throw std::runtime_error( errMsg.str() );
         }
 

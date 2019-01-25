@@ -4,19 +4,114 @@
 //----------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------
-Parameters::Parameters() :
+Parameters::Parameters(
+    std::string method,
+    std::string lib,
+    std::string pred,
+    int         E,
+    int         Tp,
+    int         knn,
+    int         tau,
+    float       theta,
+    float       svdSig,
+    std::string jacobian,
+    float       tikhonov,
+    float       elasticNet,
+    std::string colNames,
+    std::string colIndex,
+    std::string targNames,
+    std::string targIndex,
+    bool        embedded,
+    int         multi,
+    std::string libSizes,
+    int         sample,
+    bool        random,
+    int         rseed,
+    bool        noNeigh,
+    bool        fwdTau,
+    bool        verbose,
+    std::string path,
+    std::string dataFile,
+    std::string predictFile,
+    std::string SmapFile,
+    std::string blockFile
+    
+    ) :
     // default variable initialization
-    method( Method::Simplex ),
-    library   ( std::vector<int>(2,0) ),
-    prediction( std::vector<int>(2,0) ),
-    E( 0 ), Tp( 1 ), knn( 0 ), tau( 1 ), theta( 0. ),
-    SVDSignificance( 1E-5 ), TikhonovAlpha( 0 ), ElasticNetAlpha( 0 ),
-    columnIndex( 1 ), targetIndex( 0 ), embedded( false ),
-    MultiviewEnsemble( 0 ), librarySizes( std::vector<int>(5,0) ),
-    subSamples( 100 ), randomLib( true ), seed( 0 ),
-    noNeighborLimit( false ), forwardTau( false ), verbose( false ),
-    path( "./" )
-{}
+    method ( ToLower(method).compare("simplex") ? Method::SMap :
+                                                  Method::Simplex),
+    E                ( E ),
+    Tp               ( Tp ),
+    knn              ( knn ),
+    tau              ( tau ),
+    theta            ( theta ),
+    SVDSignificance  ( svdSig ),
+    TikhonovAlpha    ( tikhonov ),
+    ElasticNetAlpha  ( elasticNet ),
+    columnNames      ( SplitString( colNames ) ),
+    embedded         ( embedded ),
+    MultiviewEnsemble( multi ),
+    subSamples       ( sample ),
+    randomLib        ( random ),
+    seed             ( rseed ),
+    noNeighborLimit  ( noNeigh ),
+    forwardTau       ( fwdTau ),
+    verbose          ( verbose )
+{
+    // Generate library indices and zero-offset
+    std::vector<std::string> lib_str = SplitString( lib, " \t," );
+    if ( lib_str.size() != 2 ) {
+        std::string errMsg("Parameters(): library must be two integers.\n");
+        throw std::runtime_error( errMsg );
+    }
+    int lib1 = std::stoi( lib_str[0] );
+    int lib2 = std::stoi( lib_str[1] );
+
+    library = std::vector<int>( lib2 - lib1 + 1 );
+    std::iota ( library.begin(), library.end(), lib1 - 1 );
+
+    // Generate prediction indices and zero-offset
+    std::vector<std::string> pred_str = SplitString( pred, " \t," );
+    if ( pred_str.size() != 2 ) {
+        std::string errMsg("Parameters(): prediction must be two integers.\n");
+        throw std::runtime_error( errMsg );
+    }
+    int pred1 = std::stoi( pred_str[0] );
+    int pred2 = std::stoi( pred_str[1] );
+
+    prediction = std::vector<int>( pred2 - pred1 + 1 );
+    std::iota ( prediction.begin(), prediction.end(), pred1 - 1 );
+
+#ifdef DEBUG
+    std::cout << "Parameters(): library: ";
+    for ( auto li = library.begin(); li != library.end(); ++li ) {
+        std::cout << *li << " ";
+    } std::cout << std::endl;
+    std::cout << "Parameters(): prediction: ";
+    for ( auto pi = prediction.begin(); pi != prediction.end(); ++pi ) {
+        std::cout << *pi << " ";
+    } std::cout << std::endl;
+#endif
+
+    // Jacobians
+    std::vector<std::string> jac_str = SplitString( jacobian, " \t," );
+    jacobians = std::vector<int>( jac_str.size() );
+    for ( size_t i = 0; i < jac_str.size(); i++ ) {
+        jacobians.push_back( std::stoi( jac_str[i] ) );
+    }
+
+    // columnIndex
+    std::vector<std::string> col_i_str = SplitString( colIndex, " \t," );
+    columnIndex = std::vector<int>( col_i_str.size() );
+    for ( size_t i = 0; i < col_i_str.size(); i++ ) {
+        columnIndex.push_back( std::stoi( col_i_str[i] ) );
+    }
+
+
+    
+    // Validate and adjust parameters
+    //Validate();
+}
 
 //----------------------------------------------------------------
 // Destructor
@@ -31,7 +126,7 @@ void Parameters::Load() {}
 //----------------------------------------------------------------
 // Index offsets and validation
 //----------------------------------------------------------------
-void Parameters::Adjust() {
+void Parameters::Validate() {
 
     // If S-Map prediction, require k_NN > E + 1, default is all neighbors.
     // If Simplex and knn not specified, knn is set to E+1 in Simplex() ?JP
@@ -90,22 +185,4 @@ void Parameters::Adjust() {
         }
     }
 
-    // Convert library and prediction indices to zero-offset
-    if ( library[0] < 1 ) {
-        std::string errMsg( "Parameters::Adjust() library start index must "
-                            "be at least 1.");
-        throw std::runtime_error( errMsg );                
-    }
-    if ( prediction[0] < 1 ) {
-        std::string errMsg( "Parameters::Adjust() prediction start index must "
-                            "be at least 1.");
-        throw std::runtime_error( errMsg );                
-    }
-
-    for ( auto li = library.begin(); li != library.end(); ++li ) {
-        *li = *li - 1;
-    }
-    for ( auto pi = prediction.begin(); pi != prediction.end(); ++pi ) {
-        *pi = *pi - 1;
-    }
 }
