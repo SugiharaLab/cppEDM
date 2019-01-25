@@ -51,8 +51,11 @@ public:  // JP Should be protected with accessors...
     std::string predictOutputFile;
     std::string SmapOutputFile;
     std::string blockOutputFile;
+
+    bool        validated;
     
-public:
+    friend std::ostream& operator<<(std::ostream &os, Parameters &params);
+
     // Constructor declaration and default arguments
     Parameters(
         std::string method      = "simplex",
@@ -70,7 +73,7 @@ public:
         std::string colNames    = "",
         std::string colIndex    = "",
         std::string targNames   = "",
-        std::string targIndex   = "",
+        int         targIndex   = 0,
         bool        embedded    = false,
         int         multi       = 0,
         std::string libSizes    = "",
@@ -86,6 +89,7 @@ public:
         std::string SmapFile    = "",
         std::string blockFile   = ""
         );
+    
     ~Parameters();
 
     void Load();     // Populate the parameters from arguments

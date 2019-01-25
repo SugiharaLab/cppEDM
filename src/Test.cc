@@ -39,9 +39,11 @@ int main( int argc, char *argv[] ) {
         parameters.knn        = 4;
         parameters.Tp         = 1;
         parameters.library    = { 1,   150 };
-        parameters.prediction = { 180, 189 };
-        
+        parameters.prediction = { 181, 198 };
 
+        parameters.Validate();
+        std::cout << parameters;
+        
         // Call FindNeighbors()
         //--------------------------------------------------
         const Parameters &params = parameters;
@@ -51,7 +53,7 @@ int main( int argc, char *argv[] ) {
     
     catch ( const std::exception& e ) {
  	std::cout << "Exception caught in main:\n";
-        std::cout << e.what();
+        std::cout << e.what() << std::endl;
 	return -1;
     }
     catch (...) {

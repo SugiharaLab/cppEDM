@@ -64,7 +64,6 @@ depend:
 # DO NOT DELETE
 
 DataFrame.o: DataFrame.h Common.h Matrix.h
-Matrix.o: Matrix.h Common.h
 Common.o: Common.h
 Parameter.o: Parameter.h Common.h
 Interface.o: Common.h

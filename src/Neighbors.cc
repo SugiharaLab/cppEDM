@@ -55,7 +55,7 @@ struct Neighbors FindNeighbors(
                            parameters.library.begin(),
                            parameters.library.end(), 
                            result.begin() );
-
+    
     if ( ii != result.begin() ) {
         // Overlapping indices exist
         std::stringstream msg;
@@ -90,12 +90,12 @@ struct Neighbors FindNeighbors(
         const std::valarray<double> &pred_vec =
             pred_row_vec[ std::slice( 1, N_columns-1, 1 ) ];
 
-#ifdef JP_REMOVE //----------------------------------------
+//#ifdef JP_REMOVE //----------------------------------------
         std::cout << "Predict row " << pred_row << " : " ;
         for ( size_t i = 0; i < pred_vec.size(); i++ ) {
             std::cout << pred_vec[i] << " ";
         } std::cout << std::endl;
-#endif // JP REMOVE ----------------------------------------
+//#endif // JP REMOVE ----------------------------------------
 
         // Reset the neighbor and distance vectors for next row
         for ( size_t i = 0; i < parameters.knn; i++ ) {
@@ -116,23 +116,22 @@ struct Neighbors FindNeighbors(
             const std::valarray<double> &lib_vec =
                 lib_row_vec[ std::slice( 1, N_columns - 1, 1 ) ];
 
-#ifdef JP_REMOVE //----------------------------------------
+//#ifdef JP_REMOVE //----------------------------------------
             std::cout << "Library row " << lib_row << " : " ;
             for ( size_t k = 0; k < lib_vec.size(); k++ ) {
                 std::cout << lib_vec[k] << " ";
             } std::cout << std::endl;
-#endif // JP REMOVE ----------------------------------------
+//#endif // JP REMOVE ----------------------------------------
             
             // If the library point is degenerate with the prediction,
             // ignore it.
-            if ( parameters.library[ lib_row ] ==
-                 parameters.prediction[ pred_row ] ) {
+            if ( lib_row == pred_row ) {
                 if ( parameters.verbose ) {
                     std::stringstream msg;
                     msg << "FindNeighbors(): Ignoring degenerate lib_row "
-                        << parameters.library[ lib_row ]
+                        << lib_row
                         << " and pred_row "
-                        << parameters.prediction[ pred_row ]
+                        << pred_row
                         << std::endl;
                     std::cout << msg.str();
                 }
