@@ -9,45 +9,28 @@
 int main( int argc, char *argv[] ) {
     
     try {
-
-        DataFrame df = DataFrame( "../data/", "block_3sp.csv" );
-
-        const Matrix< double > &M = df.matrix();
-
-        std::vector< std::string > colNames = df.ColumnNames();
-        std::valarray<double>      row0     = M.row( 0 );
-
-        std::cout << "Data Frame from block_3sp.csv has "
-                  << df.NumColumns() << "(" << M.NColumns() << ") and "
-                  << df.NumRows() << "(" << M.NRows() << ") rows." << std::endl;
-        std::cout << "Column Names: ";
-        for ( auto ci = colNames.begin(); ci != colNames.end(); ++ci ) {
-            std::cout << *ci << ", ";
-        } std::cout << std::endl;
-        std::cout << "Row 0: ";
-        for ( auto ri = begin(row0); ri != end(row0); ++ri ) {
-            std::cout << *ri << ", ";
-        } std::cout << std::endl;
-        
-        
         //--------------------------------------------------
         // Default parameters
         //--------------------------------------------------
-        Parameters parameters = Parameters();
-        parameters.verbose    = true;
-        parameters.embedded   = true;
-        parameters.knn        = 4;
-        parameters.Tp         = 1;
-        parameters.library    = { 1,   150 };
-        parameters.prediction = { 181, 198 };
-
-        parameters.Validate();
-        std::cout << parameters;
+        Parameters param = Parameters( Method::Simplex,
+                                       "../data/", "block_3sp.csv", "",
+                                       "1 10", "195 198", 3, 1, 4, 1, 0,
+                                       "x_t y_t z_t", "x_t" );
+        std::cout << param;
         
+        DataFrame df = DataFrame( param.path, param.dataFile );
+
+        std::cout << df;
+        
+        // Get columns x_t, y_t, z_t : Time is Not included for FindNeighbors
+        Matrix<double> M_col = df.MatrixColumnNames( param.columnNames );
+
+        //--------------------------------------------------
         // Call FindNeighbors()
         //--------------------------------------------------
-        const Parameters &params = parameters;
-        Neighbors neighbors = FindNeighbors( M, params );
+        const Parameters     &param_ = param;
+        const Matrix<double> &M_     = M_col;
+        Neighbors neighbors = FindNeighbors( M_, param_ );
 
     }
     
@@ -81,9 +64,9 @@ void TestCode() {
         }
         
         std::valarray<double> A( 99, 3 );
-        M.writeRow( 0, A );
+        M.WriteRow( 0, A );
         std::valarray<double> B( -1, 6 );
-        M.writeColumn( 1, B );
+        M.WriteColumn( 1, B );
 
         // test Matrix.row() & column()
         std::cout << "Matrix:" << std::endl;
@@ -95,7 +78,7 @@ void TestCode() {
         }   
         std::cout << "Matrix rows():" << std::endl;
         for ( size_t i = 0; i < 6; i++ ) {
-            std::valarray<double> row = M.row( i );
+            std::valarray<double> row = M.Row( i );
             std::cout << "Row " << i << " : ";
             for ( size_t j = 0; j < row.size(); j++ ) {
                 std::cout << row[j] << " ";
@@ -103,7 +86,7 @@ void TestCode() {
         }
         std::cout << "Matrix cols():" << std::endl;
         for ( size_t i = 0; i < 3; i++ ) {
-            std::valarray<double> col = M.column( i );
+            std::valarray<double> col = M.Column( i );
             std::cout << "Column " << i << " : ";
             for ( size_t j = 0; j < col.size(); j++ ) {
                 std::cout << col[j] << " ";

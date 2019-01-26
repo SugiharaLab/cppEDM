@@ -3,138 +3,84 @@
 
 //----------------------------------------------------------------
 // Constructor
+// Default arguments in Parameter.h
 //----------------------------------------------------------------
 Parameters::Parameters(
-    std::string method,
-    std::string lib,
-    std::string pred,
+    Method      method,
+    std::string path,
+    std::string dataFile,
+    std::string predictFile,    
+    std::string lib_str,
+    std::string pred_str,
     int         E,
     int         Tp,
     int         knn,
     int         tau,
     float       theta,
+
+    std::string colNames_str,
+    std::string targetName,
+    std::string colIndex_str,
+    int         targetIndex,
+    
+    bool        embedded,
+    bool        verbose,
+    
+    std::string SmapFile,
+    std::string blockFile,
+    
     float       svdSig,
-    std::string jacobian,
+    std::string jacobian_str,
     float       tikhonov,
     float       elasticNet,
-    std::string colNames,
-    std::string colIndex,
-    std::string targetName,
-    int         targetIndex,
-    bool        embedded,
+    
     int         multi,
-    std::string libSizes,
+    std::string libSizes_str,
     int         sample,
     bool        random,
     int         rseed,
     bool        noNeigh,
-    bool        fwdTau,
-    bool        verbose,
-    std::string path,
-    std::string dataFile,
-    std::string predictFile,
-    std::string SmapFile,
-    std::string blockFile
+    bool        fwdTau
     ) :
-    // default variable initialization
-    method ( ToLower(method).compare("simplex") ? Method::SMap :
-                                                  Method::Simplex),
+    // default variable initialization from parameter arguments
+    method           ( method ),
+    path             ( path ),
+    dataFile         ( dataFile ),
+    predictOutputFile( predictFile ),    
+    lib_str          ( lib_str ),
+    pred_str         ( pred_str ),
     E                ( E ),
     Tp               ( Tp ),
     knn              ( knn ),
     tau              ( tau ),
     theta            ( theta ),
+    
+    colNames_str     ( colNames_str ),
+    targetName       ( targetName ),
+    colIndex_str     ( colIndex_str ),
+    targetIndex      ( targetIndex ),
+
+    embedded         ( embedded ),
+    verbose          ( verbose ),
+    
+    SmapOutputFile   ( SmapFile ),
+    blockOutputFile  ( blockFile ),
+
     SVDSignificance  ( svdSig ),
+    jacobian_str     ( jacobian_str ),
     TikhonovAlpha    ( tikhonov ),
     ElasticNetAlpha  ( elasticNet ),
-    columnNames      ( SplitString( colNames ) ),
-    targetName       ( targetName ),
-    targetIndex      ( targetIndex ),
-    embedded         ( embedded ),
+    
     MultiviewEnsemble( multi ),
+    libSizes_str     ( libSizes_str ),
     subSamples       ( sample ),
     randomLib        ( random ),
     seed             ( rseed ),
     noNeighborLimit  ( noNeigh ),
     forwardTau       ( fwdTau ),
-    verbose          ( verbose ),
-    path             ( path ),
-    dataFile         ( dataFile ),
-    predictOutputFile( predictFile ),
-    SmapOutputFile   ( SmapFile ),
-    blockOutputFile  ( blockFile ),
     validated        ( false )
 {
-    // Generate library indices: Not zero-offset
-    std::vector<std::string> lib_vec = SplitString( lib, " \t," );
-    if ( lib_vec.size() != 2 ) {
-        std::string errMsg("Parameters(): library must be two integers.\n");
-        throw std::runtime_error( errMsg );
-    }
-    int lib_start = std::stoi( lib_vec[0] );
-    int lib_end   = std::stoi( lib_vec[1] );
-
-    library = std::vector<int>( lib_end - lib_start + 1 );
-    std::iota ( library.begin(), library.end(), lib_start );
-
-    // Generate prediction indices: Not zero-offset
-    std::vector<std::string> pred_vec = SplitString( pred, " \t," );
-    if ( pred_vec.size() != 2 ) {
-        std::string errMsg("Parameters(): prediction must be two integers.\n");
-        throw std::runtime_error( errMsg );
-    }
-    int pred_start = std::stoi( pred_vec[0] );
-    int pred_end   = std::stoi( pred_vec[1] );
-
-    prediction = std::vector<int>( pred_end - pred_start + 1 );
-    std::iota ( prediction.begin(), prediction.end(), pred_start );
-
-#ifdef DEBUG_ALL
-    std::cout << "Parameters(): library: ";
-    for ( auto li = library.begin(); li != library.end(); ++li ) {
-        std::cout << *li << " ";
-    } std::cout << std::endl;
-    std::cout << "Parameters(): prediction: ";
-    for ( auto pi = prediction.begin(); pi != prediction.end(); ++pi ) {
-        std::cout << *pi << " ";
-    } std::cout << std::endl;
-#endif
-
-    // Jacobians
-    if ( jacobian.size() > 0 ) {
-        std::vector<std::string> jac_vec = SplitString( jacobian, " \t," );
-        if ( jac_vec.size() < 2 ) {
-            std::string errMsg( "Parameters(): jacobians must be at least "
-                                "two integers.\n" );
-            throw std::runtime_error( errMsg );
-        }
-        jacobians = std::vector<int>( jac_vec.size() );
-        for ( size_t i = 0; i < jac_vec.size(); i++ ) {
-            jacobians.push_back( std::stoi( jac_vec[i] ) );
-        }
-    }
-
-    // columnIndex
-    if ( colIndex.size() > 0 ) {
-        std::vector<std::string> col_i_vec = SplitString( colIndex, " \t," );
-        columnIndex = std::vector<int>( col_i_vec.size() );
-        for ( size_t i = 0; i < col_i_vec.size(); i++ ) {
-            columnIndex.push_back( std::stoi( col_i_vec[i] ) );
-        }
-    }
-
-    // librarySizes
-    if ( libSizes.size() > 0 ) {
-        std::vector<std::string> libsize_vec = SplitString( libSizes, " \t," );
-        if ( libsize_vec.size() != 3 ) {
-            std::string errMsg( "Parameters(): librarySizes must be three "
-                                "integers.\n" );
-            throw std::runtime_error( errMsg );
-        }
-        for ( size_t i = 0; i < libsize_vec.size(); i++ ) {
-            librarySizes.push_back( std::stoi( libsize_vec[i] ) );
-        }
-    }
+    Validate();
 }
 
 //----------------------------------------------------------------
@@ -148,31 +94,16 @@ Parameters::~Parameters() {}
 void Parameters::Load() {}
 
 //----------------------------------------------------------------
-// Index offsets and validation
+// Index offsets, generate library and prediction indices,
+// and parameter validation
 //----------------------------------------------------------------
 void Parameters::Validate() {
 
     validated = true;
 
-    // Apply zero-offsets
-    // Convert library and prediction indices to zero-offset
-    if ( library[0] < 1 ) {
-        std::string errMsg( "Parameters::Validate() library start index must "
-                            "be at least 1.");
-        throw std::runtime_error( errMsg );                
+    if ( method != Method::SMap and method != Method::Simplex ) {
+        throw std::runtime_error( "Prediction method error.\n" );
     }
-    if ( prediction[0] < 1 ) {
-        std::string errMsg( "Parameters::Validate() prediction start index"
-                            " must be at least 1.");
-        throw std::runtime_error( errMsg );                
-    }
-
-    for ( auto li = library.begin(); li != library.end(); ++li ) {
-        *li = *li - 1;
-    }
-    for ( auto pi = prediction.begin(); pi != prediction.end(); ++pi ) {
-        *pi = *pi - 1;
-    }    
 
     // If S-Map prediction, require k_NN > E + 1, default is all neighbors.
     // If Simplex and knn not specified, knn is set to E+1 in Simplex() ?JP
@@ -230,14 +161,91 @@ void Parameters::Validate() {
             ElasticNetAlpha = 1;
         }
     }
+
+    //--------------------------------------------------------------
+    // Generate library indices: Apply zero-offset
+    //--------------------------------------------------------------
+    std::vector<std::string> lib_vec = SplitString( lib_str, " \t," );
+    if ( lib_vec.size() != 2 ) {
+        std::string errMsg("Parameters(): library must be two integers.\n");
+        throw std::runtime_error( errMsg );
+    }
+    int lib_start = std::stoi( lib_vec[0] );
+    int lib_end   = std::stoi( lib_vec[1] );
+
+    library = std::vector<size_t>( lib_end - lib_start + 1 );
+    std::iota ( library.begin(), library.end(), lib_start - 1 );
+
+    //--------------------------------------------------------------
+    // Generate prediction indices: Not zero-offset
+    //--------------------------------------------------------------
+    std::vector<std::string> pred_vec = SplitString( pred_str, " \t," );
+    if ( pred_vec.size() != 2 ) {
+        std::string errMsg("Parameters(): prediction must be two integers.\n");
+        throw std::runtime_error( errMsg );
+    }
+    int pred_start = std::stoi( pred_vec[0] );
+    int pred_end   = std::stoi( pred_vec[1] );
+
+    prediction = std::vector<size_t>( pred_end - pred_start + 1 );
+    std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
+
+#ifdef DEBUG_ALL
+    PrintIndices( library, prediction );
+#endif
+
+    //--------------------------------------------------------------
+    // Convert multi argument parameters from string to vectors
+    //--------------------------------------------------------------
+    
+    // Jacobians
+    if ( jacobian_str.size() > 0 ) {
+        std::vector<std::string> jac_vec = SplitString( jacobian_str, " \t," );
+        if ( jac_vec.size() < 2 ) {
+            std::string errMsg( "Parameters(): jacobians must be at least "
+                                "two integers.\n" );
+            throw std::runtime_error( errMsg );
+        }
+        jacobians = std::vector<int>( jac_vec.size() );
+        for ( size_t i = 0; i < jac_vec.size(); i++ ) {
+            jacobians.push_back( std::stoi( jac_vec[i] ) );
+        }
+    }
+
+    // columnNames
+    if ( colNames_str.size() > 0 ) {
+        columnNames = SplitString( colNames_str," \t,");
+    }
+    
+    // columnIndex
+    if ( colIndex_str.size() > 0 ) {
+        std::vector<std::string> col_i_vec = SplitString( colIndex_str," \t,");
+        columnIndex = std::vector<int>( col_i_vec.size() );
+        for ( size_t i = 0; i < col_i_vec.size(); i++ ) {
+            columnIndex.push_back( std::stoi( col_i_vec[i] ) );
+        }
+    }
+
+    // librarySizes
+    if ( libSizes_str.size() > 0 ) {
+        std::vector<std::string> libsize_vec = SplitString(libSizes_str," \t,");
+        if ( libsize_vec.size() != 3 ) {
+            std::string errMsg( "Parameters(): librarySizes must be three "
+                                "integers.\n" );
+            throw std::runtime_error( errMsg );
+        }
+        for ( size_t i = 0; i < libsize_vec.size(); i++ ) {
+            librarySizes.push_back( std::stoi( libsize_vec[i] ) );
+        }
+    }
 }
 
 //------------------------------------------------------------------
 // Print to ostream
 //  @param os: the stream to print to
-//  @return: the stream passed in
+//  @return  : the stream passed in
 //------------------------------------------------------------------
-std::ostream& operator<< (std::ostream &os, Parameters &p ) {
+std::ostream& operator<< ( std::ostream &os, Parameters &p ) {
 
     // print info about the dataframe
     os << "Parameters: -------------------------------------------\n";
@@ -246,6 +254,18 @@ std::ostream& operator<< (std::ostream &os, Parameters &p ) {
        << " E=" << p.E << " Tp=" << p.Tp
        << " knn=" << p.knn << " tau=" << p.tau << " theta=" << p.theta
        << std::endl;
+
+    if ( p.columnNames.size() ) {
+        os << "Column Names : [ ";
+        for ( auto ci = p.columnNames.begin();
+              ci != p.columnNames.end(); ++ci ) {
+            os << *ci << " ";
+        } os << "]" << std::endl;
+    }
+
+    if ( p.targetName.size() ) {
+        os << "Target: " << p.targetName << std::endl;
+    }
 
     os << "Library: [" << p.library[0] << " : "
        << p.library[ p.library.size() - 1 ] << "]  "
@@ -259,3 +279,20 @@ std::ostream& operator<< (std::ostream &os, Parameters &p ) {
     return os;
 }
 
+#ifdef DEBUG
+//------------------------------------------------------------------
+// 
+//------------------------------------------------------------------
+void Parameters::PrintIndices( std::vector<size_t> library,
+                               std::vector<size_t> prediction )
+{
+    std::cout << "Parameters(): library: ";
+    for ( auto li = library.begin(); li != library.end(); ++li ) {
+        std::cout << *li << " ";
+    } std::cout << std::endl;
+    std::cout << "Parameters(): prediction: ";
+    for ( auto pi = prediction.begin(); pi != prediction.end(); ++pi ) {
+        std::cout << *pi << " ";
+    } std::cout << std::endl;
+}
+#endif

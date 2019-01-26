@@ -10,45 +10,52 @@
 // Prefix for DataFrame columns without header titles
 #define COL_PREFIX "vec_"
 
-#define MAX_PRINT_IDX 50 // DataFrame << max rows to print
-
 //---------------------------------------------------------
 // DataFrame class
-// Provide a data storage container for EDM input data and
+// Provide a data storage Matrix for EDM input data and
 // embeddings (blocks) similar to the DataFrame of R/pandas
 //---------------------------------------------------------
 class DataFrame {
 
 private:
     
-    // Underlying datastructure is a single valarray<T>
-    Matrix< double > container;
+    // Underlying datastructure: a single valarray<T>
+    Matrix< double > dataMatrix;
     
-    NamedData csvInput; // map< string, vector<double> >
+    NamedData csvInput; // pair< string, vector<double> >
 
-    std::vector< std::string > colNames; // colNames are ordered NamedData keys
+    std::vector< std::string > colNames;
 
     std::string path;     // User specified input path
     std::string fileName; // User specified input data file
+
+    size_t maxRowPrint;
     
 public:
 
-    DataFrame (const std::string path, const std::string fileName); 
+    // Prototypes
+    DataFrame ( const std::string path,
+                const std::string fileName,
+                size_t maxPrint = 5 );
     
     NamedData ReadData();
     
-    Matrix< double > SetupContainer (const NamedData csvInput);
+    Matrix< double > SetupDataMatrix ( const NamedData csvInput );
 
-    Matrix< double > matrix() const { return container; }
+    Matrix< double > MatrixColumnNames( std::vector<std::string> colNames );
     
-    size_t NumColumns();
-    size_t NumRows();
+    // Accessors
+    size_t NumColumns()  const { return dataMatrix.NColumns(); }
+    size_t NumRows()     const { return dataMatrix.NRows();    }
+    size_t MaxRowPrint() const { return maxRowPrint;           }
     
-    std::vector< std::string > ColumnNames();
-    
-    friend std::ostream& operator<<(std::ostream& os, DataFrame& df);
-    double & operator() (size_t rowIdx, size_t colIdx);
-    double & operator() (size_t colIdx, std::string colName);
+    Matrix< double >           DataMatrix()  const { return dataMatrix; }
+    std::vector< std::string > ColumnNames() const { return colNames;   }
+
+    // Overloads
+    friend std::ostream& operator <<( std::ostream& os, DataFrame& df );
+    double & operator() ( size_t rowIdx, size_t colIdx );
+    double & operator() ( size_t colIdx, std::string colName );
 };
 
 #endif

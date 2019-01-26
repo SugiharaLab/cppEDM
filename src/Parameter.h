@@ -12,13 +12,13 @@
 class Parameters {
 
 public:  // JP Should be protected with accessors...
-    Method      method;           // Simplex or SMap enum class
-    std::vector<int> library;     // library row indices
-    std::vector<int> prediction;  // prediction row indices
-    int         E;                // dimension
-    int         Tp;               // prediction interval
-    int         knn;              // k nearest neighbors
-    int         tau;              // block embedding delay
+    Method      method;             // Simplex or SMap enum class
+    std::vector<size_t> library;    // library row indices
+    std::vector<size_t> prediction; // prediction row indices
+    int         E;                  // dimension
+    int         Tp;                 // prediction interval
+    int         knn;                // k nearest neighbors
+    int         tau;                // block embedding delay
     
     float       theta;            // S Map localization
     float       SVDSignificance;  // SVD singular value cutoff
@@ -45,55 +45,68 @@ public:  // JP Should be protected with accessors...
     bool        forwardTau;       // Embed/block with t+tau instead t-tau
 
     bool        verbose;
-
+    bool        validated;
+    
     std::string path;
     std::string dataFile;
     std::string predictOutputFile;
     std::string SmapOutputFile;
     std::string blockOutputFile;
 
-    bool        validated;
-    
+    std::string lib_str;      // String inputs of multi argument parameters
+    std::string pred_str;
+    std::string jacobian_str;
+    std::string colNames_str;
+    std::string colIndex_str;
+    std::string libSizes_str;
+
     friend std::ostream& operator<<(std::ostream &os, Parameters &params);
 
     // Constructor declaration and default arguments
     Parameters(
-        std::string method      = "simplex",
-        std::string lib         = "1 10",
-        std::string pred        = "11 20",
-        int         E           = 0,
-        int         Tp          = 0,
-        int         knn         = 0,
-        int         tau         = 1,
-        float       theta       = 0,
-        float       svdSig      = 1E-5,
-        std::string jacobians   = "",
-        float       tikhonov    = 0,
-        float       elasticNet  = 0,
-        std::string colNames    = "",
-        std::string colIndex    = "",
-        std::string targNames   = "",
-        int         targIndex   = 0,
-        bool        embedded    = false,
-        int         multi       = 0,
-        std::string libSizes    = "",
-        int         sample      = 0,
-        bool        random      = true,
-        int         seed        = -1,
-        bool        noNeighbor  = false,
-        bool        forwardTau  = false,
-        bool        verbose     = false,
-        std::string path        = "./",
-        std::string dataFile    = "",
-        std::string predictFile = "",
-        std::string SmapFile    = "",
-        std::string blockFile   = ""
+        Method      method       = Method::Simplex,
+        std::string path         = "./",
+        std::string dataFile     = "",
+        std::string predictFile  = "",
+        std::string lib_str      = "1 10",
+        std::string pred_str     = "11 20",
+        int         E            = 0,
+        int         Tp           = 0,
+        int         knn          = 0,
+        int         tau          = 1,
+        float       theta        = 0,
+
+        std::string colNames_str = "",
+        std::string targetName   = "",
+        std::string colIndex_str = "",
+        int         targetIndex  = 0,
+        bool        embedded     = false,
+
+        bool        verbose      = false,
+        
+        std::string SmapFile     = "",
+        std::string blockFile    = "",        
+        
+        float       svdSig       = 1E-5,
+        std::string jacobian_str = "",
+        float       tikhonov     = 0,
+        float       elasticNet   = 0,
+        
+        int         multi        = 0,
+        std::string libSizes_str = "",
+        int         sample       = 0,
+        bool        random       = true,
+        int         seed         = -1,
+        bool        noNeighbor   = false,
+        bool        forwardTau   = false
         );
     
     ~Parameters();
 
-    void Load();     // Populate the parameters from arguments
     void Validate(); // Parameter validation and index offsets
+    void Load();     // Populate the parameters from arguments
+    void PrintIndices( std::vector<size_t> library,
+                       std::vector<size_t> prediction );
 };
 
 #endif

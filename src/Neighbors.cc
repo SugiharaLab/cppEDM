@@ -2,59 +2,50 @@
 #include "Neighbors.h"
 
 //----------------------------------------------------------------
-Neighbors::Neighbors() {}
+Neighbors:: Neighbors() {}
 Neighbors::~Neighbors() {}
 
 //----------------------------------------------------------------
-// 
+// It is assumed that the matrix has only columns of data for which
+// knn will be computed.  The (time) column is not present.
 //----------------------------------------------------------------
 struct Neighbors FindNeighbors(
-    const Matrix<double>  & matrix,
-    const Parameters      & parameters )
+    const Matrix<double> & matrix,
+    const Parameters     & parameters )
 {
+
+#ifdef DEBUG_ALL
+    PrintMatrixIn( matrix, parameters );
+#endif
+
+    if ( not parameters.validated ) {
+        std::string errMsg("FindNeighbors(): Parameters not validated." );
+        throw( std::runtime_error( errMsg ) );
+    }
+
+    if ( parameters.E != matrix.NColumns() ) {
+        std::stringstream errMsg;
+        errMsg << "FindNeighbors(): The number of matric columns ("
+               << matrix.NColumns() << ") does not match the embedding "
+               << "dimension E (" << parameters.E << ")\n";
+        throw std::runtime_error( errMsg.str() );
+    }
 
     int N_library_rows    = parameters.library.size();
     int N_prediction_rows = parameters.prediction.size();
     int N_columns         = matrix.NColumns();
     
-#ifdef DEBUG
-    std::cout << "FindNeighbors(): library:" << std::endl;
-    for ( size_t row = 0; row < N_library_rows; row++ ) {
-        int row_i = parameters.library[row];
-        std::cout << "row " << row_i << " : ";
-        for ( size_t col = 0; col < N_columns; col++ ) {
-            std::cout << matrix(row_i,col) << " "; 
-        } std::cout << std::endl;
-    }
-    std::cout << "FindNeighbors(): prediction:" << std::endl;
-    for ( size_t row = 0; row < N_prediction_rows; row++ ) {
-        int row_i = parameters.prediction[row];
-        std::cout << "row " << row_i << " : ";
-        for ( size_t col = 0; col < N_columns; col++ ) {
-            std::cout << matrix(row_i,col) << " "; 
-        } std::cout << std::endl;
-    }
-#endif
-
-    std::valarray< double > time = matrix.column(0);
-
-#ifdef JP_REMOVE //----------------------------------------
-    std::cout << "Neighbors(): time: ";
-    for ( size_t i = 0; i < time.size(); i++ ) {
-        cout << time[i] << " ";
-    } std::cout << endl;
-#endif // JP REMOVE ---------------------------------------
+    // Maximum column index.
+    // We assume that the matrix has been selected to the proper columns
+    size_t maxCol_i = N_columns - 1;
 
     // Identify degenerate library : prediction points by
-    // set_intersection(), needs a result vector
+    // set_intersection() of lib & pred indices, needs a result vector
     std::vector< double > result( N_library_rows + N_prediction_rows, 0 );
-    std::vector< double >::iterator ii;
-    
-    ii = set_intersection( parameters.prediction.begin(),
-                           parameters.prediction.end(),
-                           parameters.library.begin(),
-                           parameters.library.end(), 
-                           result.begin() );
+    std::vector< double >::iterator ii = set_intersection (
+        parameters.prediction.begin(), parameters.prediction.end(),
+        parameters.library.begin(),    parameters.library.end(), 
+        result.begin() );
     
     if ( ii != result.begin() ) {
         // Overlapping indices exist
@@ -83,25 +74,20 @@ struct Neighbors FindNeighbors(
     for ( size_t row_i = 0; row_i < parameters.prediction.size(); row_i++ ) {
         // Get the prediction vector for this pred_row index
         int pred_row = parameters.prediction[ row_i ];
-        std::valarray<double> pred_row_vec = matrix.row( pred_row );
+        std::valarray<double> pred_vec = matrix.Row( pred_row );
         
-        // Exclude the 1st column (j=0) of time
-        // JP Does N_columns need to be limited to E+1?
-        const std::valarray<double> &pred_vec =
-            pred_row_vec[ std::slice( 1, N_columns-1, 1 ) ];
-
-//#ifdef JP_REMOVE //----------------------------------------
+#ifdef JP_REMOVE //----------------------------------------
         std::cout << "Predict row " << pred_row << " : " ;
         for ( size_t i = 0; i < pred_vec.size(); i++ ) {
             std::cout << pred_vec[i] << " ";
         } std::cout << std::endl;
-//#endif // JP REMOVE ----------------------------------------
+#endif // JP REMOVE ----------------------------------------
 
-        // Reset the neighbor and distance vectors for next row
+        // Reset the neighbor and distance vectors for this pred row
         for ( size_t i = 0; i < parameters.knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
-            // JP: This is dumb... don't use a hardcoded threshold.
-            k_NN_distances[ i ] = 1E30;
+            // JP: I don't like this. std::numeric_limits<double>::max() ~1E308
+            k_NN_distances[ i ] = 1E300;
         }
 
         //--------------------------------------------------------------
@@ -110,18 +96,14 @@ struct Neighbors FindNeighbors(
         for ( size_t row_j = 0; row_j < parameters.library.size(); row_j++ ) {
             // Get the library vector for this lib_row index
             int lib_row = parameters.library[ row_j ];
-            std::valarray<double> lib_row_vec = matrix.row( lib_row );
+            std::valarray<double> lib_vec = matrix.Row( lib_row );
 
-            // Exclude the first column of time
-            const std::valarray<double> &lib_vec =
-                lib_row_vec[ std::slice( 1, N_columns - 1, 1 ) ];
-
-//#ifdef JP_REMOVE //----------------------------------------
+#ifdef JP_REMOVE //----------------------------------------
             std::cout << "Library row " << lib_row << " : " ;
             for ( size_t k = 0; k < lib_vec.size(); k++ ) {
                 std::cout << lib_vec[k] << " ";
-            } std::cout << std::endl;
-//#endif // JP REMOVE ----------------------------------------
+            }
+#endif // JP REMOVE ----------------------------------------
             
             // If the library point is degenerate with the prediction,
             // ignore it.
@@ -129,10 +111,7 @@ struct Neighbors FindNeighbors(
                 if ( parameters.verbose ) {
                     std::stringstream msg;
                     msg << "FindNeighbors(): Ignoring degenerate lib_row "
-                        << lib_row
-                        << " and pred_row "
-                        << pred_row
-                        << std::endl;
+                        << lib_row << " and pred_row " << pred_row << std::endl;
                     std::cout << msg.str();
                 }
                 continue;
@@ -152,6 +131,10 @@ struct Neighbors FindNeighbors(
             double d_i = Distance( lib_vec, pred_vec,
                                    DistanceMetric::Euclidean );
 
+#ifdef JP_REMOVE //----------------------------------------
+            std::cout << "  D=" << d_i << std::endl;
+#endif //JP REMOVE ----------------------------------------
+
             // If d_i is less than values in k_NN_distances, add to list
             auto max_it = std::max_element( begin( k_NN_distances ),
                                             end( k_NN_distances ) );
@@ -162,8 +145,8 @@ struct Neighbors FindNeighbors(
             }
         } // for ( row_j = 0; row_j < library.size(); row_j++ )
         
-        if ( *std::max_element( begin( k_NN_distances ), // JP NFG
-                                end  ( k_NN_distances ) ) > 1E29 ) {
+        if ( *std::max_element( begin( k_NN_distances ),
+                                end  ( k_NN_distances ) ) > 1E299 ) {
             std::stringstream errMsg;
             errMsg << "FindNeighbors(): Library is too small to resolve "
                    << parameters.knn << " knn neighbors." << std::endl;
@@ -186,21 +169,16 @@ struct Neighbors FindNeighbors(
         }
 
         // Write the neighbor indices and distance values
-        neighbors.neighbors.writeRow( row_i, k_NN_neighbors );
-        neighbors.distances.writeRow( row_i, k_NN_distances );
+        neighbors.neighbors.WriteRow( row_i, k_NN_neighbors );
+        neighbors.distances.WriteRow( row_i, k_NN_distances );
         
     } // for ( row_i = 0; row_i < predictionRows->size(); row_i++ )
 
-#ifdef DEBUG
-    std::cout << "FindNeighbors(): neighbors:distances" << std::endl;
-    for ( size_t i = 0; i < 3; i++ ) {
-        std::cout << "Row " << i << " | ";
-        for ( size_t j = 0; j < neighbors.neighbors.NColumns(); j++ ) {
-            std::cout << neighbors.neighbors( i, j ) << " : ";
-            std::cout << neighbors.distances( i, j ) << ",  ";
-        } std::cout << std::endl;
-    }
+#ifdef DEBUG//_ALL
+    const Neighbors &neigh = neighbors;
+    PrintNeighborsOut( neigh );
 #endif
+    
     return neighbors;
 }
 
@@ -209,22 +187,20 @@ struct Neighbors FindNeighbors(
 //----------------------------------------------------------------
 double Distance( const std::valarray<double> &v1,
                  const std::valarray<double> &v2,
-                 DistanceMetric         metric )
+                 DistanceMetric metric )
 {
     double distance = 0;
 
     // For efficiency sake, we forego the usual validation of v1 & v2.
 
     if ( metric == DistanceMetric::Euclidean ) {
-        // [sum_{i,j} abs(a_{i,j})^2]^{1/2}
         double sum = 0;
         for ( size_t i = 0; i < v1.size(); i++ ) {
-            sum += pow( abs( v2[i] - v1[i] ), 2 );
+            sum += pow( v2[i] - v1[i], 2 );
         }
         distance = sqrt( sum );
     }
     else if ( metric == DistanceMetric::Manhattan ) {
-        // max( sum( abs(x) ) )
         double sum = 0;
         for ( size_t i = 0; i < v1.size(); i++ ) {
             sum += abs( v2[i] - v1[i] );
@@ -239,4 +215,43 @@ double Distance( const std::valarray<double> &v1,
     }
 
     return distance;
+}
+
+//----------------------------------------------------------------
+// 
+//----------------------------------------------------------------
+void PrintMatrixIn( const Matrix<double> &matrix,
+                    const Parameters     &parameters )
+{
+    std::cout << "FindNeighbors(): library:" << std::endl;
+    for ( size_t row = 0; row < parameters.library.size(); row++ ) {
+        int row_i = parameters.library[row];
+        std::cout << "row " << row_i << " : ";
+        for ( size_t col = 0; col < matrix.NColumns(); col++ ) {
+            std::cout << matrix(row_i,col) << " "; 
+        } std::cout << std::endl;
+    }
+    std::cout << "FindNeighbors(): prediction:" << std::endl;
+    for ( size_t row = 0; row < parameters.prediction.size(); row++ ) {
+        int row_i = parameters.prediction[row];
+        std::cout << "row " << row_i << " : ";
+        for ( size_t col = 0; col < matrix.NColumns(); col++ ) {
+            std::cout << matrix(row_i,col) << " "; 
+        } std::cout << std::endl;
+    }
+}
+
+//----------------------------------------------------------------
+// 
+//----------------------------------------------------------------
+void PrintNeighborsOut( const Neighbors &neighbors )
+{
+    std::cout << "FindNeighbors(): neighbors:distances" << std::endl;
+    for ( size_t i = 0; i < neighbors.neighbors.NRows(); i++ ) {
+        std::cout << "Row " << i << " | ";
+        for ( size_t j = 0; j < neighbors.neighbors.NColumns(); j++ ) {
+            std::cout << neighbors.neighbors( i, j ) << " : ";
+            std::cout << neighbors.distances( i, j ) << ",  ";
+        } std::cout << std::endl;
+    }
 }
