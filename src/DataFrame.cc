@@ -144,7 +144,7 @@ double & DataFrame::operator() ( size_t rowIdx, std::string colName ) {
 
     colPos = std::distance( colNames.begin(), colIterate );
     
-    return (*this)( colPos, rowIdx );
+    return (*this)( rowIdx, colPos);
 }
 
 //----------------------------------------------------------------
@@ -210,7 +210,7 @@ NamedData DataFrame::ReadData() {
         // remove header line from read in lines so only numerical after
         dataLines.erase(dataLines.begin());
     }
-    // setup named columns with generic col names: COL_PREFIX?
+    // setup named columns with generic col names: COL_PREFIX
     else {
         for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++ ) {
             colNames.push_back( COL_PREFIX + std::to_string(colIdx) );
@@ -219,18 +219,16 @@ NamedData DataFrame::ReadData() {
     // setup each col in output data with new vec to insert numerical data to
     for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
         NamedData::value_type colPair ( colNames[colIdx],
-                                        std::vector<double>(dataLines.size()));
-        data.insert ( colPair );
+                                        std::vector<double>());
+        data.push_back ( colPair );
     }
     
     // Process each line in dataLines to fill in data vectors
     for ( size_t lineIdx = 0; lineIdx < dataLines.size(); lineIdx++ ) {
         std::vector<std::string> words = SplitString( dataLines[ lineIdx ] );
-        
         for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
-            std::string colName = colNames[ colIdx ];
-
-            data[ colName ][ lineIdx ] = std::stod( words[colIdx] );
+            data[ colIdx ].second.push_back(std::stod( words[colIdx] ));
+            std::cout<<"cameron test remove: "<<words[colIdx]<<std::endl;
         } 
     }
         

@@ -7,7 +7,7 @@
 #include <map>
 
 // Type definitions
-typedef std::map< std::string, std::vector< double > > NamedData;
+typedef std::vector< std::pair< std::string, std::vector< double > > > NamedData;
 
 // Enumerations
 enum class Method { Simplex, SMap };
