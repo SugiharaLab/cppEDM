@@ -228,7 +228,6 @@ NamedData DataFrame::ReadData() {
         std::vector<std::string> words = SplitString( dataLines[ lineIdx ] );
         for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
             data[ colIdx ].second.push_back(std::stod( words[colIdx] ));
-            std::cout<<"cameron test remove: "<<words[colIdx]<<std::endl;
         } 
     }
         
