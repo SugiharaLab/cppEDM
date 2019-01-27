@@ -1,0 +1,40 @@
+
+Matrix.h is a template class for valarray to support both double and int.
+
+The desired code architecture is to have declarations in .h files with
+implementations in .cc files.  In order to do this with the Matrix class
+the .h needs to explicilty instatiate the template types that will be
+supported.  This is done at the tail of the .cc file viz:
+
+//-----------------------------------------------------------------
+// Template classes are a nuisance
+// Since we want to have a separate Matrix.cc file with methods
+// for the Matrix template class, i.e. we Don't want to move all
+// the methods and code for Matrix into Matrix.h, here we can
+// instantiate the needed types explicitly.  Only these types will
+// be supported as Matrix types. 
+//-----------------------------------------------------------------
+template class Matrix<int>;
+template class Matrix<double>;
+
+
+Implementations in .cc would look like:
+
+template <class T>
+Matrix<T>::Matrix( size_t rows, size_t columns ):
+    n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
+
+
+An implementation was created Jan 23, 2019:
+https://github.com/SoftwareLiteracyFoundation/cppEDM/commit/3e8b7f1705aa9cfcfa810a6483a79da2d8a7737f
+
+
+However, the OSX XCode compiler/linker are not compatible with this
+implementation.
+
+A potential workaround is to link against the libc++ library on OSX
+instead of the gcc libstdc++.  See:
+
+https://libcxx.llvm.org/index.html
+
+https://stackoverflow.com/questions/14972425/should-i-use-libc-or-libstdc
