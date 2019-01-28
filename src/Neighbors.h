@@ -5,7 +5,6 @@
 #include <iterator>
 
 #include "Common.h"
-#include "Matrix.h"
 #include "Parameter.h"
 
 struct Neighbors; // forward declaration
@@ -13,6 +12,12 @@ struct Neighbors; // forward declaration
 // Prototypes
 struct Neighbors FindNeighbors( const Matrix<double> &matrix,
                                 const Parameters     &parameters );
+
+void PrintMatrixIn( const Matrix<double> &matrix,
+                    const Parameters     &parameters );
+
+void PrintNeighborsOut( const Neighbors &neighbors );
+
 
 double Distance( const std::valarray<double> &v1,
                  const std::valarray<double> &v2,

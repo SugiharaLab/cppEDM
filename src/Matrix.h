@@ -4,9 +4,8 @@
 // NOTE: This header deviates from the desired class implementation
 // where *.h provides declarations, *.cc methods.  This is solely to
 // accomodate the OSX XCode environment which seems unable to deal
-// with c++11 standard template implemenations.  
-
-#include <valarray>
+// with c++11 standard template implemenations.
+// A possible solution is to link against libc++ on OSX. See ../etc/.
 
 #include "Common.h"
 
@@ -20,13 +19,16 @@ class Matrix {
     std::valarray<T> elements;
     size_t           n_columns;
     size_t           n_rows;
+    std::vector< std::string > columnNames;
     
 public:
     //-----------------------------------------------------------------
     // Constructor
     //-----------------------------------------------------------------
     Matrix( size_t rows, size_t columns ):
-        n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
+        n_rows( rows ), n_columns( columns ),
+        elements( columns * rows ),
+        columnNames( std::vector<std::string>(columns) ) {}
     Matrix () {}
 
     // Fortran style access operators M(row,col)
@@ -36,27 +38,13 @@ public:
     T operator()( size_t row, size_t column ) const {
         return elements[ row * n_columns + column ];
     }
-    //to print contents of matrix
-    friend std::ostream& operator <<( std::ostream& os, const Matrix& data ) {
-        // print info about the dataframe
-        os << "Matrix: -----------------------------------\n";
-        os << data.NRows() << " rows, " << data.NColumns() << " columns.\n";
-
-        // print numerical data
-        for ( size_t rowIdx = 0; rowIdx < data.NRows(); rowIdx++ ) {
-            for ( size_t colIdx = 0; colIdx < data.NColumns(); colIdx++ ) {
-                os << data(rowIdx, colIdx) << " ";
-            }
-            os << std::endl;
-        }
-        os << "----------------------------------------------" << std::endl;
-        return os;
-    }
 
     // Member Accessors
     size_t NColumns() const { return n_columns; }
     size_t NRows()    const { return n_rows;    }
     size_t size()     const { return n_rows * n_columns; }
+    std::vector< std::string >  ColumnNames() const { return columnNames; }
+    std::vector< std::string > &ColumnNames()       { return columnNames; }
 
     //-----------------------------------------------------------------
     // Return column from index col
@@ -134,7 +122,35 @@ public:
         }
         return M;
     }
+
+    //------------------------------------------------------------------
+    // Print matrix to ostream
+    //------------------------------------------------------------------
+    friend std::ostream& operator <<( std::ostream& os, const Matrix& M ) {
+        os << "Matrix: -----------------------------------\n";
+        os << M.NRows() << " rows, " << M.NColumns() << " columns.\n";
+        
+        os << "---------------- First " << 10
+                  << " rows ---------------\n";
+        
+        // print names of columns
+        for ( size_t i = 0; i < M.ColumnNames().size(); i++ ) {
+            os << M.ColumnNames()[i] << " \t";
+        } os << std::endl;
+        
+        // print vec data up to maxRowPrint points
+        for ( size_t row = 0; row < M.NRows() and row < 10; row++ ) {
+            
+            // print data points from each col
+            for ( size_t col = 0; col < M.NColumns(); col++ ) {
+                os << M( row, col ) << " \t";
+            }
+            os << std::endl;
+        }
+        os << "----------------------------------------------"
+           << std::endl;
+
+        return os;
+    }
 };
-
-
 #endif

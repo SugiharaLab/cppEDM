@@ -2,13 +2,11 @@
 #define DATAFRAME_H
 
 #include <fstream>
-#include <cctype>
 
 #include "Common.h"
-#include "Matrix.h"
 
 // Prefix for DataFrame columns without header titles
-#define COL_PREFIX "vec_"
+#define COL_PREFIX "V"
 
 //---------------------------------------------------------
 // DataFrame class
@@ -43,12 +41,14 @@ public:
     Matrix< double > SetupDataMatrix ( const NamedData csvInput );
 
     Matrix< double > MatrixColumnNames( std::vector<std::string> colNames );
+    std::valarray< double > VectorColumnName ( std::string colName );
     
     // Accessors
     size_t NumColumns()  const { return dataMatrix.NColumns(); }
     size_t NumRows()     const { return dataMatrix.NRows();    }
     size_t MaxRowPrint() const { return maxRowPrint;           }
     
+    Matrix< double >          &DataMatrix()        { return dataMatrix; }
     Matrix< double >           DataMatrix()  const { return dataMatrix; }
     std::vector< std::string > ColumnNames() const { return colNames;   }
 

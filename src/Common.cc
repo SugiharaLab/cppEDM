@@ -16,6 +16,31 @@ std::string ToLower( std::string str ) {
 }
 
 //----------------------------------------------------------------
+// true : str has only digits   false : str has non-digits
+//----------------------------------------------------------------
+bool OnlyDigits( std::string str ) {
+
+    if ( not str.size() ) {
+        throw std::runtime_error( "OnlyDigits(): String is empty.\n" );
+    }
+
+    bool onlyDigits = true; 
+    std::string str_( str );
+    
+    // remove whitespace
+    str_.erase( std::remove_if( str_.begin(), str_.end(), ::isspace ),
+                str_.end() );
+
+    const char *cstr = str_.c_str(); // isdigit() is a C function...
+    
+    for ( size_t i = 0; i < str_.size(); i++ ) {
+        if ( not isdigit( cstr[i] ) ) { onlyDigits = false; break; }
+    }
+
+    return onlyDigits;
+}
+
+//----------------------------------------------------------------
 // SplitString
 //
 // Purpose: like Python string.split()

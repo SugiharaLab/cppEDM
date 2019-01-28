@@ -83,6 +83,32 @@ Matrix< double > DataFrame::MatrixColumnNames( std::vector<std::string>
 }
 
 //------------------------------------------------------------------
+// Return data column selected by columnName
+//------------------------------------------------------------------
+std::valarray< double > DataFrame::VectorColumnName( std::string column ) {
+
+    std::vector< std::string >::iterator ci = std::find( colNames.begin(),
+                                                         colNames.end(),
+                                                         column );
+    if ( ci == colNames.end() ) {
+        std::stringstream errMsg;
+        errMsg << "DataFrame::VectorColumnName() Failed to find column: "
+               << column;
+        errMsg << " in DataFrame columns:\n[ ";
+        for ( auto cni = colNames.begin(); cni != colNames.end(); ++cni ) {
+            errMsg << *cni << " ";
+        } errMsg << "]" << std::endl;
+        throw std::runtime_error( errMsg.str() );
+    }
+
+    size_t col_i = std::distance( colNames.begin(), ci );
+
+    std::valarray<double> vec = dataMatrix.Column( col_i );
+    
+    return vec;
+}
+
+//------------------------------------------------------------------
 // method to print the dataframe
 //  @param os: the stream to print to
 //  @return: the stream passed in
@@ -211,28 +237,28 @@ NamedData DataFrame::ReadData() {
     std::vector< std::string > colNames;
 
     // Check first line to see if it's only numeric digits, or a header
+    bool onlyDigits = true;
     std::vector<std::string> firstLineWords = SplitString( dataLines[0] );
-    bool isHeader = false;
+    
     for ( auto si = firstLineWords.begin(); si != firstLineWords.end(); ++si ){
-        const char *word = si->c_str(); // Crap: isdigit() is a C function...
-        for ( size_t i = 0; i < si->size(); i++ ) {
-            if ( not isdigit( word[i] ) ) { isHeader = true; break; }
-        }
-        if ( isHeader ) { break; }
+
+        onlyDigits = OnlyDigits( *si );
+        
+        if ( not onlyDigits ) { break; }
     }
-    if ( isHeader ) {
-        // setup named columns
+    if ( onlyDigits ) {
+        // create named columns with generic col names: COL_PREFIX
+        for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++ ) {
+            colNames.push_back( COL_PREFIX + std::to_string(colIdx) );
+        }
+    }
+    else {
+        // get named columns from header line
         for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++) {
             colNames.push_back( firstLineWords[colIdx] );  
         }
         // remove header line from read in lines so only numerical after
         dataLines.erase( dataLines.begin() );
-    }
-    // setup named columns with generic col names: COL_PREFIX
-    else {
-        for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++ ) {
-            colNames.push_back( COL_PREFIX + std::to_string(colIdx) );
-        } 
     }
     
     // setup each col in namedData with new vec to insert numerical data to
