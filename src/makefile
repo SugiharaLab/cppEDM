@@ -1,7 +1,7 @@
 
 CC  = g++
 OBJ = DataFrame.o Common.o Parameter.o Interface.o Neighbors.o\
-	Simplex.o Eval.o CCM.o Multiview.o SMap.o
+	Simplex.o Eval.o CCM.o Multiview.o SMap.o EmbedData.o
 
 LIB = libEDM.a
 
@@ -26,6 +26,9 @@ DataFrame.o: DataFrame.cc
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
+
+EmbedData.o: EmbedData.cc
+	$(CC) -c EmbedData.cc $(CFLAGS)
 
 Parameter.o: Parameter.cc
 	$(CC) -c Parameter.cc $(CFLAGS)
@@ -72,3 +75,4 @@ Simplex.o: Common.h
 Eval.o: Common.h
 CCM.o: Common.h
 Multiview.o: Common.h
+EmbedData.o: Common.h Matrix.h
