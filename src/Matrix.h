@@ -36,6 +36,22 @@ public:
     T operator()( size_t row, size_t column ) const {
         return elements[ row * n_columns + column ];
     }
+    //to print contents of matrix
+    friend std::ostream& operator <<( std::ostream& os, const Matrix& data ) {
+        // print info about the dataframe
+        os << "Matrix: -----------------------------------\n";
+        os << data.NRows() << " rows, " << data.NColumns() << " columns.\n";
+
+        // print numerical data
+        for ( size_t rowIdx = 0; rowIdx < data.NRows(); rowIdx++ ) {
+            for ( size_t colIdx = 0; colIdx < data.NColumns(); colIdx++ ) {
+                os << data(rowIdx, colIdx) << " ";
+            }
+            os << std::endl;
+        }
+        os << "----------------------------------------------" << std::endl;
+        return os;
+    }
 
     // Member Accessors
     size_t NColumns() const { return n_columns; }
@@ -119,4 +135,6 @@ public:
         return M;
     }
 };
+
+
 #endif
