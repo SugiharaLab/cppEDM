@@ -67,12 +67,12 @@ depend:
 # DO NOT DELETE
 
 DataFrame.o: DataFrame.h Common.h Matrix.h
-Common.o: Common.h
-Parameter.o: Parameter.h Common.h
-Interface.o: Common.h
+Common.o: Common.h Matrix.h
+Parameter.o: Parameter.h Common.h Matrix.h
+Interface.o: Common.h Matrix.h
 Neighbors.o: Neighbors.h Common.h Matrix.h Parameter.h
-Simplex.o: Common.h
-Eval.o: Common.h
-CCM.o: Common.h
-Multiview.o: Common.h
-EmbedData.o: Common.h Matrix.h
+Simplex.o: Common.h Matrix.h Parameter.h DataFrame.h Neighbors.h
+Eval.o: Common.h Matrix.h
+CCM.o: Common.h Matrix.h
+Multiview.o: Common.h Matrix.h
+SMap.o: Common.h Matrix.h

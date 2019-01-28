@@ -247,11 +247,14 @@ void PrintMatrixIn( const Matrix<double> &matrix,
 void PrintNeighborsOut( const Neighbors &neighbors )
 {
     std::cout << "FindNeighbors(): neighbors:distances" << std::endl;
-    for ( size_t i = 0; i < neighbors.neighbors.NRows(); i++ ) {
+    //for ( size_t i = 0; i < neighbors.neighbors.NRows(); i++ ) {
+    for ( size_t i = 0; i < 5; i++ ) {
         std::cout << "Row " << i << " | ";
         for ( size_t j = 0; j < neighbors.neighbors.NColumns(); j++ ) {
-            std::cout << neighbors.neighbors( i, j ) << " : ";
-            std::cout << neighbors.distances( i, j ) << ",  ";
+            std::cout << neighbors.neighbors( i, j ) << " ";
+        } std::cout << "   : ";
+        for ( size_t j = 0; j < neighbors.neighbors.NColumns(); j++ ) {
+            std::cout << neighbors.distances( i, j ) << " ";
         } std::cout << std::endl;
     }
 }

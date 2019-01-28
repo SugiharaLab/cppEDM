@@ -10,28 +10,13 @@ int main( int argc, char *argv[] ) {
     
     try {
         //--------------------------------------------------
-        // Default parameters
+        // 
         //--------------------------------------------------
-        Parameters param = Parameters( Method::Simplex,
-                                       "../data/", "block_3sp.csv", "",
-                                       "1 10", "195 198", 3, 1, 4, 1, 0,
-                                       "x_t y_t z_t", "x_t" );
-        std::cout << param;
-        
-        DataFrame df = DataFrame( param.path, param.dataFile );
+        Matrix<double> dataMatrix = 
+        Simplex( "../data/", "block_3sp.csv", "", "1 100", "190 198",
+                 3, 1, 0, 1, "x_t y_t z_t", "x_t", true, true );
 
-        std::cout << df;
-        
-        // Get columns x_t, y_t, z_t : Time is Not included for FindNeighbors
-        Matrix<double> M_col = df.MatrixColumnNames( param.columnNames );
-
-        //--------------------------------------------------
-        // Call FindNeighbors()
-        //--------------------------------------------------
-        const Parameters     &param_ = param;
-        const Matrix<double> &M_     = M_col;
-        Neighbors neighbors = FindNeighbors( M_, param_ );
-
+        std::cout << dataMatrix;
     }
     
     catch ( const std::exception& e ) {

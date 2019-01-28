@@ -22,15 +22,15 @@ public:  // JP Should be protected with accessors...
     
     float       theta;            // S Map localization
     float       SVDSignificance;  // SVD singular value cutoff
-    std::vector<int> jacobians;   // list of column indices for Jacobians
+    std::vector<size_t> jacobians;// list of column indices for Jacobians
     float       TikhonovAlpha;    // Initial alpha parameter
     float       ElasticNetAlpha;  // Initial alpha parameter
 
     std::vector<std::string> columnNames; // column names 
-    std::vector<int>         columnIndex; // column indices
+    std::vector<size_t>      columnIndex; // column indices
 
     std::string targetName;       // target column name
-    int         targetIndex;      // target column index
+    size_t      targetIndex;      // target column index
 
     bool        embedded;         // true if data is already embedded/block
     
@@ -55,10 +55,10 @@ public:  // JP Should be protected with accessors...
 
     std::string lib_str;      // String inputs of multi argument parameters
     std::string pred_str;
-    std::string jacobian_str;
-    std::string colNames_str;
-    std::string colIndex_str;
+    std::string columns_str;
+    std::string target_str;
     std::string libSizes_str;
+    std::string jacobian_str;
 
     friend std::ostream& operator<<(std::ostream &os, Parameters &params);
 
@@ -76,19 +76,17 @@ public:  // JP Should be protected with accessors...
         int         tau          = 1,
         float       theta        = 0,
 
-        std::string colNames_str = "",
-        std::string targetName   = "",
-        std::string colIndex_str = "",
-        int         targetIndex  = 0,
-        bool        embedded     = false,
+        std::string columns_str  = "",
+        std::string target_str   = "",
 
+        bool        embedded     = false,
         bool        verbose      = false,
         
         std::string SmapFile     = "",
         std::string blockFile    = "",        
+        std::string jacobian_str = "",
         
         float       svdSig       = 1E-5,
-        std::string jacobian_str = "",
         float       tikhonov     = 0,
         float       elasticNet   = 0,
         
