@@ -1,7 +1,7 @@
 
 CC  = g++
-OBJ = DataFrame.o Common.o Parameter.o Interface.o Neighbors.o\
-	Simplex.o Eval.o CCM.o Multiview.o SMap.o EmbedData.o
+OBJ = DataFrame.o Common.o Parameter.o Embed.o Interface.o Neighbors.o\
+	Simplex.o Eval.o CCM.o Multiview.o SMap.o
 
 LIB = libEDM.a
 
@@ -27,11 +27,11 @@ DataFrame.o: DataFrame.cc
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
 
-EmbedData.o: EmbedData.cc
-	$(CC) -c EmbedData.cc $(CFLAGS)
-
 Parameter.o: Parameter.cc
 	$(CC) -c Parameter.cc $(CFLAGS)
+
+Embed.o: Embed.cc
+	$(CC) -c Embed.cc $(CFLAGS)
 
 Interface.o: Interface.cc
 	$(CC) -c Interface.cc $(CFLAGS)
@@ -69,10 +69,10 @@ depend:
 DataFrame.o: DataFrame.h Common.h Matrix.h
 Common.o: Common.h Matrix.h
 Parameter.o: Parameter.h Common.h Matrix.h
+Embed.o: Embed.h Common.h Matrix.h Parameter.h DataFrame.h
 Interface.o: Common.h Matrix.h
 Neighbors.o: Neighbors.h Common.h Matrix.h Parameter.h
-Simplex.o: Common.h Matrix.h Parameter.h DataFrame.h Neighbors.h
+Simplex.o: Common.h Matrix.h Parameter.h DataFrame.h Neighbors.h Embed.h
 Eval.o: Common.h Matrix.h
 CCM.o: Common.h Matrix.h
 Multiview.o: Common.h Matrix.h
-SMap.o: Common.h Matrix.h
