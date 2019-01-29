@@ -23,9 +23,9 @@ struct Neighbors FindNeighbors(
         throw( std::runtime_error( errMsg ) );
     }
 
-    if ( parameters.E != matrix.NColumns() ) {
+    if ( parameters.embedded and parameters.E != matrix.NColumns() ) {
         std::stringstream errMsg;
-        errMsg << "FindNeighbors(): The number of matric columns ("
+        errMsg << "FindNeighbors(): The number of matrix columns ("
                << matrix.NColumns() << ") does not match the embedding "
                << "dimension E (" << parameters.E << ")\n";
         throw std::runtime_error( errMsg.str() );

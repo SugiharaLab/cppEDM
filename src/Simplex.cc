@@ -3,6 +3,7 @@
 #include "Parameter.h"
 #include "DataFrame.h"
 #include "Neighbors.h"
+#include "Embed.h"
 
 //----------------------------------------------------------------
 // 
@@ -50,7 +51,7 @@ Matrix<double> Simplex( std::string path,
     }
     else {
         // embedded = false: create the embedding block
-        // MakeBlock()
+        dataBlock = Embed( path, dataFile, E, tau, columns, verbose );
     }
     
     //----------------------------------------------------------
