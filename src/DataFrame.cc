@@ -1,4 +1,7 @@
 
+// NOTE: This is redundancy between DataFrame and Matrix methods to
+// access and return Matrix/data values and slices.  Should be reduced. 
+
 #include "DataFrame.h"
 
 //------------------------------------------------------------------
@@ -10,14 +13,15 @@ DataFrame::DataFrame ( const std::string path, const std::string fileName,
                        size_t maxPrint ) :
     path( path ), fileName( fileName ), maxRowPrint( maxPrint ) {
     
-    csvInput   = ReadData ();  // csvInput is a NamedData object
-    dataMatrix = SetupDataMatrix ( csvInput );
+    csvInput = ReadData ();  // csvInput is a NamedData object
     
     // Setup column names in same order as dataMatrix
     for ( NamedData::iterator iterate = csvInput.begin(); 
           iterate != csvInput.end(); iterate++ ) {
         colNames.push_back( iterate->first );
     }
+    
+    dataMatrix = SetupDataMatrix ( csvInput );
 }
 
 //------------------------------------------------------------------
@@ -30,31 +34,35 @@ Matrix< double > DataFrame::SetupDataMatrix ( NamedData csvInput ) {
     const size_t numRows = csvInput.begin()->second.size();
     const size_t numCols = csvInput.size();
 
-    // Initialize a Matrix() object with (numRows, numCols)
-    Matrix<double> dataMatrix_ = Matrix<double> (numRows, numCols);
+    // Initialize a Matrix() object with (numRows, numCols, colNames)
+    Matrix<double> dataMatrix = Matrix<double> ( numRows, numCols, colNames );
 
-    // Transfer each vector into the matrix
-    // Another option is to use the writeColumn() Matrix method
+    // Transfer each data value into the matrix
+    //    Another option is to use the writeColumn() Matrix method
+    // csvInput is : pair< string, vector<double> >
     for ( NamedData::iterator iterate  = csvInput.begin(); 
                               iterate != csvInput.end(); iterate++ ) {
         
         size_t colIdx = std::distance( csvInput.begin(), iterate );
 
         for ( size_t rowIdx = 0; rowIdx < numRows; rowIdx++ ) {
-            dataMatrix_( rowIdx, colIdx ) = iterate->second[ rowIdx ];
+            dataMatrix( rowIdx, colIdx ) = iterate->second[ rowIdx ];
         }
     }
 
-    return dataMatrix_;
+    return dataMatrix;
 }
 
 //------------------------------------------------------------------
-// Return Matrix selected by columnNames
+// Return (sub)Matrix selected by columnNames
+// columnNames are converted to column indices for Matrix::MatrixColumns()
 //------------------------------------------------------------------
 Matrix< double > DataFrame::MatrixColumnNames( std::vector<std::string>
                                                columnNames ) {
-    std::vector<size_t> col_i_vec;
-    
+    // vector of column indices for dataMatrix.MatrixColumns()
+    std::vector<size_t> col_i_vec; 
+
+    // Map column names to indices
     std::vector<std::string>::iterator si;
     for ( auto ci = columnNames.begin(); ci != columnNames.end(); ++ci ) {
         auto si = find( colNames.begin(), colNames.end(), *ci );
@@ -64,6 +72,7 @@ Matrix< double > DataFrame::MatrixColumnNames( std::vector<std::string>
         }
     }
 
+    // Validation
     if ( col_i_vec.size() != columnNames.size() ) {
         std::stringstream errMsg;
         errMsg << "DataFrame::MatrixColumnNames() Failed to find columns:\n[ ";
@@ -78,6 +87,10 @@ Matrix< double > DataFrame::MatrixColumnNames( std::vector<std::string>
     }
 
     Matrix<double> M_col = dataMatrix.MatrixColumns( col_i_vec );
+
+    // Now insert the columnNames
+    M_col.ColumnNames() = columnNames;
+    M_col.BuildColumnNameIndex();
 
     return M_col;
 }
@@ -109,44 +122,9 @@ std::valarray< double > DataFrame::VectorColumnName( std::string column ) {
 }
 
 //------------------------------------------------------------------
-// method to print the dataframe
-//  @param os: the stream to print to
-//  @return: the stream passed in
-//------------------------------------------------------------------
-std::ostream& operator<< ( std::ostream& os, DataFrame& df )
-{
-    // print info about the dataframe
-    os << "DataFrame: -----------------------------------\n";
-    os << df.NumRows() << " rows, " << df.NumColumns() << " columns.\n";
-    
-    // print names of columns
-    for ( size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++ ) {
-        os << df.ColumnNames().at(colIdx) << " ";
-    } os << std::endl;
-
-    os << "---------------- First " << df.MaxRowPrint()
-       << " rows ---------------\n";
-        
-    // print vec data up to maxRowPrint points
-    for ( size_t rowIdx = 0;
-          rowIdx < df.NumRows() and rowIdx < df.MaxRowPrint(); rowIdx++ ) {
-        
-        // print data points from each col
-        for ( size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++ ) {
-            os << df(rowIdx, colIdx) << " ";
-        }
-        os << std::endl;
-    }
-
-    os << "----------------------------------------------" << std::endl;
-    
-    return os;
-}
-
-//------------------------------------------------------------------
-// method to access a column from the dataframe by int col/row idx
+// method to access a value by row and column index
 // @param colIdx: the index to access from the dataframe 
-// @return: the NumericVector column
+// @return: the data value
 //------------------------------------------------------------------
 double & DataFrame::operator() ( size_t rowIdx, size_t colIdx ) {
     
@@ -167,9 +145,9 @@ double & DataFrame::operator() ( size_t rowIdx, size_t colIdx ) {
 }
 
 //------------------------------------------------------------------
-// method to access a column from the dataframe by string index
+// method to access a value by row index and column name
 // @param colName: the name of the column to access
-// @return: the NumericVector column
+// @return: the data value
 //------------------------------------------------------------------
 double & DataFrame::operator() ( size_t rowIdx, std::string colName ) {
 
@@ -292,4 +270,40 @@ NamedData DataFrame::ReadData() {
 #endif
     
     return namedData;
+}
+
+//------------------------------------------------------------------
+// method to print the dataframe
+//  @param os: the stream to print to
+//  @return: the stream passed in
+//------------------------------------------------------------------
+std::ostream& operator<< ( std::ostream& os, DataFrame& df )
+{
+    // print info about the dataframe
+    os << "DataFrame: -----------------------------------\n";
+    os << df.NumRows() << " rows, " << df.NumColumns() << " columns.\n";
+    
+    os << "----------------------------------------------" << std::endl;
+    // print names of columns
+    for ( size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++ ) {
+        os << df.ColumnNames().at(colIdx) << " ";
+    } os << std::endl;
+
+    os << "---------------- First " << df.MaxRowPrint()
+       << " rows ---------------\n";
+        
+    // print vec data up to maxRowPrint points
+    for ( size_t rowIdx = 0;
+          rowIdx < df.NumRows() and rowIdx < df.MaxRowPrint(); rowIdx++ ) {
+        
+        // print data points from each col
+        for ( size_t colIdx = 0; colIdx < df.NumColumns(); colIdx++ ) {
+            os << df(rowIdx, colIdx) << " ";
+        }
+        os << std::endl;
+    }
+
+    os << "----------------------------------------------" << std::endl;
+    
+    return os;
 }

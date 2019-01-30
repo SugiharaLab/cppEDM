@@ -1,6 +1,9 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+// NOTE: This is redundancy between DataFrame and Matrix methods to
+// access and return Matrix/data values and slices.  Should be reduced. 
+
 // NOTE: This header deviates from the desired class implementation
 // where *.h provides declarations, *.cc methods.  This is solely to
 // accomodate the OSX XCode environment which seems unable to deal
@@ -8,6 +11,10 @@
 // A possible solution is to link against libc++ on OSX. See ../etc/.
 
 #include "Common.h"
+
+// Since #include Matrix.h is in Common.h, need forward declaration
+extern std::vector<std::string> SplitString( std::string inString, 
+                                             std::string delimeters );
 
 //---------------------------------------------------------
 // Matrix class
@@ -19,19 +26,42 @@ class Matrix {
     std::valarray<T> elements;
     size_t           n_columns;
     size_t           n_rows;
-    std::vector< std::string > columnNames;
+    std::vector< std::string >      columnNames;
+    std::map< std::string, size_t > columnNameToIndex;
     
 public:
     //-----------------------------------------------------------------
-    // Constructor
+    // Constructors
+    //-----------------------------------------------------------------
+    Matrix () {}
+    
+    //-----------------------------------------------------------------
     //-----------------------------------------------------------------
     Matrix( size_t rows, size_t columns ):
-        n_rows( rows ), n_columns( columns ),
-        elements( columns * rows ),
-        columnNames( std::vector<std::string>(columns) ) {}
-    Matrix () {}
-
+        n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
+    
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+    Matrix( size_t rows, size_t columns, std::string colNames ):
+        n_rows( rows ), n_columns( columns ), elements( columns * rows ),
+        columnNames( std::vector<std::string>(columns) )
+    {
+        BuildColumnNameIndex( colNames );
+    }
+   
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+    Matrix( size_t rows, size_t columns,
+            std::vector< std::string > columnNames ):
+        n_rows( rows ), n_columns( columns ), elements( columns * rows ),
+        columnNames( columnNames )
+    {
+        BuildColumnNameIndex();
+    }
+   
+    //-----------------------------------------------------------------
     // Fortran style access operators M(row,col)
+    //-----------------------------------------------------------------
     T &operator()( size_t row, size_t column ) {
         return elements[ row * n_columns + column ];
     }
@@ -39,12 +69,20 @@ public:
         return elements[ row * n_columns + column ];
     }
 
+    //-----------------------------------------------------------------
     // Member Accessors
+    //-----------------------------------------------------------------
     size_t NColumns() const { return n_columns; }
     size_t NRows()    const { return n_rows;    }
     size_t size()     const { return n_rows * n_columns; }
     std::vector< std::string >  ColumnNames() const { return columnNames; }
     std::vector< std::string > &ColumnNames()       { return columnNames; }
+    std::map< std::string, size_t > ColumnNameToIndex() const {
+        return columnNameToIndex;
+    }
+    std::map< std::string, size_t > &ColumnNameToIndex() {
+        return columnNameToIndex;
+    }
 
     //-----------------------------------------------------------------
     // Return column from index col
@@ -97,7 +135,7 @@ public:
     }
 
     //-----------------------------------------------------------------
-    // Return matrix of specified column indices
+    // Return (sub)Matrix of specified column indices
     //-----------------------------------------------------------------
     Matrix<double> MatrixColumns( std::vector<size_t> columns ) {
         
@@ -120,24 +158,75 @@ public:
             M.WriteColumn( col_j, column_vec_i );
             col_j++;
         }
+        
         return M;
     }
 
+    //-----------------------------------------------------------------
+    // Build Column Name Index( std::string colNames )
+    //-----------------------------------------------------------------
+    void BuildColumnNameIndex( std::string colNames ) {
+        // If colNames provided populate columnNames, columnNameToIndex
+        if ( colNames.size() ) {
+            columnNames = SplitString( colNames, " ,\t" );
+            if ( columnNames.size() != n_columns ) {
+                std::stringstream errMsg;
+                errMsg << "Matrix::BuildColumnNameIndex(s) "
+                       << "Number of column names ("
+                       << columnNames.size() << ") does not match the"
+                       << " number of columns (" << n_columns << ").\n";
+                throw std::runtime_error( errMsg.str() );
+            }
+        }
+        for ( size_t i = 0; i < columnNames.size(); i++ ) {
+            columnNameToIndex[ columnNames[i] ] = i;
+        }
+    }
+
+    //-----------------------------------------------------------------
+    // Build Column Name Index
+    //-----------------------------------------------------------------
+    void BuildColumnNameIndex() {
+        // If columnNames provided, populate columnNameToIndex
+        if ( columnNames.size() ) {
+            if ( columnNames.size() != n_columns ) {
+                std::stringstream errMsg;
+                errMsg << "Matrix::BuildColumnNameIndex() Number of column "
+                       << " names (" << columnNames.size() 
+                       << ") does not match the number of columns "
+                       << "(" << n_columns << ").\n";
+                throw std::runtime_error( errMsg.str() );
+            }
+        }
+        for ( size_t i = 0; i < columnNames.size(); i++ ) {
+            columnNameToIndex[ columnNames[i] ] = i;
+        }
+        
+#ifdef DEBUG_ALL
+        std::cout << "Matrix::BuildColumnNameIndex()\n";
+        for ( size_t i = 0; i < columnNames.size(); i++ ) {
+            std::cout << columnNames[i] << " : "
+                      << columnNameToIndex[ columnNames[i] ] << "   ";
+            columnNameToIndex[ columnNames[i] ] = i;
+        } std::cout << std::endl;
+#endif
+    }
+    
     //------------------------------------------------------------------
     // Print matrix to ostream
     //------------------------------------------------------------------
     friend std::ostream& operator <<( std::ostream& os, const Matrix& M ) {
         os << "Matrix: -----------------------------------\n";
         os << M.NRows() << " rows, " << M.NColumns() << " columns.\n";
-        
-        os << "---------------- First " << 10
-                  << " rows ---------------\n";
+        os << "---------------- First " << 10 << " rows ---------------\n";
         
         // print names of columns
         for ( size_t i = 0; i < M.ColumnNames().size(); i++ ) {
             os << M.ColumnNames()[i] << " \t";
         } os << std::endl;
         
+        os << "----------------------------------------------\n";
+ 
         // print vec data up to maxRowPrint points
         for ( size_t row = 0; row < M.NRows() and row < 10; row++ ) {
             
@@ -147,8 +236,7 @@ public:
             }
             os << std::endl;
         }
-        os << "----------------------------------------------"
-           << std::endl;
+        os << "----------------------------------------------" << std::endl;
 
         return os;
     }

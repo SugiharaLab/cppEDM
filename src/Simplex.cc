@@ -51,7 +51,9 @@ Matrix<double> Simplex( std::string path,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( path, dataFile, E, tau, columns, verbose );
+        dataBlock = Embed( param.path, param.dataFile,
+                           param.E, param.tau,
+                           columns, param.verbose );
     }
     
     //----------------------------------------------------------

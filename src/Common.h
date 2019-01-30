@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <valarray>
+#include <map>
 #include <cctype>
 
 #include "Matrix.h"
