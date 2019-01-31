@@ -278,7 +278,7 @@ NamedData DataFrame::ReadData() {
 //  @param outputFileName: filename to write to 
 //  @return: true if write was good, false if bad
 //------------------------------------------------------------------
-bool DataFrame::WriteData(std::string outputFilePath, std::string outputFileName) {
+void DataFrame::WriteData(std::string outputFilePath, std::string outputFileName) {
     //to hold the lines to print to the output file
     std::vector< std::string > fileLines;
 
@@ -321,12 +321,16 @@ bool DataFrame::WriteData(std::string outputFilePath, std::string outputFileName
                 std::ostream_iterator<std::string>(outputFile,"\n"));
 
         outputFile.close();
-        return true;
     }
-    std::cout<<"bad file";
 
     //bad write if got to here
-    return false;
+    else {
+        std::stringstream errMsg;
+        errMsg << "DataFrame::WriteData(): bad file permissions: "
+            << outputFilePath + outputFileName << ". \n";
+        throw std::runtime_error( errMsg.str() );
+    }
+
 }
 
 //------------------------------------------------------------------
