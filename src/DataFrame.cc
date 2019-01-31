@@ -273,6 +273,63 @@ NamedData DataFrame::ReadData() {
 }
 
 //------------------------------------------------------------------
+//  method to read the DataFrame data to file
+//  @param outputFilePath: path to the file to write to
+//  @param outputFileName: filename to write to 
+//  @return: true if write was good, false if bad
+//------------------------------------------------------------------
+bool DataFrame::WriteData(std::string outputFilePath, std::string outputFileName) {
+    //to hold the lines to print to the output file
+    std::vector< std::string > fileLines;
+
+    //tmp string to hold one line at a time
+    std::stringstream lineStr;
+
+    //save col names line
+    for (auto & colName : colNames) {
+        lineStr << colName << " ";
+    }
+
+    //set and empty
+    fileLines.push_back( lineStr.str() );
+    lineStr.str(std::string());
+
+    //for more efficient access inside inner loop below
+    size_t nCols = dataMatrix.NColumns();
+
+    //iterate through all numerical data to print
+    for (size_t rowIdx = 0; rowIdx < dataMatrix.NRows(); rowIdx++) {
+        for (size_t colIdx = 0; colIdx < nCols; colIdx++) {
+
+            lineStr << dataMatrix (rowIdx, colIdx);
+
+            if (colIdx != nCols-1) {
+                lineStr << ", ";
+            }
+        }
+
+        //set and empty
+        fileLines.push_back( lineStr.str() );
+        lineStr.str(std::string());
+    }
+
+    //write contents to file
+    std::ofstream outputFile(outputFilePath + outputFileName);
+    if (outputFile.is_open()) {
+
+        std::copy(fileLines.begin(), fileLines.end(),
+                std::ostream_iterator<std::string>(outputFile,"\n"));
+
+        outputFile.close();
+        return true;
+    }
+    std::cout<<"bad file";
+
+    //bad write if got to here
+    return false;
+}
+
+//------------------------------------------------------------------
 // method to print the dataframe
 //  @param os: the stream to print to
 //  @return: the stream passed in

@@ -1,5 +1,5 @@
 #include "DataFrame.h"
-#include "EmbedData.cc"
+#include "Embed.cc"
 
 int main () {
 
@@ -12,7 +12,11 @@ int main () {
     int E=2;
     int tau=1;
     std::vector<int> targets {0,1};
-    Matrix<double> embedReturn = EmbedData(E,tau,targets,df.DataMatrix());
-    std::cout<<embedReturn;
+   //Matrix<double> embedReturn = EmbedData(E,tau,targets,df.DataMatrix());
+    //std::cout<<embedReturn;
+    //
 
+    std::cout<<"done"<<std::endl<<std::flush;
+    df.WriteData ("","testOutput.csv");
+    std::cout<<"done2"<<std::endl<<std::flush;
 }

@@ -37,6 +37,7 @@ public:
                 size_t maxPrint = 5 );
     
     NamedData ReadData();
+    bool WriteData(std::string outputFilePath, std::string outputFileName);
     
     Matrix< double > SetupDataMatrix ( const NamedData csvInput );
 
