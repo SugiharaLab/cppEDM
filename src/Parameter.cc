@@ -163,31 +163,36 @@ void Parameters::Validate() {
     //--------------------------------------------------------------
     // Generate library indices: Apply zero-offset
     //--------------------------------------------------------------
-    std::vector<std::string> lib_vec = SplitString( lib_str, " \t," );
-    if ( lib_vec.size() != 2 ) {
-        std::string errMsg("Parameters(): library must be two integers.\n");
-        throw std::runtime_error( errMsg );
+    if ( lib_str.size() ) {
+        std::vector<std::string> lib_vec = SplitString( lib_str, " \t," );
+        if ( lib_vec.size() != 2 ) {
+            std::string errMsg("Parameters(): library must be two integers.\n");
+            throw std::runtime_error( errMsg );
+        }
+        int lib_start = std::stoi( lib_vec[0] );
+        int lib_end   = std::stoi( lib_vec[1] );
+        
+        library = std::vector<size_t>( lib_end - lib_start + 1 );
+        std::iota ( library.begin(), library.end(), lib_start - 1 );
     }
-    int lib_start = std::stoi( lib_vec[0] );
-    int lib_end   = std::stoi( lib_vec[1] );
-
-    library = std::vector<size_t>( lib_end - lib_start + 1 );
-    std::iota ( library.begin(), library.end(), lib_start - 1 );
 
     //--------------------------------------------------------------
     // Generate prediction indices: Apply zero-offset
     //--------------------------------------------------------------
-    std::vector<std::string> pred_vec = SplitString( pred_str, " \t," );
-    if ( pred_vec.size() != 2 ) {
-        std::string errMsg("Parameters(): prediction must be two integers.\n");
-        throw std::runtime_error( errMsg );
+    if ( pred_str.size() ) {
+        std::vector<std::string> pred_vec = SplitString( pred_str, " \t," );
+        if ( pred_vec.size() != 2 ) {
+            std::string errMsg("Parameters(): prediction must be two "
+                               "integers.\n");
+            throw std::runtime_error( errMsg );
+        }
+        int pred_start = std::stoi( pred_vec[0] );
+        int pred_end   = std::stoi( pred_vec[1] );
+        
+        prediction = std::vector<size_t>( pred_end - pred_start + 1 );
+        std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
     }
-    int pred_start = std::stoi( pred_vec[0] );
-    int pred_end   = std::stoi( pred_vec[1] );
-
-    prediction = std::vector<size_t>( pred_end - pred_start + 1 );
-    std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
-
+    
 #ifdef DEBUG_ALL
     PrintIndices( library, prediction );
 #endif
