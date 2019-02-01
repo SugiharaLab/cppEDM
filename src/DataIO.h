@@ -22,8 +22,6 @@ private:
     std::string path;     // User specified input path
     std::string fileName; // User specified input data file
 
-    size_t maxRowPrint;
-    
 public:
     // Prototypes
     DataIO ( const std::string path,
@@ -39,7 +37,6 @@ public:
     // Accessors
     size_t NumColumns()  const { return dataFrame.NColumns(); }
     size_t NumRows()     const { return dataFrame.NRows();    }
-    size_t MaxRowPrint() const { return maxRowPrint;          }
     
     DataFrame< double > &DFrame()        { return dataFrame; }
     DataFrame< double >  DFrame()  const { return dataFrame; }

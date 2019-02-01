@@ -108,3 +108,85 @@ std::vector<std::string> SplitString( std::string inString,
 
   return splitString;
 }
+
+//----------------------------------------------------------------
+// 
+//----------------------------------------------------------------
+VectorError ComputeError( std::valarray< double > obsIn,
+                          std::valarray< double > predIn ) {
+
+#ifdef DEBUG_ALL
+    std::cout << "ComputeError(): obs(" << obsIn.size() << "): ";
+    for ( auto o : obsIn ) { std::cout << o << " "; }
+    std::cout << std::endl;
+    std::cout << "ComputeError(): pred(" << predIn.size() << "): ";
+    for ( auto p : predIn ) { std::cout << p << " "; }
+    std::cout << std::endl;
+#endif
+
+    // Check for nan in vectors
+    size_t nanObs  = 0;
+    size_t nanPred = 0;
+    for ( auto o : obsIn )  { if ( std::isnan( o ) ) { nanObs++;  } }
+    for ( auto p : predIn ) { if ( std::isnan( p ) ) { nanPred++; } }
+
+    if ( nanObs != nanPred ) {
+        std::stringstream errMsg;
+        errMsg << "ComputeError(): obs has " << nanObs << " nan, pred has "
+               << nanPred << " nan.  ComputeError result invalid.\n";
+        std::cout << errMsg.str() << std::flush;
+    }
+
+    std::valarray<double> pred( predIn.size() - 2 * nanPred );
+    std::valarray<double> obs ( predIn.size() - 2 * nanPred );
+    if ( nanPred > 0 ) {
+        // ignore nanPred initial pred, and nanObs end obs
+        pred = predIn[ std::slice( nanPred, pred.size() - nanPred - 1, 1 ) ];
+        obs  = obsIn [ std::slice( nanPred, pred.size() - nanPred - 1, 1 ) ];
+    }
+    else {
+        pred = std::valarray<double>( predIn );
+        obs  = std::valarray<double>( obsIn );
+    }
+
+#ifdef DEBUG_ALL
+    std::cout << "ComputeError(): obs(" << obs.size() << "): ";
+    for ( auto o : obs ) { std::cout << o << " "; }
+    std::cout << std::endl;
+    std::cout << "ComputeError(): pred(" << pred.size() << "): ";
+    for ( auto p : pred ) { std::cout << p << " "; }
+    std::cout << std::endl;
+#endif
+
+    size_t N = pred.size();
+        
+    std::valarray< double > two( 2, N );
+
+    double sumPred    = pred.sum();
+    double sumObs     = obs.sum();
+    double sumSqrPred = pow( pred, two ).sum();
+    double sumSqrObs  = pow( obs,  two ).sum();
+    double sumErr     = abs( obs - pred ).sum();
+    double sumSqrErr  = pow( obs - pred, two ).sum();
+    double sumProd    = ( obs * pred ).sum();
+    double rho;
+
+    if ( sumSqrPred * N == sumSqrPred ) {
+        rho = 0;
+    }
+    else {
+        rho = ( ( sumProd * N - sumObs * sumPred ) /
+                std::sqrt( ( sumSqrObs  * N - sumSqrObs  ) *
+                           ( sumSqrPred * N - sumSqrPred ) ) );
+    }
+
+    VectorError vectorError = VectorError();
+    
+    vectorError.RMSE = sqrt( sumSqrErr / N );
+
+    vectorError.MAE = sumErr / N;
+
+    vectorError.rho = rho;
+    
+    return vectorError;
+}

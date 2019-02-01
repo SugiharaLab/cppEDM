@@ -28,6 +28,8 @@ class DataFrame {
     std::vector< std::string >      columnNames;
     std::map< std::string, size_t > columnNameToIndex;
     
+    size_t maxRowPrint;
+    
 public:
     //-----------------------------------------------------------------
     // Constructors
@@ -35,25 +37,23 @@ public:
     DataFrame () {}
     
     //-----------------------------------------------------------------
-    //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns ):
-        n_rows( rows ), n_columns( columns ), elements( columns * rows ) {}
+        n_rows( rows ), n_columns( columns ), elements( columns * rows ),
+        maxRowPrint( 10 ) {}
     
-    //-----------------------------------------------------------------
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns, std::string colNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
-        columnNames( std::vector<std::string>(columns) )
+        columnNames( std::vector<std::string>(columns) ), maxRowPrint( 10 )
     {
         BuildColumnNameIndex( colNames );
     }
    
     //-----------------------------------------------------------------
-    //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns,
             std::vector< std::string > columnNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
-        columnNames( columnNames )
+        columnNames( columnNames ), maxRowPrint( 10 )
     {
         BuildColumnNameIndex();
     }
@@ -85,6 +85,9 @@ public:
         return columnNameToIndex;
     }
 
+    size_t &MaxRowPrint()       { return maxRowPrint; }
+    size_t  MaxRowPrint() const { return maxRowPrint; }
+    
     //-----------------------------------------------------------------
     // Return column from index col
     //-----------------------------------------------------------------
@@ -106,9 +109,9 @@ public:
     //------------------------------------------------------------------
     std::valarray< double > VectorColumnName( std::string column ) {
         
-        std::vector< std::string >::iterator ci = std::find( columnNames.begin(),
-                                                             columnNames.end(),
-                                                             column );
+        std::vector< std::string >::iterator ci = std::find(columnNames.begin(),
+                                                            columnNames.end(),
+                                                            column );
         if ( ci == columnNames.end() ) {
             std::stringstream errMsg;
             errMsg << "DataFrame::VectorColumnName() Failed to find column: "
@@ -186,7 +189,7 @@ public:
                 errMsg << *ci << " ";
             } errMsg << "]" << std::endl;
             errMsg << "in DataFrame columns:\n[ ";
-            for ( auto ci = columnNames.begin(); ci != columnNames.end(); ++ci ){
+            for (auto ci = columnNames.begin(); ci != columnNames.end(); ++ci){
                 errMsg << *ci << " ";
             } errMsg << "]" << std::endl;
             throw std::runtime_error( errMsg.str() );
@@ -288,24 +291,26 @@ public:
     //------------------------------------------------------------------
     // Print DataFrame to ostream
     //------------------------------------------------------------------
-    friend std::ostream& operator <<( std::ostream& os, const DataFrame& M ) {
+    friend std::ostream& operator <<( std::ostream& os, const DataFrame& D ) {
         os << "DataFrame: -----------------------------------\n";
-        os << M.NRows() << " rows, " << M.NColumns() << " columns.\n";
-        os << "---------------- First " << 10 << " rows ---------------\n";
+        os << D.NRows() << " rows, " << D.NColumns() << " columns.\n";
+        os << "---------------- First " << D.MaxRowPrint()
+           << " rows ---------------\n";
         
         // print names of columns
-        for ( size_t i = 0; i < M.ColumnNames().size(); i++ ) {
-            os << M.ColumnNames()[i] << " \t";
+        for ( size_t i = 0; i < D.ColumnNames().size(); i++ ) {
+            os << D.ColumnNames()[i] << " \t";
         } os << std::endl;
         
         os << "----------------------------------------------\n";
  
         // print vec data up to maxRowPrint points
-        for ( size_t row = 0; row < M.NRows() and row < 10; row++ ) {
+        for ( size_t row = 0; row < D.NRows() and
+                              row < D.MaxRowPrint(); row++ ) {
             
             // print data points from each col
-            for ( size_t col = 0; col < M.NColumns(); col++ ) {
-                os << M( row, col ) << " \t";
+            for ( size_t col = 0; col < D.NColumns(); col++ ) {
+                os << D( row, col ) << " \t";
             }
             os << std::endl;
         }

@@ -7,6 +7,7 @@
 #include <valarray>
 #include <map>
 #include <cctype>
+#include <cmath>
 
 #include "DataFrame.h"
 
@@ -17,6 +18,13 @@ typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 enum class Method { Simplex, SMap };
 enum class DistanceMetric { Euclidean, Manhattan };
 
+// Data structs
+struct VectorError {
+    double rho;
+    double RMSE;
+    double MAE;
+};
+
 // Prototypes
 //---------------------------------------------------------
 std::string ToLower   ( std::string str );
@@ -24,6 +32,9 @@ bool        OnlyDigits( std::string str );
 
 std::vector<std::string> SplitString( std::string inString, 
                                       std::string delimeters = "," );
+
+VectorError ComputeError( std::valarray< double > obs,
+                          std::valarray< double > pred );
 
 DataFrame<double> Simplex( std::string path         = "./data/",
                            std::string dataFile     = "block_3sp.csv",

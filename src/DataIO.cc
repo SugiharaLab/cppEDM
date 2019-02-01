@@ -8,7 +8,7 @@
 //------------------------------------------------------------------
 DataIO::DataIO ( const std::string path, const std::string fileName,
                        size_t maxPrint ) :
-    path( path ), fileName( fileName ), maxRowPrint( maxPrint ) {
+    path( path ), fileName( fileName ) {
     
     csvInput = ReadData ();  // csvInput is a NamedData object
     
