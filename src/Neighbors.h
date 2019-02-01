@@ -10,14 +10,13 @@
 struct Neighbors; // forward declaration
 
 // Prototypes
-struct Neighbors FindNeighbors( const Matrix<double> &matrix,
-                                const Parameters     &parameters );
+struct Neighbors FindNeighbors( const DataFrame<double> &dataFrame,
+                                const Parameters        &parameters );
 
-void PrintMatrixIn( const Matrix<double> &matrix,
-                    const Parameters     &parameters );
+void PrintDataFrameIn( const DataFrame<double> &dataFrame,
+                       const Parameters        &parameters );
 
 void PrintNeighborsOut( const Neighbors &neighbors );
-
 
 double Distance( const std::valarray<double> &v1,
                  const std::valarray<double> &v2,
@@ -25,8 +24,8 @@ double Distance( const std::valarray<double> &v1,
 
 // Return structure of FindNeighbors()
 struct Neighbors {
-    Matrix<int>    neighbors;
-    Matrix<double> distances;
+    DataFrame<int>    neighbors;
+    DataFrame<double> distances;
     Neighbors();
     ~Neighbors();
 };

@@ -1,6 +1,6 @@
 
 CC  = g++
-OBJ = DataFrame.o Common.o Parameter.o Embed.o Interface.o Neighbors.o\
+OBJ = Common.o DataIO.o Parameter.o Embed.o Interface.o Neighbors.o\
 	Simplex.o Eval.o CCM.o Multiview.o SMap.o
 
 LIB = libEDM.a
@@ -21,8 +21,8 @@ distclean:
 
 $(LIB): $(OBJ)
 
-DataFrame.o: DataFrame.cc
-	$(CC) -c DataFrame.cc $(CFLAGS)
+DataIO.o: DataIO.cc
+	$(CC) -c DataIO.cc $(CFLAGS)
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
@@ -66,13 +66,13 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-DataFrame.o: DataFrame.h Common.h Matrix.h
-Common.o: Common.h Matrix.h
-Parameter.o: Parameter.h Common.h Matrix.h
-Embed.o: Embed.h Common.h Matrix.h Parameter.h DataFrame.h
-Interface.o: Common.h Matrix.h
-Neighbors.o: Neighbors.h Common.h Matrix.h Parameter.h
-Simplex.o: Common.h Matrix.h Parameter.h DataFrame.h Neighbors.h Embed.h
-Eval.o: Common.h Matrix.h
-CCM.o: Common.h Matrix.h
-Multiview.o: Common.h Matrix.h
+DataIO.o: DataIO.h Common.h DataFrame.h
+Common.o: Common.h DataFrame.h
+Parameter.o: Parameter.h Common.h DataFrame.h
+Embed.o: Embed.h Common.h DataFrame.h Parameter.h DataIO.h
+Interface.o: Common.h DataFrame.h
+Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h
+Simplex.o: Common.h DataFrame.h Parameter.h DataIO.h Neighbors.h Embed.h
+Eval.o: Common.h DataFrame.h
+CCM.o: Common.h DataFrame.h
+Multiview.o: Common.h DataFrame.h

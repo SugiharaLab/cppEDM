@@ -1,48 +1,48 @@
 
 #include "Common.h"
 #include "Parameter.h"
-#include "DataFrame.h"
+#include "DataIO.h"
 #include "Neighbors.h"
 #include "Embed.h"
 
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-Matrix<double> Simplex( std::string path,
-                        std::string dataFile,
-                        std::string predictFile,
-                        std::string lib,
-                        std::string pred,
-                        int         E,
-                        int         Tp,
-                        int         knn,
-                        int         tau,
-                        std::string columns,
-                        std::string target,
-                        bool        embedded,
-                        bool        verbose ) {
+DataFrame<double> Simplex( std::string path,
+                           std::string dataFile,
+                           std::string predictFile,
+                           std::string lib,
+                           std::string pred,
+                           int         E,
+                           int         Tp,
+                           int         knn,
+                           int         tau,
+                           std::string columns,
+                           std::string target,
+                           bool        embedded,
+                           bool        verbose ) {
 
     Parameters param = Parameters( Method::Simplex, path, dataFile, predictFile,
                                    lib, pred, E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose );
 
     //----------------------------------------------------------
-    // Load data to DataFrame
+    // Load data to DataIO
     //----------------------------------------------------------
-    DataFrame df = DataFrame( param.path, param.dataFile );
+    DataIO dio = DataIO( param.path, param.dataFile );
 
     //----------------------------------------------------------
     // Extract or embedd data block
     //----------------------------------------------------------
-    Matrix<double> dataBlock; // Multivariate or embedded Matrix
+    DataFrame<double> dataBlock; // Multivariate or embedded DataFrame
 
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
         if ( param.columnNames.size() ) {
-            dataBlock = df.MatrixColumnNames( param.columnNames );
+         dataBlock = dio.DFrame().DataFrameFromColumnNames(param.columnNames);
         }
         else if ( param.columnIndex.size() ) {
-            dataBlock = df.DataMatrix().MatrixColumns( param.columnIndex );
+         dataBlock = dio.DFrame().DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
             throw std::runtime_error( "Simplex(): colNames and colIndex "
@@ -61,14 +61,14 @@ Matrix<double> Simplex( std::string path,
     //----------------------------------------------------------
     std::valarray<double> target_vec;
     if ( param.targetIndex ) {
-        target_vec = df.DataMatrix().Column( param.targetIndex );
+        target_vec = dio.DFrame().Column( param.targetIndex );
     }
     else if ( param.targetName.size() ) {
-        target_vec = df.VectorColumnName( param.targetName );
+        target_vec = dio.DFrame().VectorColumnName( param.targetName );
     }
     else {
         // Default to first column, column i=0 is time
-        target_vec = df.DataMatrix().Column( 1 );
+        target_vec = dio.DFrame().Column( 1 );
     }
 
     //----------------------------------------------------------
@@ -85,9 +85,9 @@ Matrix<double> Simplex( std::string path,
         throw std::runtime_error( errMsg.str() );
     }
     
-    const Parameters     &param_ = param;
-    const Matrix<double> &M_     = dataBlock;
-    Neighbors neighbors = FindNeighbors( M_, param_ );
+    const Parameters        &param_ = param;
+    const DataFrame<double> &D_     = dataBlock;
+    Neighbors neighbors = FindNeighbors( D_, param_ );
 
     //----------------------------------------------------------
     // Simplex projection
@@ -181,7 +181,7 @@ Matrix<double> Simplex( std::string path,
     std::valarray<double> time( N_row + param.Tp );
     
     // Insert times from prediction. Time is the 1st column
-    time = df.DataMatrix().Column( 0 )[ pred_i ];
+    time = dio.DFrame().Column( 0 )[ pred_i ];
     // Insert Tp times at end
     for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
         time[ i ] = time[ i - 1 ] + param.Tp;
@@ -203,12 +203,12 @@ Matrix<double> Simplex( std::string path,
     }
     predictionsOut[ std::slice(param.Tp, N_row, 1) ] = predictions;
 
-    // Create output Matrix
-    Matrix<double> dataMatrix( N_row + param.Tp, 3 );
-    dataMatrix.ColumnNames() = { "Time", "Observations", "Predictions" };
-    dataMatrix.WriteColumn( 0, time );
-    dataMatrix.WriteColumn( 1, observations );
-    dataMatrix.WriteColumn( 2, predictionsOut );
+    // Create output DataFrame
+    DataFrame<double> dataFrame( N_row + param.Tp, 3 );
+    dataFrame.ColumnNames() = { "Time", "Observations", "Predictions" };
+    dataFrame.WriteColumn( 0, time );
+    dataFrame.WriteColumn( 1, observations );
+    dataFrame.WriteColumn( 2, predictionsOut );
     
 #ifdef DEBUG_ALL
     std::cout << "Simplex -----------------------------------\n";
@@ -221,5 +221,5 @@ Matrix<double> Simplex( std::string path,
     std::cout << "-------------------------------------------\n";
 #endif
     
-    return dataMatrix;
+    return dataFrame;
 }

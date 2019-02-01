@@ -6,16 +6,16 @@ Neighbors:: Neighbors() {}
 Neighbors::~Neighbors() {}
 
 //----------------------------------------------------------------
-// It is assumed that the matrix has only columns of data for which
-// knn will be computed.  The (time) column is not present.
+// It is assumed that the data frame has only columns of data for
+// which knn will be computed.  The (time) column is not present.
 //----------------------------------------------------------------
 struct Neighbors FindNeighbors(
-    const Matrix<double> & matrix,
-    const Parameters     & parameters )
+    const DataFrame<double> & dataFrame,
+    const Parameters        & parameters )
 {
 
 #ifdef DEBUG_ALL
-    PrintMatrixIn( matrix, parameters );
+    PrintDataFrameIn( dataFrame, parameters );
 #endif
 
     if ( not parameters.validated ) {
@@ -23,20 +23,20 @@ struct Neighbors FindNeighbors(
         throw( std::runtime_error( errMsg ) );
     }
 
-    if ( parameters.embedded and parameters.E != matrix.NColumns() ) {
+    if ( parameters.embedded and parameters.E != dataFrame.NColumns() ) {
         std::stringstream errMsg;
-        errMsg << "FindNeighbors(): The number of matrix columns ("
-               << matrix.NColumns() << ") does not match the embedding "
+        errMsg << "FindNeighbors(): The number of dataFrame columns ("
+               << dataFrame.NColumns() << ") does not match the embedding "
                << "dimension E (" << parameters.E << ")\n";
         throw std::runtime_error( errMsg.str() );
     }
 
     int N_library_rows    = parameters.library.size();
     int N_prediction_rows = parameters.prediction.size();
-    int N_columns         = matrix.NColumns();
+    int N_columns         = dataFrame.NColumns();
     
     // Maximum column index.
-    // We assume that the matrix has been selected to the proper columns
+    // We assume that the dataFrame has been selected to the proper columns
     size_t maxCol_i = N_columns - 1;
 
     // Identify degenerate library : prediction points by
@@ -60,21 +60,21 @@ struct Neighbors FindNeighbors(
 
     // Neighbors: struct on local stack to be returned by copy
     Neighbors neighbors = Neighbors();
-    neighbors.neighbors = Matrix<int>   ( N_prediction_rows, parameters.knn );
-    neighbors.distances = Matrix<double>( N_prediction_rows, parameters.knn );
+    neighbors.neighbors = DataFrame<int>   ( N_prediction_rows, parameters.knn );
+    neighbors.distances = DataFrame<double>( N_prediction_rows, parameters.knn );
 
     // Vectors to hold the indices and values from each comparison
     std::valarray<int>    k_NN_neighbors( parameters.knn );
     std::valarray<double> k_NN_distances( parameters.knn );
 
     //-------------------------------------------------------------------
-    // For each prediction vector (row in prediction Matrix) find the list
+    // For each prediction vector (row in prediction DataFrame) find the list
     // of library indices that are within k_NN points
     //-------------------------------------------------------------------
     for ( size_t row_i = 0; row_i < parameters.prediction.size(); row_i++ ) {
         // Get the prediction vector for this pred_row index
         int pred_row = parameters.prediction[ row_i ];
-        std::valarray<double> pred_vec = matrix.Row( pred_row );
+        std::valarray<double> pred_vec = dataFrame.Row( pred_row );
         
 #ifdef JP_REMOVE //----------------------------------------
         std::cout << "Predict row " << pred_row << " : " ;
@@ -96,7 +96,7 @@ struct Neighbors FindNeighbors(
         for ( size_t row_j = 0; row_j < parameters.library.size(); row_j++ ) {
             // Get the library vector for this lib_row index
             int lib_row = parameters.library[ row_j ];
-            std::valarray<double> lib_vec = matrix.Row( lib_row );
+            std::valarray<double> lib_vec = dataFrame.Row( lib_row );
 
 #ifdef JP_REMOVE //----------------------------------------
             std::cout << "Library row " << lib_row << " : " ;
@@ -220,23 +220,23 @@ double Distance( const std::valarray<double> &v1,
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-void PrintMatrixIn( const Matrix<double> &matrix,
-                    const Parameters     &parameters )
+void PrintDataFrameIn( const DataFrame<double> &dataFrame,
+                       const Parameters        &parameters )
 {
     std::cout << "FindNeighbors(): library:" << std::endl;
     for ( size_t row = 0; row < parameters.library.size(); row++ ) {
         int row_i = parameters.library[row];
         std::cout << "row " << row_i << " : ";
-        for ( size_t col = 0; col < matrix.NColumns(); col++ ) {
-            std::cout << matrix(row_i,col) << " "; 
+        for ( size_t col = 0; col < dataFrame.NColumns(); col++ ) {
+            std::cout << dataFrame(row_i,col) << " "; 
         } std::cout << std::endl;
     }
     std::cout << "FindNeighbors(): prediction:" << std::endl;
     for ( size_t row = 0; row < parameters.prediction.size(); row++ ) {
         int row_i = parameters.prediction[row];
         std::cout << "row " << row_i << " : ";
-        for ( size_t col = 0; col < matrix.NColumns(); col++ ) {
-            std::cout << matrix(row_i,col) << " "; 
+        for ( size_t col = 0; col < dataFrame.NColumns(); col++ ) {
+            std::cout << dataFrame(row_i,col) << " "; 
         } std::cout << std::endl;
     }
 }
