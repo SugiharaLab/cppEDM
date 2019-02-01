@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "DataIO.h"
 #include "Embed.cc"
 
@@ -18,4 +19,11 @@ int main () {
     std::cout<<"done"<<std::endl<<std::flush;
     dio.WriteData ("","testOutput.csv");
     std::cout<<"done2"<<std::endl<<std::flush;
+
+    //testing DataIO writing from dataframe instead of file
+    DataFrame<double> df = dio.DFrame();
+    df(5,5) = 400;
+    std::cout<<df;
+    DataIO nonFileData (df);
+    nonFileData.WriteData("","testOutput2.csv");
 }

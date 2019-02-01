@@ -17,8 +17,6 @@ private:
     // Underlying datastructure: a single valarray<T>
     DataFrame< double > dataFrame;
     
-    NamedData csvInput; // pair< string, vector<double> >
-
     std::string path;     // User specified input path
     std::string fileName; // User specified input data file
 
@@ -27,7 +25,11 @@ public:
     DataIO ( const std::string path,
              const std::string fileName,
              size_t maxPrint = 5 );
+
+    DataIO ( const DataFrame< double > & data,
+             size_t maxPrint = 5 );
     
+
     NamedData ReadData();
     
     void WriteData(std::string outputFilePath, std::string outputFileName);

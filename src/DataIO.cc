@@ -10,9 +10,16 @@ DataIO::DataIO ( const std::string path, const std::string fileName,
                        size_t maxPrint ) :
     path( path ), fileName( fileName ) {
     
-    csvInput = ReadData ();  // csvInput is a NamedData object
+    NamedData csvInput = ReadData ();  
     
     dataFrame = SetupDataFrame ( csvInput );
+}
+//------------------------------------------------------------------
+// Constructor :     the DataFrame is already created
+// @param data :     the DataFrame already created
+//------------------------------------------------------------------
+DataIO::DataIO ( const DataFrame<double> & data, size_t maxPrint ) :
+    path( std::string() ), fileName( std::string() ), dataFrame (data) {
 }
 
 //------------------------------------------------------------------
@@ -159,7 +166,7 @@ NamedData DataIO::ReadData() {
 //  method to read the DataIO data to file
 //  @param outputFilePath: path to the file to write to
 //  @param outputFileName: filename to write to 
-//  @return: true if write was good, false if bad
+//  @return: none
 //------------------------------------------------------------------
 void DataIO::WriteData(std::string outputFilePath, std::string outputFileName) {
     //to hold the lines to print to the output file
