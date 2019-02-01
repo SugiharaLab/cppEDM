@@ -45,15 +45,22 @@ int main( int argc, char *argv[] ) {
                  3, 1, 0, 1, "x_t y_t z_t", "x_t", true, true );
         std::cout << dataFrame;
 
+        VectorError ve = ComputeError(
+            dataFrame.VectorColumnName( "Observations" ),
+            dataFrame.VectorColumnName( "Predictions"  ) );
+
+        std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
+                  << "  MAE " << ve.MAE << std::endl;
+        
         // embedded = false : Simplex calls Embed to get dataBlock
         DataFrame<double> dataFrameEmbed = 
         Simplex( "../data/", "block_3sp.csv", "", "1 100", "101 198",
                  3, 1, 0, 1, "x_t y_t z_t", "x_t", false, true );
 
-        dataFrameEmbed.MaxRowPrint() = 30; // Set number of rows to print
+        dataFrameEmbed.MaxRowPrint() = 5; // Set number of rows to print
         std::cout << dataFrameEmbed;
 
-        VectorError ve = ComputeError(
+        ve = ComputeError(
             dataFrameEmbed.VectorColumnName( "Observations" ),
             dataFrameEmbed.VectorColumnName( "Predictions"  ) );
 

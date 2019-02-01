@@ -137,6 +137,8 @@ VectorError ComputeError( std::valarray< double > obsIn,
         std::cout << errMsg.str() << std::flush;
     }
 
+    // JP: Assume that nan are at the beginning of predictions and
+    //     at the end of observations... probably not a robust assumption
     std::valarray<double> pred( predIn.size() - 2 * nanPred );
     std::valarray<double> obs ( predIn.size() - 2 * nanPred );
     if ( nanPred > 0 ) {
@@ -164,6 +166,8 @@ VectorError ComputeError( std::valarray< double > obsIn,
 
     double sumPred    = pred.sum();
     double sumObs     = obs.sum();
+    double meanPred   = sumPred / N;
+    double meanObs    = sumObs  / N;
     double sumSqrPred = pow( pred, two ).sum();
     double sumSqrObs  = pow( obs,  two ).sum();
     double sumErr     = abs( obs - pred ).sum();
@@ -175,9 +179,9 @@ VectorError ComputeError( std::valarray< double > obsIn,
         rho = 0;
     }
     else {
-        rho = ( ( sumProd * N - sumObs * sumPred ) /
-                std::sqrt( ( sumSqrObs  * N - sumSqrObs  ) *
-                           ( sumSqrPred * N - sumSqrPred ) ) );
+        rho = ( sumProd - N * meanObs * meanPred ) /
+            ( std::sqrt( ( sumSqrObs  - N * pow( meanObs,  2 ) ) ) *
+              std::sqrt( ( sumSqrPred - N * pow( meanPred, 2 ) ) ) );
     }
 
     VectorError vectorError = VectorError();
