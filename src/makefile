@@ -5,7 +5,7 @@ OBJ = Common.o DataIO.o Parameter.o Embed.o Interface.o Neighbors.o\
 
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g -DDEBUG # -DDEBUG_ALL
+CFLAGS = -I "../lib/Eigen" -std=c++11 -g -DDEBUG # -DDEBUG_ALL
 LFLAGS = -lstdc++ -L./
 
 all:	$(LIB)
