@@ -47,7 +47,8 @@ public:  // JP Should be protected with accessors...
     bool        verbose;
     bool        validated;
     
-    std::string path;             // path for input dataFile
+    std::string pathIn;           // path for input dataFile
+    std::string pathOut;          // path for output files
     std::string dataFile;         // input dataFile (assumed .csv)
     std::string predictOutputFile;//
     std::string SmapOutputFile;   //
@@ -65,8 +66,9 @@ public:  // JP Should be protected with accessors...
     // Constructor declaration and default arguments
     Parameters(
         Method      method       = Method::Simplex,
-        std::string path         = "./",
+        std::string pathIn       = "./",
         std::string dataFile     = "",
+        std::string pathOut      = "./",
         std::string predictFile  = "",
         std::string lib_str      = "",
         std::string pred_str     = "",

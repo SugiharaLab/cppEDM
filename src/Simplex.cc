@@ -9,8 +9,9 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-DataFrame<double> Simplex( std::string path,
+DataFrame<double> Simplex( std::string pathIn,
                            std::string dataFile,
+                           std::string pathOut,
                            std::string predictFile,
                            std::string lib,
                            std::string pred,
@@ -23,7 +24,8 @@ DataFrame<double> Simplex( std::string path,
                            bool        embedded,
                            bool        verbose ) {
 
-    Parameters param = Parameters( Method::Simplex, path, dataFile, predictFile,
+    Parameters param = Parameters( Method::Simplex, pathIn, dataFile,
+                                   pathOut, predictFile,
                                    lib, pred, E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose );
 
@@ -38,7 +40,7 @@ DataFrame<double> Simplex( std::string path,
     //----------------------------------------------------------
     // Load data to DataIO
     //----------------------------------------------------------
-    DataIO dio = DataIO( param.path, param.dataFile );
+    DataIO dio = DataIO( param.pathIn, param.dataFile );
 
     //----------------------------------------------------------
     // Extract or embedd data block
@@ -60,7 +62,7 @@ DataFrame<double> Simplex( std::string path,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( param.path, param.dataFile,
+        dataBlock = Embed( param.pathIn, param.dataFile,
                            param.E, param.tau,
                            columns, param.verbose );
     }
@@ -218,6 +220,12 @@ DataFrame<double> Simplex( std::string path,
     dataFrame.WriteColumn( 0, time );
     dataFrame.WriteColumn( 1, observations );
     dataFrame.WriteColumn( 2, predictionsOut );
+
+    if ( param.predictOutputFile.size() ) {
+        // Write to disk, first embed in a DataIO object
+        DataIO dout( dataFrame );
+        dout.WriteData( param.pathOut, param.predictOutputFile );
+    }
     
 #ifdef DEBUG_ALL
     std::cout << "Simplex -----------------------------------\n";

@@ -7,8 +7,9 @@
 //----------------------------------------------------------------
 Parameters::Parameters(
     Method      method,
-    std::string path,
+    std::string pathIn,
     std::string dataFile,
+    std::string pathOut,
     std::string predictFile,    
     std::string lib_str,
     std::string pred_str,
@@ -42,8 +43,9 @@ Parameters::Parameters(
     ) :
     // default variable initialization from parameter arguments
     method           ( method ),
-    path             ( path ),
+    pathIn           ( pathIn ),
     dataFile         ( dataFile ),
+    pathOut          ( pathOut ),
     predictOutputFile( predictFile ),    
     lib_str          ( lib_str ),
     pred_str         ( pred_str ),

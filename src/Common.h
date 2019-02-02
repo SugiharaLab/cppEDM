@@ -36,8 +36,9 @@ std::vector<std::string> SplitString( std::string inString,
 VectorError ComputeError( std::valarray< double > obs,
                           std::valarray< double > pred );
 
-DataFrame<double> Simplex( std::string path         = "./data/",
+DataFrame<double> Simplex( std::string pathIn       = "./data/",
                            std::string dataFile     = "",
+                           std::string pathOut      = "./",
                            std::string predictFile  = "",
                            std::string lib          = "1  10",
                            std::string pred         = "11 20",
@@ -50,8 +51,9 @@ DataFrame<double> Simplex( std::string path         = "./data/",
                            bool        embedded     = true,
                            bool        verbose      = true );
 
-DataFrame<double> SMap( std::string path            = "./data/",
+DataFrame<double> SMap( std::string pathIn          = "./data/",
                         std::string dataFile        = "",
+                        std::string pathOut         = "./",
                         std::string predictFile     = "",
                         std::string lib             = "1  10",
                         std::string pred            = "11 20",

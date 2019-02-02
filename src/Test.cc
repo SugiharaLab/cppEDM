@@ -20,16 +20,16 @@ int main( int argc, char *argv[] ) {
         std::cout << EmbedFrame;
         
         // Embedding of DataFrame object not read from disk
-        // Load data into DataIO dataFrame, then subset dataFrame from there
+        // Load data into DataIO dataFrame, then subset dataFrame 
         // based on column names in Parameters, then pass to Embed.
         // Could bypass Parameters and select dataFrame with explicit colNames
         Parameters param = Parameters( Method::Simplex,
-                                       "../data/", "block_3sp.csv", "",
+                                       "../data/", "block_3sp.csv", "", "",
                                        "1 100", "190 198", 2, 1, 4, 1, 0,
                                        "x_t y_t z_t" );
         std::cout << param;
         
-        DataIO dio = DataIO( param.path, param.dataFile );
+        DataIO dio = DataIO( param.pathIn, param.dataFile );
         DataFrame< double > D = dio.DFrame().DataFrameFromColumnNames(
             param.columnNames );
         std::cout << D;
@@ -39,11 +39,13 @@ int main( int argc, char *argv[] ) {
 #endif
 
 #ifdef SIMPLEX_TEST
-        // embedded = true : data is read from file as embedding
+        //----------------------------------------------------------
+        // embedded = true : data file is multivariable embedding
         //----------------------------------------------------------
         DataFrame<double> dataFrame = 
-        Simplex( "../data/", "block_3sp.csv", "", "1 100", "101 198",
-                 3, 1, 0, 1, "x_t y_t z_t", "x_t", true, true );
+            Simplex( "../data/", "block_3sp.csv", "./", "simplex_3sp.csv",
+                     "1 100", "101 198", 3, 1, 0, 1,
+                     "x_t y_t z_t", "x_t", true, true );
         std::cout << dataFrame;
 
         VectorError ve = ComputeError(
@@ -53,16 +55,14 @@ int main( int argc, char *argv[] ) {
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl;
         
-        // Write to disk, first embed in a DataIO object
-        DataIO dout( dataFrame );
-        dout.WriteData( "", "simplex_3sp.csv" );
-        
-        // embedded = false : Simplex calls Embed to embed dataBlock
+        //----------------------------------------------------------
+        // embedded = false : Simplex embeds data file columns to E
         //----------------------------------------------------------
         DataFrame<double> dataFrameEmbed = 
-        Simplex( "../data/", "block_3sp.csv", "", "1 100", "101 198",
-                 3, 1, 0, 1, "x_t y_t z_t", "x_t", false, true );
-
+            Simplex( "../data/", "block_3sp.csv", "./", "simplex_3sp_Embed.csv",
+                     "1 100", "101 198", 3, 1, 0, 1,
+                     "x_t y_t z_t", "x_t", false, true );
+        
         dataFrameEmbed.MaxRowPrint() = 5; // Set number of rows to print
         std::cout << dataFrameEmbed;
 
@@ -72,11 +72,8 @@ int main( int argc, char *argv[] ) {
 
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl;
-
-        // Write to disk, first embed in a DataIO object
-        DataIO dout2( dataFrameEmbed );
-        dout2.WriteData( "", "simplex_3sp_Embed.csv" );
 #endif
+
     }
     
     catch ( const std::exception& e ) {

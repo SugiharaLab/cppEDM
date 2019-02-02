@@ -13,7 +13,7 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     //----------------------------------------------------------
     // Load data to DataIO
     //----------------------------------------------------------
-    DataIO dio = DataIO( param.path, param.dataFile );
+    DataIO dio = DataIO( param.pathIn, param.dataFile );
 
     //----------------------------------------------------------
     // Extract or embedd data block
@@ -35,9 +35,9 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( param.path, param.dataFile,
-                           param.E,    param.tau,
-                           columns,    param.verbose );
+        dataBlock = Embed( param.pathIn, param.dataFile,
+                           param.E,      param.tau,
+                           columns,      param.verbose );
     }
     
     //----------------------------------------------------------

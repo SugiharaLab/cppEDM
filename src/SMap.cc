@@ -9,8 +9,9 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-DataFrame<double> SMap( std::string path,
+DataFrame<double> SMap( std::string pathIn,
                         std::string dataFile,
+                        std::string pathOut,
                         std::string predictFile,
                         std::string lib,
                         std::string pred,
@@ -27,7 +28,8 @@ DataFrame<double> SMap( std::string path,
                         std::string jacobians,
                         double      SVDsignificance ) {
 
-    Parameters param = Parameters( Method::SMap, path, dataFile, predictFile,
+    Parameters param = Parameters( Method::SMap, pathIn, dataFile,
+                                   pathOut, predictFile,
                                    lib, pred, E, Tp, knn, tau, theta,
                                    columns, target, embedded, verbose,
                                    smapFile, "", jacobians, SVDsignificance );
@@ -43,7 +45,7 @@ DataFrame<double> SMap( std::string path,
     //----------------------------------------------------------
     // Load data to DataIO
     //----------------------------------------------------------
-    DataIO dio = DataIO( param.path, param.dataFile );
+    DataIO dio = DataIO( param.pathIn, param.dataFile );
 
     //----------------------------------------------------------
     // Extract or embedd data block
@@ -65,9 +67,9 @@ DataFrame<double> SMap( std::string path,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( param.path, param.dataFile,
-                           param.E, param.tau,
-                           columns, param.verbose );
+        dataBlock = Embed( param.pathIn, param.dataFile,
+                           param.E,      param.tau,
+                           columns,      param.verbose );
     }
     
     //----------------------------------------------------------

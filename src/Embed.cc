@@ -22,13 +22,13 @@ DataFrame< double > Embed ( std::string path,
     
     // Parameter.Validate() will convert columns into a vector of names
     // or a vector of column indices
-    Parameters param = Parameters( Method::Simplex, path, dataFile, "",
+    Parameters param = Parameters( Method::Simplex, path, dataFile, "", "",
                                    "1 1", "1 1", E, 0, 0, tau, 0,
                                    columns, "", false, verbose );
 
     // Load dataFrame with column from path/file
     // JP This is possibly redundant file I/O if called from another function
-    DataIO dio = DataIO( param.path, param.dataFile );
+    DataIO dio = DataIO( param.pathIn, param.dataFile );
     
     // Extract the specified columns into a new dataFrame for MakeBlock
     DataFrame< double > dataFrame;
@@ -71,7 +71,7 @@ DataFrame< double > Embed ( DataFrame< double > dataFrameIn,
     
     // Parameter.Validate will convert columns into a vector of names
     // or a vector of column indices
-    Parameters param = Parameters( Method::Simplex, "", "", "",
+    Parameters param = Parameters( Method::Simplex, "", "", "", "",
                                    "1 1", "1 1", E, 0, 0, tau, 0,
                                    columns, "", false, verbose );
 
