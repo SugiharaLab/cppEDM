@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "Common.h"
+#include "DataEmbedNN.h"
 
 //----------------------------------------------------------------
 // 

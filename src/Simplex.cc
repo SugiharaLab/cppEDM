@@ -4,6 +4,7 @@
 #include "DataIO.h"
 #include "Neighbors.h"
 #include "Embed.h"
+#include "DataEmbedNN.h"
 
 //----------------------------------------------------------------
 // 
@@ -25,6 +26,14 @@ DataFrame<double> Simplex( std::string path,
     Parameters param = Parameters( Method::Simplex, path, dataFile, predictFile,
                                    lib, pred, E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose );
+
+#ifdef REMOVE
+    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( param, columns );
+    DataIO                dio        = dataEmbedNN.dio;
+    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
+    std::valarray<double> target_vec = dataEmbedNN.targetVec;
+    Neighbors             neighbors  = dataEmbedNN.neighbors;
+#endif
 
     //----------------------------------------------------------
     // Load data to DataIO

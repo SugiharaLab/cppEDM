@@ -9,13 +9,13 @@
 #include <cctype>
 #include <cmath>
 
-#include "DataFrame.h"
+#include "DataFrame.h" // #include Common.h
 
 // Type definitions
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 // Enumerations
-enum class Method { Simplex, SMap };
+enum class Method         { Simplex, SMap };
 enum class DistanceMetric { Euclidean, Manhattan };
 
 // Data structs
@@ -37,17 +37,34 @@ VectorError ComputeError( std::valarray< double > obs,
                           std::valarray< double > pred );
 
 DataFrame<double> Simplex( std::string path         = "./data/",
-                           std::string dataFile     = "block_3sp.csv",
+                           std::string dataFile     = "",
                            std::string predictFile  = "",
-                           std::string lib          = "1 10",
-                           std::string pred         = "195 198",
-                           int         E            = 3,
+                           std::string lib          = "1  10",
+                           std::string pred         = "11 20",
+                           int         E            = 0,
                            int         Tp           = 1,
                            int         knn          = 0,
                            int         tau          = 1,
-                           std::string colNames     = "x_t y_t z_t",
-                           std::string targetName   = "x_t",
+                           std::string colNames     = "",
+                           std::string targetName   = "",
                            bool        embedded     = true,
                            bool        verbose      = true );
 
+DataFrame<double> SMap( std::string path            = "./data/",
+                        std::string dataFile        = "",
+                        std::string predictFile     = "",
+                        std::string lib             = "1  10",
+                        std::string pred            = "11 20",
+                        int         E               = 0,
+                        int         Tp              = 1,
+                        int         knn             = 0,
+                        int         tau             = 1,
+                        double      theta           = 0,
+                        std::string columns         = "",
+                        std::string target          = "",
+                        bool        embedded        = true,
+                        bool        verbose         = true,
+                        std::string smapFile        = "",
+                        std::string jacobians       = "",
+                        double      SVDsignificance = 1.E-5 );
 #endif

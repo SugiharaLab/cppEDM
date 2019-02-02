@@ -21,6 +21,9 @@ private:
     std::string fileName; // User specified input data file
 
 public:
+    // Empty constructor
+    DataIO() {};
+    
     // Prototypes
     DataIO ( const std::string path,
              const std::string fileName,

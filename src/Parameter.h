@@ -47,11 +47,11 @@ public:  // JP Should be protected with accessors...
     bool        verbose;
     bool        validated;
     
-    std::string path;
-    std::string dataFile;
-    std::string predictOutputFile;
-    std::string SmapOutputFile;
-    std::string blockOutputFile;
+    std::string path;             // path for input dataFile
+    std::string dataFile;         // input dataFile (assumed .csv)
+    std::string predictOutputFile;//
+    std::string SmapOutputFile;   //
+    std::string blockOutputFile;  // Embed() output file
 
     std::string lib_str;      // String inputs of multi argument parameters
     std::string pred_str;

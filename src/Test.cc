@@ -40,8 +40,9 @@ int main( int argc, char *argv[] ) {
 
 #ifdef SIMPLEX_TEST
         // embedded = true : data is read from file as embedding
+        //----------------------------------------------------------
         DataFrame<double> dataFrame = 
-        Simplex( "../data/", "block_3sp.csv", "", "1 100", "190 198",
+        Simplex( "../data/", "block_3sp.csv", "", "1 100", "101 198",
                  3, 1, 0, 1, "x_t y_t z_t", "x_t", true, true );
         std::cout << dataFrame;
 
@@ -52,7 +53,12 @@ int main( int argc, char *argv[] ) {
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl;
         
-        // embedded = false : Simplex calls Embed to get dataBlock
+        // Write to disk, first embed in a DataIO object
+        DataIO dout( dataFrame );
+        dout.WriteData( "", "simplex_3sp.csv" );
+        
+        // embedded = false : Simplex calls Embed to embed dataBlock
+        //----------------------------------------------------------
         DataFrame<double> dataFrameEmbed = 
         Simplex( "../data/", "block_3sp.csv", "", "1 100", "101 198",
                  3, 1, 0, 1, "x_t y_t z_t", "x_t", false, true );
@@ -66,6 +72,10 @@ int main( int argc, char *argv[] ) {
 
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl;
+
+        // Write to disk, first embed in a DataIO object
+        DataIO dout2( dataFrameEmbed );
+        dout2.WriteData( "", "simplex_3sp_Embed.csv" );
 #endif
     }
     
