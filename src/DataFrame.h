@@ -71,6 +71,9 @@ public:
     //-----------------------------------------------------------------
     // Member Accessors
     //-----------------------------------------------------------------
+    std::valarray<T>  Elements() const { return elements; }
+    std::valarray<T> &Elements()       { return elements; }
+    
     size_t NColumns() const { return n_columns; }
     size_t NRows()    const { return n_rows;    }
     size_t size()     const { return n_rows * n_columns; }
