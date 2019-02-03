@@ -22,7 +22,7 @@ DataFrame< double > Embed ( std::string path,
     
     // Parameter.Validate() will convert columns into a vector of names
     // or a vector of column indices
-    Parameters param = Parameters( Method::Simplex, path, dataFile, "", "",
+    Parameters param = Parameters( Method::Embed, path, dataFile, "", "",
                                    "1 1", "1 1", E, 0, 0, tau, 0,
                                    columns, "", false, verbose );
 
@@ -71,7 +71,7 @@ DataFrame< double > Embed ( DataFrame< double > dataFrameIn,
     
     // Parameter.Validate will convert columns into a vector of names
     // or a vector of column indices
-    Parameters param = Parameters( Method::Simplex, "", "", "", "",
+    Parameters param = Parameters( Method::Embed, "", "", "", "",
                                    "1 1", "1 1", E, 0, 0, tau, 0,
                                    columns, "", false, verbose );
 

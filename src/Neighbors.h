@@ -10,8 +10,8 @@
 struct Neighbors; // forward declaration
 
 // Prototypes
-struct Neighbors FindNeighbors( const DataFrame<double> &dataFrame,
-                                const Parameters        &parameters );
+struct Neighbors FindNeighbors( DataFrame<double> dataFrame,
+                                Parameters        parameters );
 
 void PrintDataFrameIn( const DataFrame<double> &dataFrame,
                        const Parameters        &parameters );

@@ -3,8 +3,10 @@
 #include "Neighbors.h"
 #include "Embed.h"
 
-#define SIMPLEX_TEST
 //#define EMBED_TEST
+#define SIMPLEX_TEST1
+#define SIMPLEX_TEST2
+#define SMAP_TEST
 
 //----------------------------------------------------------------
 // Intended to execute tests to validate the code.
@@ -38,7 +40,7 @@ int main( int argc, char *argv[] ) {
         std::cout << EmbedFrame2;
 #endif
 
-#ifdef SIMPLEX_TEST
+#ifdef SIMPLEX_TEST1
         //----------------------------------------------------------
         // embedded = true : data file is multivariable embedding
         //----------------------------------------------------------
@@ -53,8 +55,11 @@ int main( int argc, char *argv[] ) {
             dataFrame.VectorColumnName( "Predictions"  ) );
 
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
-                  << "  MAE " << ve.MAE << std::endl;
+                  << "  MAE " << ve.MAE << std::endl << std::endl;
         
+#endif
+        
+#ifdef SIMPLEX_TEST2
         //----------------------------------------------------------
         // embedded = false : Simplex embeds data file columns to E
         //----------------------------------------------------------
@@ -63,15 +68,39 @@ int main( int argc, char *argv[] ) {
                      "1 100", "101 198", 3, 1, 0, 1,
                      "x_t y_t z_t", "x_t", false, true );
         
-        dataFrameEmbed.MaxRowPrint() = 5; // Set number of rows to print
+        dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
         std::cout << dataFrameEmbed;
 
-        ve = ComputeError(
+        VectorError ve2 = ComputeError(
             dataFrameEmbed.VectorColumnName( "Observations" ),
             dataFrameEmbed.VectorColumnName( "Predictions"  ) );
+        
+        std::cout << "rho " << ve2.rho << "  RMSE " << ve2.RMSE
+                  << "  MAE " << ve2.MAE << std::endl << std::endl;
+#endif
 
-        std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
-                  << "  MAE " << ve.MAE << std::endl;
+#ifdef SMAP_TEST
+        //----------------------------------------------------------
+        // embedded = false : SMap embeds data file columns to E
+        //----------------------------------------------------------
+        SMapValues SMV = 
+            SMap( "../data/", "block_3sp.csv", "./", "smap_3sp_Embed.csv",
+                  "1 100", "101 198", 3, 1, 0, 1, 4.,
+                  "x_t y_t z_t", "x_t", false, true,
+                  "smap_3sp_coeff.csv" );
+
+        DataFrame< double > predictions  = SMV.predictions;
+        DataFrame< double > coefficients = SMV.coefficients;
+        
+        predictions.MaxRowPrint() = 10; // Set number of rows to print
+        std::cout << predictions;
+
+        VectorError vesm = ComputeError(
+            predictions.VectorColumnName( "Observations" ),
+            predictions.VectorColumnName( "Predictions"  ) );
+
+        std::cout << "rho " << vesm.rho << "  RMSE " << vesm.RMSE
+                  << "  MAE " << vesm.MAE << std::endl << std::endl;
 #endif
 
     }

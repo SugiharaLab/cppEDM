@@ -2,7 +2,7 @@
 #include <algorithm>
 
 #include "Common.h"
-#include "DataEmbedNN.h"
+#include "AuxFunc.h"
 
 //----------------------------------------------------------------
 // 

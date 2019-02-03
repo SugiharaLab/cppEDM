@@ -79,7 +79,9 @@ Parameters::Parameters(
     forwardTau       ( fwdTau ),
     validated        ( false )
 {
-    Validate();
+    if ( method != Method::None ) {
+        Validate();
+    }
 }
 
 //----------------------------------------------------------------
@@ -99,68 +101,6 @@ void Parameters::Load() {}
 void Parameters::Validate() {
 
     validated = true;
-
-    if ( method != Method::SMap and method != Method::Simplex ) {
-        throw std::runtime_error( "Parameters::Validate() "
-                                  "Prediction method error.\n" );
-    }
-
-    // If S-Map prediction, require k_NN > E + 1, default is all neighbors.
-    // If Simplex and knn not specified, knn is set to E+1 in Simplex() ?JP
-    if ( method == Method::SMap ) {
-        if ( knn > 0 ) {
-            if ( knn < E + 1 ) {
-                std::stringstream errMsg;
-                errMsg << "Parameters::Validate() knn must be at least "
-                          " E+1 (" << E+1 << ") with method S-Map.\n";
-                throw std::runtime_error( errMsg.str() );
-            }
-        }
-        if ( not embedded and columnNames.size() > 1 ) {
-            std::string msg( "Parameters::Validate() WARNING:  "
-                             "Multivariable S-Map should use "
-                             "-e (embedded) data input to ensure "
-                             "data/dimension correspondance.\n" );
-            std::cout << msg;
-        }
-
-        // S-Map coefficient columns for jacobians start at 1 since the 0th
-        // column is the S-Map linear prediction bias term
-        if ( jacobians.size() > 1 ) {
-            std::vector<size_t>::iterator it = std::find( jacobians.begin(),
-                                                          jacobians.end(), 0 );
-            if ( it != jacobians.end() ) {
-                std::string errMsg( "Parameters::Validate() S-Map coefficient "
-                             " columns for jacobians can not use column 0.\n");
-                throw std::runtime_error( errMsg );
-            }
-            if ( jacobians.size() % 2 ) {
-                std::string errMsg( "Parameters::Validate() S-Map coefficient "
-                                  " columns for jacobians must be in pairs.\n");
-                throw std::runtime_error( errMsg );                
-            }
-        }
-
-        // Tikhonov and ElasticNet are mutually exclusive
-        if ( TikhonovAlpha and ElasticNetAlpha ) {
-            std::string errMsg( "Parameters::Validate() Multiple S-Map solve "
-                                "methods specified.  Use one or none of: "
-                                "tikhonov,   elasticNet.\n");
-            throw std::runtime_error( errMsg );                
-        }
-
-        // Very small alphas don't make sense in elastic net
-        if ( ElasticNetAlpha < 0.01 ) {
-            std::cout << "Parameters::Validate() ElasticNetAlpha too small."
-                         " Setting to 0.01.";
-            ElasticNetAlpha = 0.01;
-        }
-        if ( ElasticNetAlpha > 1 ) {
-            std::cout << "Parameters::Validate() ElasticNetAlpha too large."
-                         " Setting to 1.";
-            ElasticNetAlpha = 1;
-        }
-    }
 
     //--------------------------------------------------------------
     // Generate library indices: Apply zero-offset
@@ -203,7 +143,7 @@ void Parameters::Validate() {
     // Convert multi argument parameters from string to vectors
     //--------------------------------------------------------------
     
-    // columns
+    // Columns
     // If columns are purely numeric, then populate vector<size_t> columnIndex
     // otherwise fill in vector<string> columnNames
     if ( columns_str.size() ) {
@@ -253,7 +193,7 @@ void Parameters::Validate() {
         }
     }
 
-    // librarySizes
+    // CCM librarySizes
     if ( libSizes_str.size() > 0 ) {
         std::vector<std::string> libsize_vec = SplitString(libSizes_str," \t,");
         if ( libsize_vec.size() != 3 ) {
@@ -264,6 +204,94 @@ void Parameters::Validate() {
         for ( size_t i = 0; i < libsize_vec.size(); i++ ) {
             librarySizes.push_back( std::stoi( libsize_vec[i] ) );
         }
+    }
+
+    //--------------------------------------------------------------------
+    // If Simplex and knn not specified, knn set to E+1
+    // If S-Map require knn > E + 1, default is all neighbors.
+    if ( method == Method::Simplex ) {
+        if ( knn < 1 ) {
+            knn = E + 1;
+            std::stringstream msg;
+            msg << "Parameters::Validate(): Set knn = " << knn
+                << " (E+1) for Simplex. " << std::endl;
+            std::cout << msg.str();
+        }
+        if ( knn < E + 1 ) {
+            std::stringstream errMsg;
+            errMsg << "Parameters::Validate(): Simplex knn of " << knn
+                   << " is less than E+1 = " << E + 1 << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+    }
+    else if ( method == Method::SMap ) {
+        if ( knn > 0 ) {
+            if ( knn < E + 1 ) {
+                std::stringstream errMsg;
+                errMsg << "Parameters::Validate() S-Map knn must be at least "
+                          " E+1 = " << E + 1 << ".\n";
+                throw std::runtime_error( errMsg.str() );
+            }
+        }
+        else {
+            // knn = 0
+            knn = prediction.size() - Tp;
+            std::stringstream msg;
+            msg << "Parameters::Validate(): Set knn = " << knn
+                << " for SMap. " << std::endl;
+            std::cout << msg.str();
+        }
+        if ( not embedded and columnNames.size() > 1 ) {
+            std::string msg( "Parameters::Validate() WARNING:  "
+                             "Multivariable S-Map should use "
+                             "-e (embedded) data input to ensure "
+                             "data/dimension correspondance.\n" );
+            std::cout << msg;
+        }
+
+        // S-Map coefficient columns for jacobians start at 1 since the 0th
+        // column is the S-Map linear prediction bias term
+        if ( jacobians.size() > 1 ) {
+            std::vector<size_t>::iterator it = std::find( jacobians.begin(),
+                                                          jacobians.end(), 0 );
+            if ( it != jacobians.end() ) {
+                std::string errMsg( "Parameters::Validate() S-Map coefficient "
+                             " columns for jacobians can not use column 0.\n");
+                throw std::runtime_error( errMsg );
+            }
+            if ( jacobians.size() % 2 ) {
+                std::string errMsg( "Parameters::Validate() S-Map coefficient "
+                                  " columns for jacobians must be in pairs.\n");
+                throw std::runtime_error( errMsg );                
+            }
+        }
+
+        // Tikhonov and ElasticNet are mutually exclusive
+        if ( TikhonovAlpha and ElasticNetAlpha ) {
+            std::string errMsg( "Parameters::Validate() Multiple S-Map solve "
+                                "methods specified.  Use one or none of: "
+                                "tikhonov,   elasticNet.\n");
+            throw std::runtime_error( errMsg );                
+        }
+
+        // Very small alphas don't make sense in elastic net
+        if ( ElasticNetAlpha < 0.01 ) {
+            std::cout << "Parameters::Validate() ElasticNetAlpha too small."
+                         " Setting to 0.01.";
+            ElasticNetAlpha = 0.01;
+        }
+        if ( ElasticNetAlpha > 1 ) {
+            std::cout << "Parameters::Validate() ElasticNetAlpha too large."
+                         " Setting to 1.";
+            ElasticNetAlpha = 1;
+        }
+    }
+    else if ( method == Method::Embed ) {
+        // no-op
+    }
+    else {
+        throw std::runtime_error( "Parameters::Validate() "
+                                  "Prediction method error.\n" );
     }
 }
 

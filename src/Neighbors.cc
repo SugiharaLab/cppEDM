@@ -10,8 +10,8 @@ Neighbors::~Neighbors() {}
 // which knn will be computed.  The (time) column is not present.
 //----------------------------------------------------------------
 struct Neighbors FindNeighbors(
-    const DataFrame<double> & dataFrame,
-    const Parameters        & parameters )
+    DataFrame<double> dataFrame,
+    Parameters        parameters )
 {
 
 #ifdef DEBUG_ALL
@@ -174,7 +174,7 @@ struct Neighbors FindNeighbors(
         
     } // for ( row_i = 0; row_i < predictionRows->size(); row_i++ )
 
-#ifdef DEBUG//_ALL
+#ifdef DEBUG_ALL
     const Neighbors &neigh = neighbors;
     PrintNeighborsOut( neigh );
 #endif

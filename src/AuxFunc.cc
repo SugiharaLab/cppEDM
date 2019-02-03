@@ -1,14 +1,12 @@
 
-#include "DataEmbedNN.h"
+#include "AuxFunc.h"
 
 //----------------------------------------------------------
 // Common code to Simplex and Smap that loads data,
 // embeds, computes neighbors.
-// Data objects seem right, but when used in Simplex the
-// predictions are nan...
 //----------------------------------------------------------
 DataEmbedNN LoadDataEmbedNN( Parameters  param,
-                             std::string columns) {
+                             std::string columns ) {
 
     //----------------------------------------------------------
     // Load data to DataIO
@@ -58,28 +56,59 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     //----------------------------------------------------------
     // Nearest neighbors
     //----------------------------------------------------------
-    // If knn not specified, knn set to E+1
-    if ( param.knn < 1 ) {
-        param.knn = param.E + 1;
-    }
-    if ( param.knn < param.E + 1 ) {
-        std::stringstream errMsg;
-        errMsg << "Simplex(): knn of " << param.knn << " is less than E+1 of "
-               << param.E + 1 << std::endl;
-        throw std::runtime_error( errMsg.str() );
-    }
-    
-    const Parameters        &param_ = param;
-    const DataFrame<double> &D_     = dataBlock;
-    Neighbors neighbors = FindNeighbors( D_, param_ );
+    Neighbors neighbors = FindNeighbors( dataBlock, param );
 
     // Create struct to return the objects
-    DataEmbedNN dataEmbedNN = DataEmbedNN();
-
-    dataEmbedNN.dio       = dio;
-    dataEmbedNN.dataFrame = dataBlock;
-    dataEmbedNN.targetVec = target_vec;
-    dataEmbedNN.neighbors = neighbors;
+    DataEmbedNN dataEmbedNN = DataEmbedNN(dio, dataBlock, target_vec, neighbors);
 
     return dataEmbedNN;
+}
+
+//----------------------------------------------------------
+// Common code to Simplex and Smap for output generation
+//----------------------------------------------------------
+DataFrame<double> FormatOutput( Parameters            param,
+                                size_t                N_row,
+                                std::valarray<double> predictions,
+                                DataFrame<double>     dataFrameIn,
+                                std::valarray<double> target_vec )
+{
+
+    std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
+    
+    // Time vector with additional Tp points
+    //----------------------------------------------------
+    std::valarray<double> time( N_row + param.Tp );
+    
+    // Insert times from prediction. Time is the 1st column
+    time = dataFrameIn.Column( 0 )[ pred_i ];
+    // Insert Tp times at end
+    for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
+        time[ i ] = time[ i - 1 ] + param.Tp;
+    }
+
+    // Observations: add Tp nan at end
+    //----------------------------------------------------
+    std::valarray<double> observations( N_row + param.Tp );
+    observations[ std::slice( 0, N_row, 1 ) ] = target_vec[ pred_i ];
+    for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
+        observations[ i ] = NAN;
+    }
+
+    // Predictions: insert Tp nan at start
+    //----------------------------------------------------
+    std::valarray<double> predictionsOut( N_row + param.Tp );
+    for ( size_t i = 0; i < param.Tp; i++ ) {
+        predictionsOut[ i ] = NAN;
+    }
+    predictionsOut[ std::slice(param.Tp, N_row, 1) ] = predictions;
+
+    // Create output DataFrame
+    DataFrame<double> dataFrame( N_row + param.Tp, 3 );
+    dataFrame.ColumnNames() = { "Time", "Observations", "Predictions" };
+    dataFrame.WriteColumn( 0, time );
+    dataFrame.WriteColumn( 1, observations );
+    dataFrame.WriteColumn( 2, predictionsOut );
+    
+    return dataFrame;
 }

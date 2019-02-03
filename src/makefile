@@ -1,11 +1,11 @@
 
 CC  = g++
-OBJ = Common.o DataIO.o Parameter.o Embed.o Interface.o Neighbors.o\
-	Simplex.o Eval.o CCM.o Multiview.o SMap.o DataEmbedNN.o
+OBJ = Common.o AuxFunc.o DataIO.o Parameter.o Embed.o Interface.o Neighbors.o\
+	Simplex.o Eval.o CCM.o Multiview.o SMap.o 
 
 LIB = libEDM.a
 
-CFLAGS = -I "../lib/Eigen" -std=c++11 -g -DDEBUG # -DDEBUG_ALL
+CFLAGS = -std=c++11 -g -DDEBUG # -DDEBUG_ALL
 LFLAGS = -lstdc++ -L./
 
 all:	$(LIB)
@@ -21,14 +21,14 @@ distclean:
 
 $(LIB): $(OBJ)
 
-DataIO.o: DataIO.cc
-	$(CC) -c DataIO.cc $(CFLAGS)
-
-DataEmbedNN.o: DataEmbedNN.cc
-	$(CC) -c DataEmbedNN.cc $(CFLAGS)
+AuxFunc.o: AuxFunc.cc
+	$(CC) -c AuxFunc.cc $(CFLAGS)
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
+
+DataIO.o: DataIO.cc
+	$(CC) -c DataIO.cc $(CFLAGS)
 
 Parameter.o: Parameter.cc
 	$(CC) -c Parameter.cc $(CFLAGS)
@@ -69,7 +69,7 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Common.o: Common.h DataFrame.h DataEmbedNN.h DataIO.h Neighbors.h Parameter.h
+Common.o: Common.h DataFrame.h AuxFunc.h DataIO.h Neighbors.h Parameter.h
 Common.o: Embed.h
 DataIO.o: DataIO.h Common.h DataFrame.h
 Parameter.o: Parameter.h Common.h DataFrame.h
@@ -77,9 +77,9 @@ Embed.o: Embed.h Common.h DataFrame.h Parameter.h DataIO.h
 Interface.o: Common.h DataFrame.h
 Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h
 Simplex.o: Common.h DataFrame.h Parameter.h DataIO.h Neighbors.h Embed.h
-Simplex.o: DataEmbedNN.h
+Simplex.o: AuxFunc.h
 Eval.o: Common.h DataFrame.h
 CCM.o: Common.h DataFrame.h
 Multiview.o: Common.h DataFrame.h
 SMap.o: Common.h DataFrame.h Parameter.h DataIO.h Embed.h Neighbors.h
-SMap.o: DataEmbedNN.h
+SMap.o: AuxFunc.h

@@ -15,7 +15,7 @@
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 // Enumerations
-enum class Method         { Simplex, SMap };
+enum class Method         { None, Embed, Simplex, SMap };
 enum class DistanceMetric { Euclidean, Manhattan };
 
 // Data structs
@@ -23,6 +23,11 @@ struct VectorError {
     double rho;
     double RMSE;
     double MAE;
+};
+
+struct SMapValues {
+    DataFrame< double > predictions;
+    DataFrame< double > coefficients;
 };
 
 // Prototypes
@@ -51,22 +56,22 @@ DataFrame<double> Simplex( std::string pathIn       = "./data/",
                            bool        embedded     = true,
                            bool        verbose      = true );
 
-DataFrame<double> SMap( std::string pathIn          = "./data/",
-                        std::string dataFile        = "",
-                        std::string pathOut         = "./",
-                        std::string predictFile     = "",
-                        std::string lib             = "1  10",
-                        std::string pred            = "11 20",
-                        int         E               = 0,
-                        int         Tp              = 1,
-                        int         knn             = 0,
-                        int         tau             = 1,
-                        double      theta           = 0,
-                        std::string columns         = "",
-                        std::string target          = "",
-                        bool        embedded        = true,
-                        bool        verbose         = true,
-                        std::string smapFile        = "",
-                        std::string jacobians       = "",
-                        double      SVDsignificance = 1.E-5 );
+SMapValues SMap( std::string pathIn          = "./data/",
+                 std::string dataFile        = "",
+                 std::string pathOut         = "./",
+                 std::string predictFile     = "",
+                 std::string lib             = "1  10",
+                 std::string pred            = "11 20",
+                 int         E               = 0,
+                 int         Tp              = 1,
+                 int         knn             = 0,
+                 int         tau             = 1,
+                 double      theta           = 0,
+                 std::string columns         = "",
+                 std::string target          = "",
+                 bool        embedded        = true,
+                 bool        verbose         = true,
+                 std::string smapFile        = "",
+                 std::string jacobians       = "",
+                 double      SVDsignificance = 1.E-5 );
 #endif

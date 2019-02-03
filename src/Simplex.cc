@@ -4,7 +4,7 @@
 #include "DataIO.h"
 #include "Neighbors.h"
 #include "Embed.h"
-#include "DataEmbedNN.h"
+#include "AuxFunc.h"
 
 //----------------------------------------------------------------
 // 
@@ -29,76 +29,14 @@ DataFrame<double> Simplex( std::string pathIn,
                                    lib, pred, E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose );
 
-#ifdef REMOVE
+    //----------------------------------------------------------
+    // Load data, Embed, compute Neighbors
+    //----------------------------------------------------------
     DataEmbedNN dataEmbedNN = LoadDataEmbedNN( param, columns );
     DataIO                dio        = dataEmbedNN.dio;
     DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
     std::valarray<double> target_vec = dataEmbedNN.targetVec;
     Neighbors             neighbors  = dataEmbedNN.neighbors;
-#endif
-
-    //----------------------------------------------------------
-    // Load data to DataIO
-    //----------------------------------------------------------
-    DataIO dio = DataIO( param.pathIn, param.dataFile );
-
-    //----------------------------------------------------------
-    // Extract or embedd data block
-    //----------------------------------------------------------
-    DataFrame<double> dataBlock; // Multivariate or embedded DataFrame
-
-    if ( param.embedded ) {
-        // Data is multivariable block, no embedding needed
-        if ( param.columnNames.size() ) {
-         dataBlock = dio.DFrame().DataFrameFromColumnNames(param.columnNames);
-        }
-        else if ( param.columnIndex.size() ) {
-         dataBlock = dio.DFrame().DataFrameFromColumnIndex(param.columnIndex);
-        }
-        else {
-            throw std::runtime_error( "Simplex(): colNames and colIndex "
-                                      " are empty" );
-        }
-    }
-    else {
-        // embedded = false: create the embedding block
-        dataBlock = Embed( param.pathIn, param.dataFile,
-                           param.E, param.tau,
-                           columns, param.verbose );
-    }
-    
-    //----------------------------------------------------------
-    // Get target (library) vector
-    //----------------------------------------------------------
-    std::valarray<double> target_vec;
-    if ( param.targetIndex ) {
-        target_vec = dio.DFrame().Column( param.targetIndex );
-    }
-    else if ( param.targetName.size() ) {
-        target_vec = dio.DFrame().VectorColumnName( param.targetName );
-    }
-    else {
-        // Default to first column, column i=0 is time
-        target_vec = dio.DFrame().Column( 1 );
-    }
-
-    //----------------------------------------------------------
-    // Nearest neighbors
-    //----------------------------------------------------------
-    // If knn not specified, knn set to E+1
-    if ( param.knn < 1 ) {
-        param.knn = param.E + 1;
-    }
-    if ( param.knn < param.E + 1 ) {
-        std::stringstream errMsg;
-        errMsg << "Simplex(): knn of " << param.knn << " is less than E+1 of "
-               << param.E + 1 << std::endl;
-        throw std::runtime_error( errMsg.str() );
-    }
-    
-    const Parameters        &param_ = param;
-    const DataFrame<double> &D_     = dataBlock;
-    Neighbors neighbors = FindNeighbors( D_, param_ );
 
     //----------------------------------------------------------
     // Simplex projection
@@ -185,41 +123,8 @@ DataFrame<double> Simplex( std::string pathIn,
     //----------------------------------------------------
     // Ouput
     //----------------------------------------------------
-    std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
-    
-    // Time vector with additional Tp points
-    //----------------------------------------------------
-    std::valarray<double> time( N_row + param.Tp );
-    
-    // Insert times from prediction. Time is the 1st column
-    time = dio.DFrame().Column( 0 )[ pred_i ];
-    // Insert Tp times at end
-    for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
-        time[ i ] = time[ i - 1 ] + param.Tp;
-    }
-
-    // Observations: add Tp nan at end
-    //----------------------------------------------------
-    std::valarray<double> observations( N_row + param.Tp );
-    observations[ std::slice( 0, N_row, 1 ) ] = target_vec[ pred_i ];
-    for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
-        observations[ i ] = NAN;
-    }
-
-    // Predictions: insert Tp nan at start
-    //----------------------------------------------------
-    std::valarray<double> predictionsOut( N_row + param.Tp );
-    for ( size_t i = 0; i < param.Tp; i++ ) {
-        predictionsOut[ i ] = NAN;
-    }
-    predictionsOut[ std::slice(param.Tp, N_row, 1) ] = predictions;
-
-    // Create output DataFrame
-    DataFrame<double> dataFrame( N_row + param.Tp, 3 );
-    dataFrame.ColumnNames() = { "Time", "Observations", "Predictions" };
-    dataFrame.WriteColumn( 0, time );
-    dataFrame.WriteColumn( 1, observations );
-    dataFrame.WriteColumn( 2, predictionsOut );
+    DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
+                                                dio.DFrame(), target_vec );
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object

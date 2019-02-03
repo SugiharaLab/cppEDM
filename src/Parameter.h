@@ -65,7 +65,7 @@ public:  // JP Should be protected with accessors...
 
     // Constructor declaration and default arguments
     Parameters(
-        Method      method       = Method::Simplex,
+        Method      method       = Method::None,
         std::string pathIn       = "./",
         std::string dataFile     = "",
         std::string pathOut      = "./",
@@ -90,7 +90,7 @@ public:  // JP Should be protected with accessors...
         
         float       svdSig       = 1E-5,
         float       tikhonov     = 0,
-        float       elasticNet   = 0,
+        float       elasticNet   = 0.1,
         
         int         multi        = 0,
         std::string libSizes_str = "",
