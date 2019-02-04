@@ -175,6 +175,10 @@ void DataIO::WriteData(std::string outputFilePath, std::string outputFileName) {
     //tmp string to hold one line at a time
     std::stringstream lineStr;
 
+    // Set stream precision. This should be a parameter.
+    lineStr.precision( 4 );
+    lineStr.setf( std::ios::fixed, std::ios::floatfield );
+
     //for more efficient access inside inner loop below
     size_t nCols = DFrame().NColumns();
 
