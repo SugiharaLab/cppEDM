@@ -7,6 +7,8 @@
 // with c++11 standard template implemenations.
 // A possible solution is to link against libc++ on OSX. See ../etc/.
 
+#include <iomanip>
+
 #include "Common.h"
 
 // Since #include DataFrame.h is in Common.h, need forward declaration
@@ -295,6 +297,11 @@ public:
     // Print DataFrame to ostream
     //------------------------------------------------------------------
     friend std::ostream& operator <<( std::ostream& os, const DataFrame& D ) {
+        // precision should be a parameter
+        os.precision( 4 );
+        os.fill( ' ' );
+        os.setf( std::ios::fixed, std::ios::floatfield );
+        
         os << "DataFrame: -----------------------------------\n";
         os << D.NRows() << " rows, " << D.NColumns() << " columns.\n";
         os << "---------------- First " << D.MaxRowPrint()
@@ -302,7 +309,7 @@ public:
         
         // print names of columns
         for ( size_t i = 0; i < D.ColumnNames().size(); i++ ) {
-            os << D.ColumnNames()[i] << " \t";
+            os << std::setw(13) << D.ColumnNames()[i];
         } os << std::endl;
         
         os << "----------------------------------------------\n";
@@ -313,7 +320,7 @@ public:
             
             // print data points from each col
             for ( size_t col = 0; col < D.NColumns(); col++ ) {
-                os << D( row, col ) << " \t";
+                os << std::setw(13) << D( row, col );
             }
             os << std::endl;
         }
