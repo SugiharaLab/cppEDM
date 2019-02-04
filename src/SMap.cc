@@ -27,17 +27,17 @@ SMapValues SMap( std::string pathIn,
                  double      theta,
                  std::string columns,
                  std::string target,
-                 bool        embedded,
-                 bool        verbose,
                  std::string smapFile,
                  std::string jacobians,
-                 double      SVDsignificance ) {
+                 bool        embedded,
+                 bool        verbose )
+{
 
     Parameters param = Parameters( Method::SMap, pathIn, dataFile,
                                    pathOut, predictFile,
                                    lib, pred, E, Tp, knn, tau, theta,
                                    columns, target, embedded, verbose,
-                                   smapFile, "", jacobians, SVDsignificance );
+                                   smapFile, "", jacobians );
 
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors

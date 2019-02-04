@@ -86,8 +86,8 @@ int main( int argc, char *argv[] ) {
         SMapValues SMV = 
             SMap( "../data/", "block_3sp.csv", "./", "smap_3sp_Embed.csv",
                   "1 100", "101 198", 3, 1, 0, 1, 4.,
-                  "x_t y_t z_t", "x_t", false, true,
-                  "smap_3sp_coeff.csv" );
+                  "x_t y_t z_t", "x_t", "smap_3sp_coeff.csv", "",
+                  false, true );
 
         DataFrame< double > predictions  = SMV.predictions;
         DataFrame< double > coefficients = SMV.coefficients;

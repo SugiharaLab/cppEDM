@@ -30,6 +30,10 @@ struct SMapValues {
     DataFrame< double > coefficients;
 };
 
+struct CCMResult {
+    DataFrame< double > CCM_result;
+};
+
 // Prototypes
 //---------------------------------------------------------
 std::string ToLower   ( std::string str );
@@ -69,9 +73,28 @@ SMapValues SMap( std::string pathIn          = "./data/",
                  double      theta           = 0,
                  std::string columns         = "",
                  std::string target          = "",
-                 bool        embedded        = true,
-                 bool        verbose         = true,
                  std::string smapFile        = "",
                  std::string jacobians       = "",
-                 double      SVDsignificance = 1.E-5 );
+                 bool        embedded        = true,
+                 bool        verbose         = true );
+
+CCMResult CCM(  std::string pathIn       = "./data/",
+                std::string dataFile     = "",
+                std::string pathOut      = "./",
+                std::string predictFile  = "",
+                std::string lib          = "1  10",
+                std::string pred         = "11 20",
+                int         E            = 0,
+                int         Tp           = 1,
+                int         knn          = 0,
+                int         tau          = 1,
+                std::string colNames     = "",
+                std::string targetName   = "",
+                std::string libSizes_str = "",
+                int         sample       = 0,
+                bool        random       = true,
+                int         seed         = -1,
+                bool        embedded     = true,
+                bool        verbose      = true );
+
 #endif
