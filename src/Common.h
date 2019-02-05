@@ -40,7 +40,7 @@ std::string ToLower   ( std::string str );
 bool        OnlyDigits( std::string str );
 
 std::vector<std::string> SplitString( std::string inString, 
-                                      std::string delimeters = "," );
+                                      std::string delimeters );
 
 VectorError ComputeError( std::valarray< double > obs,
                           std::valarray< double > pred );

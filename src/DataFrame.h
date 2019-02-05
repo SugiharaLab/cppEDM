@@ -8,12 +8,18 @@
 // A possible solution is to link against libc++ on OSX. See ../etc/.
 
 #include <iomanip>
+#include <fstream>
+#include <iterator>
 
 #include "Common.h"
 
 // Since #include DataFrame.h is in Common.h, need forward declaration
 extern std::vector<std::string> SplitString( std::string inString, 
-                                             std::string delimeters );
+                                             std::string delimeters = "," );
+extern bool OnlyDigits( std::string str );
+
+// this is included in common rn but will be deleted once DataIO is excised
+typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 //---------------------------------------------------------
 // DataFrame class
@@ -50,7 +56,14 @@ public:
     {
         BuildColumnNameIndex( colNames );
     }
-   
+    //-----------------------------------------------------------------
+    DataFrame( std::string path, std::string fileName ):
+         maxRowPrint( 10 )
+    {
+        //SetupDataFrame will take care of our member vars we need to setup
+        NamedData csvInput = ReadData (path, fileName);
+        SetupDataFrame (csvInput);
+    }
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns,
             std::vector< std::string > columnNames ):
@@ -328,5 +341,217 @@ public:
 
         return os;
     }
+
+    //------------------------------------------------------------------
+    //  method to read the data to file
+    //  @param outputFilePath: path to the file to write to
+    //  @param outputFileName: filename to write to 
+    //  @return: none
+    //------------------------------------------------------------------
+    void WriteData(std::string outputFilePath, std::string outputFileName) {
+        //to hold the lines to print to the output file
+        std::vector< std::string > fileLines;
+
+        //tmp string to hold one line at a time
+        std::stringstream lineStr;
+
+        // Set stream precision. This should be a parameter.
+        lineStr.precision( 4 );
+        lineStr.setf( std::ios::fixed, std::ios::floatfield );
+
+        //save col names line
+        for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
+            lineStr << ColumnNames()[ colIdx ];
+
+            if ( colIdx != n_columns - 1 ) {
+                lineStr << ",";
+            }
+        }
+
+        //set and empty
+        fileLines.push_back( lineStr.str() );
+        lineStr.str(std::string()); // would lineStr.flush() do the same?
+
+        //iterate through all numerical data to print
+        for (size_t rowIdx = 0; rowIdx < n_rows; rowIdx++) {
+            for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
+
+                lineStr << (*this) (rowIdx, colIdx);
+
+                if ( colIdx != n_columns - 1 ) {
+                    lineStr << ",";
+                }
+            }
+
+            //set and empty
+            fileLines.push_back( lineStr.str() );
+            lineStr.str(std::string());
+        }
+
+        //write contents to file
+        std::ofstream outputFile(outputFilePath + outputFileName);
+        if (outputFile.is_open()) {
+
+            std::copy(fileLines.begin(), fileLines.end(),
+                    std::ostream_iterator<std::string>(outputFile,"\n"));
+
+            outputFile.close();
+        }
+
+        //bad write if got to here
+        else {
+            std::stringstream errMsg;
+            errMsg << "DataIO::WriteData(): bad file permissions: "
+                << outputFilePath + outputFileName << ". \n";
+            throw std::runtime_error( errMsg.str() );
+        }
+
+    }
+private:
+    //------------------------------------------------------------------
+    // method to setup the dataFrame
+    // @param csvInput from ReadData()
+    // @return: dataFrame
+    //------------------------------------------------------------------
+    void SetupDataFrame ( NamedData csvInput ) {
+
+        // Setup column names in same order as dataFrame
+        std::vector< std::string > colNames;
+        for ( NamedData::iterator iterate = csvInput.begin(); 
+              iterate != csvInput.end(); iterate++ ) {
+            colNames.push_back( iterate->first );
+        }
+        
+        // setup DataFrame members
+        n_rows = csvInput.begin()->second.size();
+        n_columns = csvInput.size();
+        elements = std::valarray <T> (n_rows * n_columns);
+        columnNames = colNames;
+        BuildColumnNameIndex();
+
+        // Initialize a DataFrame() object with (numRows, numCols, colNames)
+        //DataFrame<double> dataFrame = DataFrame<double>(numRows, numCols, colNames);
+
+        // Transfer each data value into the data frame
+        //    Another option is to use the writeColumn() DataFrame method
+        // csvInput is : pair< string, vector<double> >
+        for ( NamedData::iterator iterate  = csvInput.begin(); 
+                                  iterate != csvInput.end(); iterate++ ) {
+            
+            size_t colIdx = std::distance( csvInput.begin(), iterate );
+
+            for ( size_t rowIdx = 0; rowIdx < n_rows; rowIdx++ ) {
+                (*this)( rowIdx, colIdx ) = iterate->second[ rowIdx ];
+            }
+        }
+
+    }
+    //----------------------------------------------------------------
+    // 
+    //----------------------------------------------------------------
+    NamedData ReadData(std::string path, std::string fileName) {
+        
+        // Create input file stream and open file for input
+        std::ifstream dataStrm( path + fileName );
+        
+        //make sure file access is good before reading
+        if ( not dataStrm.is_open() ) {
+            std::stringstream errMsg;
+            errMsg << "ERROR: ReadData() file " << path + fileName
+                   << " is not open for reading." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        if ( not dataStrm.good() ) {
+            std::stringstream errMsg;
+            errMsg << "ERROR: ReadData() file " << path + fileName
+                   << " is not ready for reading." << std::endl;
+            throw std::runtime_error( errMsg.str() );
+        }
+        
+        // Read fileName into a vector of strings, one line per string
+        std::vector< std::string > dataLines;
+        std::string tmp;
+        
+        while( getline( dataStrm, tmp ) ) {
+            dataLines.push_back( tmp );
+        }
+        dataStrm.close();
+        
+#ifdef DEBUG_ALL
+        std::cout << "------- ReadData() Contents of file "
+                  << fileName << " -------" << std::endl;
+        for( std::vector< std::string >::iterator ci = dataLines.begin();
+             ci != dataLines.end(); ++ci ) {
+            std::cout << *ci << std::endl;
+        }
+#endif
+        
+        // Container for data names/vectors
+        NamedData namedData; // pair< string, vector< double >> NamedData;
+        // Container of column names in the same order as in csv file
+        std::vector< std::string > colNames;
+
+        // Check first line to see if it's only numeric digits, or a header
+        bool onlyDigits = true;
+        std::vector<std::string> firstLineWords = SplitString( dataLines[0] );
+        
+        for ( auto si = firstLineWords.begin(); si != firstLineWords.end(); ++si ){
+
+            onlyDigits = OnlyDigits( *si );
+            
+            if ( not onlyDigits ) { break; }
+        }
+        if ( onlyDigits ) {
+            // create named columns with generic col names: V1, V2...
+            for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++ ) {
+                colNames.push_back( "V" + std::to_string(colIdx) );
+            }
+        }
+        else {
+            // get named columns from header line
+            for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++) {
+                colNames.push_back( firstLineWords[colIdx] );  
+            }
+            // remove header line from read in lines so only numerical after
+            dataLines.erase( dataLines.begin() );
+        }
+        
+        // setup each col in namedData with new vec to insert numerical data to
+        for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
+            NamedData::value_type colPair ( colNames[colIdx],
+                                            std::vector<double>());
+            namedData.push_back ( colPair );
+        }
+        
+        // Process each line in dataLines to fill in data vectors
+        for ( size_t lineIdx = 0; lineIdx < dataLines.size(); lineIdx++ ) {
+            std::vector<std::string> words = SplitString( dataLines[ lineIdx ] );
+            for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
+                namedData[ colIdx ].second.push_back( std::stod( words[colIdx] ) );
+            } 
+        }
+            
+#ifdef DEBUG_ALL
+        std::cout << "------- ReadData() data from "
+                  << fileName << " -------" << std::endl;
+        for ( auto ci = namedData.begin(); ci != namedData.end(); ++ci ) {
+            std::cout << ci->first << " ";
+        } std::cout << std::endl;
+
+        for ( size_t row = 0; row < (namedData.begin()->second).size(); row++ ) {
+            for ( auto ci = namedData.begin(); ci != namedData.end(); ++ci ) {
+                std::vector< double > vec = ci->second;
+                std::cout << vec[ row ] << " ";
+            } std::cout << std::endl;
+        }
+#endif
+        
+        return namedData;
+    }
+    
 };
+
+
+
+
 #endif

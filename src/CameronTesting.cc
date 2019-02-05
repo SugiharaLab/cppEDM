@@ -26,4 +26,14 @@ int main () {
     std::cout<<df;
     DataIO nonFileData (df);
     nonFileData.WriteData("","testOutput2.csv");
+
+    //testing new DataFrame with IO capabilities
+    DataFrame<double> dfIOAbilities("../data/","SampleCSV.csv");
+    std::cout<<"testing new DataFrame IO abilities\n";
+    dfIOAbilities(5,1) = 420;
+    dfIOAbilities(2,2) = 6969;
+    std::cout<<dfIOAbilities;
+    dfIOAbilities.WriteData("","testNewDataFrameIO.csv");
+    
+
 }
