@@ -31,7 +31,7 @@ int main( int argc, char *argv[] ) {
                                        "x_t y_t z_t" );
         std::cout << param;
         
-        DataFrame dio = DataFrame( param.pathIn, param.dataFile );
+        DataFrame< double > dio ( param.pathIn, param.dataFile );
         DataFrame< double > D = dio.DataFrameFromColumnNames(
             param.columnNames );
         std::cout << D;
