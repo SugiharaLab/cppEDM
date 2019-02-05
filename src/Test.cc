@@ -1,5 +1,5 @@
 
-#include "DataIO.h"
+#include "Common.h"
 #include "Neighbors.h"
 #include "Embed.h"
 
@@ -31,8 +31,8 @@ int main( int argc, char *argv[] ) {
                                        "x_t y_t z_t" );
         std::cout << param;
         
-        DataIO dio = DataIO( param.pathIn, param.dataFile );
-        DataFrame< double > D = dio.DFrame().DataFrameFromColumnNames(
+        DataFrame dio = DataFrame( param.pathIn, param.dataFile );
+        DataFrame< double > D = dio.DataFrameFromColumnNames(
             param.columnNames );
         std::cout << D;
 

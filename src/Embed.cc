@@ -19,43 +19,12 @@ DataFrame< double > Embed ( std::string path,
                             int         tau,
                             std::string columns,
                             bool        verbose ) {
-    
-    // Parameter.Validate() will convert columns into a vector of names
-    // or a vector of column indices
-    Parameters param = Parameters( Method::Embed, path, dataFile, "", "",
-                                   "1 1", "1 1", E, 0, 0, tau, 0,
-                                   columns, "", false, verbose );
 
-    // Load dataFrame with column from path/file
-    // JP This is possibly redundant file I/O if called from another function
-    DataIO dio = DataIO( param.pathIn, param.dataFile );
-    
-    // Extract the specified columns into a new dataFrame for MakeBlock
-    DataFrame< double > dataFrame;
-    std::vector< std::string > colNames;
+    //read in and delegate to Embed with DataFrame
+    DataFrame< double > toEmbed (path, dataFile);
+    DataFrame< double > embeddedDf = Embed (toEmbed, E, tau, columns, verbose);
 
-    if ( param.columnNames.size() ) {
-        // columns names are strings, use as-is
-        colNames  = param.columnNames;
-        dataFrame = dio.DFrame().DataFrameFromColumnNames(param.columnNames);
-    }
-    else if ( param.columnIndex.size() ) {
-        // columns are indices : Create column names for MakeBlock
-        for ( size_t i = 0; i < param.columnIndex.size(); i++ ) {
-            std::stringstream ss;
-            ss << "V" << param.columnIndex[i];
-            colNames.push_back( ss.str() );
-        }
-        dataFrame = dio.DFrame().DataFrameFromColumnIndex(param.columnIndex);
-    }
-    else {
-        throw std::runtime_error( "Embed(file): columnNames and columnIndex "
-                                  " are empty.\n" );
-    }
-    
-    DataFrame< double > embedding = MakeBlock( dataFrame, E, tau,
-                                               colNames, verbose );
-    return embedding;
+    return embeddedDf;
 }
 
 //---------------------------------------------------------

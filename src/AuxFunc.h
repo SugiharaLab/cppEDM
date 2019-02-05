@@ -1,7 +1,6 @@
 #ifndef AUXFUNC
 #define AUXFUNC
 
-#include "DataIO.h"
 #include "Neighbors.h"
 #include "Embed.h"
 
@@ -10,22 +9,21 @@
 // common initial processing in Simplex and Smap
 //----------------------------------------------------------------
 struct DataEmbedNN {
-    DataIO                dio;
+
     DataFrame<double>     dataFrame;
     std::valarray<double> targetVec;
     Neighbors             neighbors;
     
     // Constructor
-    DataEmbedNN( DataIO                dio,
-                 DataFrame<double>     dataFrame,
+    DataEmbedNN( DataFrame<double>     dataFrame,
                  std::valarray<double> targetVec,
                  Neighbors             neighbors ) :
-        dio( dio ), dataFrame( dataFrame ), targetVec( targetVec ),
+        dataFrame( dataFrame ), targetVec( targetVec ),
         neighbors( neighbors ) {}
 };
 
-DataEmbedNN LoadDataEmbedNN( Parameters  param,
-                             std::string columns );
+DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
+                             Parameters  param, std::string columns );
     
 DataFrame<double> FormatOutput( Parameters            param,
                                 size_t                N_row,

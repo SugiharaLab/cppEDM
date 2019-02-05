@@ -401,7 +401,7 @@ public:
         //bad write if got to here
         else {
             std::stringstream errMsg;
-            errMsg << "DataIO::WriteData(): bad file permissions: "
+            errMsg << "DataFrame::WriteData(): bad file permissions: "
                 << outputFilePath + outputFileName << ". \n";
             throw std::runtime_error( errMsg.str() );
         }

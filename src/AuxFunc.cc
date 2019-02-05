@@ -5,26 +5,19 @@
 // Common code to Simplex and Smap that loads data,
 // embeds, computes neighbors.
 //----------------------------------------------------------
-DataEmbedNN LoadDataEmbedNN( Parameters  param,
-                             std::string columns ) {
+DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
+                             Parameters  param, std::string columns ) {
 
-    //----------------------------------------------------------
-    // Load data to DataIO
-    //----------------------------------------------------------
-    DataIO dio = DataIO( param.pathIn, param.dataFile );
-
-    //----------------------------------------------------------
-    // Extract or embedd data block
-    //----------------------------------------------------------
-    DataFrame<double> dataBlock; // Multivariate or embedded DataFrame
+    // Multivariate or embedded DataFrame - 
+    DataFrame<double> dataBlock; 
 
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
         if ( param.columnNames.size() ) {
-         dataBlock = dio.DFrame().DataFrameFromColumnNames(param.columnNames);
+            dataBlock = data.DataFrameFromColumnNames(param.columnNames);
         }
         else if ( param.columnIndex.size() ) {
-         dataBlock = dio.DFrame().DataFrameFromColumnIndex(param.columnIndex);
+            dataBlock = data.DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
             throw std::runtime_error( "LoadDataEmbedNN(): colNames and colIndex "
@@ -33,7 +26,7 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( param.pathIn, param.dataFile,
+        dataBlock = Embed( data,
                            param.E,      param.tau,
                            columns,      param.verbose );
     }
@@ -43,14 +36,14 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     //----------------------------------------------------------
     std::valarray<double> target_vec;
     if ( param.targetIndex ) {
-        target_vec = dio.DFrame().Column( param.targetIndex );
+        target_vec = data.Column( param.targetIndex );
     }
     else if ( param.targetName.size() ) {
-        target_vec = dio.DFrame().VectorColumnName( param.targetName );
+        target_vec = data.VectorColumnName( param.targetName );
     }
     else {
         // Default to first column, column i=0 is time
-        target_vec = dio.DFrame().Column( 1 );
+        target_vec = data.Column( 1 );
     }
 
     //----------------------------------------------------------
@@ -59,7 +52,7 @@ DataEmbedNN LoadDataEmbedNN( Parameters  param,
     Neighbors neighbors = FindNeighbors( dataBlock, param );
 
     // Create struct to return the objects
-    DataEmbedNN dataEmbedNN = DataEmbedNN(dio, dataBlock, target_vec, neighbors);
+    DataEmbedNN dataEmbedNN = DataEmbedNN(dataBlock, target_vec, neighbors);
 
     return dataEmbedNN;
 }

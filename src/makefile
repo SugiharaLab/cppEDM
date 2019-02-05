@@ -1,6 +1,6 @@
 
 CC  = g++
-OBJ = Common.o AuxFunc.o DataIO.o Parameter.o Embed.o Interface.o Neighbors.o\
+OBJ = Common.o AuxFunc.o Parameter.o Embed.o Interface.o Neighbors.o\
 	Simplex.o Eval.o CCM.o Multiview.o SMap.o 
 
 LIB = libEDM.a
@@ -26,9 +26,6 @@ AuxFunc.o: AuxFunc.cc
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
-
-DataIO.o: DataIO.cc
-	$(CC) -c DataIO.cc $(CFLAGS)
 
 Parameter.o: Parameter.cc
 	$(CC) -c Parameter.cc $(CFLAGS)
@@ -69,17 +66,16 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Common.o: Common.h DataFrame.h AuxFunc.h DataIO.h Neighbors.h Parameter.h
+Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h
 Common.o: Embed.h
-DataIO.o: DataIO.h Common.h DataFrame.h
 Parameter.o: Parameter.h Common.h DataFrame.h
-Embed.o: Embed.h Common.h DataFrame.h Parameter.h DataIO.h
+Embed.o: Embed.h Common.h DataFrame.h Parameter.h 
 Interface.o: Common.h DataFrame.h
 Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h
-Simplex.o: Common.h DataFrame.h Parameter.h DataIO.h Neighbors.h Embed.h
+Simplex.o: Common.h DataFrame.h Parameter.h Neighbors.h Embed.h
 Simplex.o: AuxFunc.h
 Eval.o: Common.h DataFrame.h
 CCM.o: Common.h DataFrame.h
 Multiview.o: Common.h DataFrame.h
-SMap.o: Common.h DataFrame.h Parameter.h DataIO.h Embed.h Neighbors.h
+SMap.o: Common.h DataFrame.h Parameter.h Embed.h Neighbors.h
 SMap.o: AuxFunc.h

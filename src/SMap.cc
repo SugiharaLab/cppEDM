@@ -3,7 +3,6 @@
 
 #include "Common.h"
 #include "Parameter.h"
-#include "DataIO.h"
 #include "Embed.h"
 #include "Neighbors.h"
 #include "AuxFunc.h"
@@ -14,8 +13,7 @@ std::valarray< double > SVD( DataFrame< double > A, std::valarray< double > B );
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-SMapValues SMap( std::string pathIn,
-                 std::string dataFile,
+SMapValues SMap( DataFrame< double > dataBlock,
                  std::string pathOut,
                  std::string predictFile,
                  std::string lib,
@@ -33,7 +31,7 @@ SMapValues SMap( std::string pathIn,
                  bool        verbose )
 {
 
-    Parameters param = Parameters( Method::SMap, pathIn, dataFile,
+    Parameters param = Parameters( Method::SMap, "", "",
                                    pathOut, predictFile,
                                    lib, pred, E, Tp, knn, tau, theta,
                                    columns, target, embedded, verbose,
@@ -42,9 +40,7 @@ SMapValues SMap( std::string pathIn,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( param, columns );
-    DataIO                dio        = dataEmbedNN.dio;
-    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
+    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( dataBlock, param, columns );
     std::valarray<double> target_vec = dataEmbedNN.targetVec;
     Neighbors             neighbors  = dataEmbedNN.neighbors;
     
@@ -166,7 +162,7 @@ SMapValues SMap( std::string pathIn,
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                dio.DFrame(), target_vec );
+                                                dataBlock, target_vec );
     
     // Add time column to coefficients
     std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
@@ -178,20 +174,18 @@ SMapValues SMap( std::string pathIn,
         coefNames.push_back( coefficients.ColumnNames()[ col ] );
     }
     coefOut.ColumnNames() = coefNames;
-    coefOut.WriteColumn( 0, dio.DFrame().Column( 0 )[ pred_i ] );
+    coefOut.WriteColumn( 0, dataBlock.Column( 0 )[ pred_i ] );
     for ( size_t col = 1; col < coefOut.NColumns(); col++ ) {
         coefOut.WriteColumn( col, coefficients.Column( col - 1 ) );
     }
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object
-        DataIO dout( dataFrame );
-        dout.WriteData( param.pathOut, param.predictOutputFile );
+        dataFrame.WriteData( param.pathOut, param.predictOutputFile );
     }
     if ( param.SmapOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object
-        DataIO dout2( coefOut );
-        dout2.WriteData( param.pathOut, param.SmapOutputFile );
+        coefOut.WriteData( param.pathOut, param.SmapOutputFile );
     }
     
     SMapValues values = SMapValues();
@@ -236,3 +230,38 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     
     return C_;
 }
+
+
+//----------------------------------------------------------------
+// 
+//----------------------------------------------------------------
+SMapValues SMap( std::string pathIn,
+                 std::string dataFile,
+                 std::string pathOut,
+                 std::string predictFile,
+                 std::string lib,
+                 std::string pred,
+                 int         E,
+                 int         Tp,
+                 int         knn,
+                 int         tau,
+                 double      theta,
+                 std::string columns,
+                 std::string target,
+                 std::string smapFile,
+                 std::string jacobians,
+                 bool        embedded,
+                 bool        verbose )
+{
+    //read in datafile and delegate
+    DataFrame< double > dataBlock (pathIn, dataFile);
+    //CS note may be expensive to store this in var instead of returning 
+    //since may copy in return
+    SMapValues smapOutput = SMap (dataBlock, pathOut, predictFile,
+                                           lib, pred, E, Tp, knn, tau, theta,
+                                           columns, target, smapFile, jacobians,
+                                           embedded, verbose);
+    return smapOutput;
+}
+
+

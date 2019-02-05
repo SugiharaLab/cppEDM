@@ -1,7 +1,6 @@
 
 #include "Common.h"
 #include "Parameter.h"
-#include "DataIO.h"
 #include "Neighbors.h"
 #include "Embed.h"
 #include "AuxFunc.h"
@@ -9,8 +8,7 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-DataFrame<double> Simplex( std::string pathIn,
-                           std::string dataFile,
+DataFrame<double> Simplex( DataFrame< double > dataBlock,
                            std::string pathOut,
                            std::string predictFile,
                            std::string lib,
@@ -24,7 +22,7 @@ DataFrame<double> Simplex( std::string pathIn,
                            bool        embedded,
                            bool        verbose ) {
 
-    Parameters param = Parameters( Method::Simplex, pathIn, dataFile,
+    Parameters param = Parameters( Method::Simplex, "", "",
                                    pathOut, predictFile,
                                    lib, pred, E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose );
@@ -32,9 +30,7 @@ DataFrame<double> Simplex( std::string pathIn,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( param, columns );
-    DataIO                dio        = dataEmbedNN.dio;
-    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
+    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( dataBlock, param, columns );
     std::valarray<double> target_vec = dataEmbedNN.targetVec;
     Neighbors             neighbors  = dataEmbedNN.neighbors;
 
@@ -124,12 +120,11 @@ DataFrame<double> Simplex( std::string pathIn,
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                dio.DFrame(), target_vec );
+                                                dataBlock, target_vec );
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object
-        DataIO dout( dataFrame );
-        dout.WriteData( param.pathOut, param.predictOutputFile );
+        dataFrame.WriteData( param.pathOut, param.predictOutputFile );
     }
     
 #ifdef DEBUG_ALL
@@ -144,4 +139,33 @@ DataFrame<double> Simplex( std::string pathIn,
 #endif
     
     return dataFrame;
+}
+
+//----------------------------------------------------------------
+// 
+//----------------------------------------------------------------
+DataFrame<double> Simplex( std::string pathIn,
+                           std::string dataFile,
+                           std::string pathOut,
+                           std::string predictFile,
+                           std::string lib,
+                           std::string pred,
+                           int         E,
+                           int         Tp,
+                           int         knn,
+                           int         tau,
+                           std::string columns,
+                           std::string target,
+                           bool        embedded,
+                           bool        verbose ) {
+    
+    //read in datafile and delegate
+    DataFrame< double > dataBlock (pathIn, dataFile);
+    //CS note may be expensive to store this in var instead of returning 
+    //since may copy in return
+    DataFrame< double > simplexOutput = Simplex (dataBlock, pathOut, 
+                                                 predictFile, lib, pred, E, Tp,
+                                                 knn, tau, columns, target,
+                                                 embedded, verbose);
+    return simplexOutput;
 }
