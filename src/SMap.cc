@@ -13,7 +13,7 @@ std::valarray< double > SVD( DataFrame< double > A, std::valarray< double > B );
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-SMapValues SMap( DataFrame< double > dataBlock,
+SMapValues SMap( DataFrame< double > data,
                  std::string pathOut,
                  std::string predictFile,
                  std::string lib,
@@ -40,9 +40,11 @@ SMapValues SMap( DataFrame< double > dataBlock,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( dataBlock, param, columns );
-    std::valarray<double> target_vec = dataEmbedNN.targetVec;
-    Neighbors             neighbors  = dataEmbedNN.neighbors;
+    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
+    DataFrame<double>     originalData  = dataEmbedNN.originalData;
+    DataFrame<double>     dataBlock     = dataEmbedNN.dataFrame;
+    std::valarray<double> target_vec    = dataEmbedNN.targetVec;
+    Neighbors             neighbors     = dataEmbedNN.neighbors;
     
     // target_vec spans the entire dataBlock, subset targetLibVector
     // to library for row indexing used below:
@@ -162,7 +164,7 @@ SMapValues SMap( DataFrame< double > dataBlock,
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                dataBlock, target_vec );
+                                                originalData, target_vec );
     
     // Add time column to coefficients
     std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
@@ -174,7 +176,7 @@ SMapValues SMap( DataFrame< double > dataBlock,
         coefNames.push_back( coefficients.ColumnNames()[ col ] );
     }
     coefOut.ColumnNames() = coefNames;
-    coefOut.WriteColumn( 0, dataBlock.Column( 0 )[ pred_i ] );
+    coefOut.WriteColumn( 0, originalData.Column( 0 )[ pred_i ] );
     for ( size_t col = 1; col < coefOut.NColumns(); col++ ) {
         coefOut.WriteColumn( col, coefficients.Column( col - 1 ) );
     }
@@ -231,7 +233,6 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     return C_;
 }
 
-
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
@@ -252,16 +253,11 @@ SMapValues SMap( std::string pathIn,
                  std::string jacobians,
                  bool        embedded,
                  bool        verbose )
-{
-    //read in datafile and delegate
-    DataFrame< double > dataBlock (pathIn, dataFile);
-    //CS note may be expensive to store this in var instead of returning 
-    //since may copy in return
-    SMapValues smapOutput = SMap (dataBlock, pathOut, predictFile,
-                                           lib, pred, E, Tp, knn, tau, theta,
-                                           columns, target, smapFile, jacobians,
-                                           embedded, verbose);
-    return smapOutput;
+{    //create DataFrame and delegate
+    DataFrame< double > toSMap (pathIn, dataFile);
+    SMapValues SMapOutput = SMap (toSMap, pathOut, predictFile,
+                            lib, pred, E, Tp, knn, tau, theta, 
+                            columns, target, smapFile, jacobians, 
+                            embedded, verbose);
+    return SMapOutput;
 }
-
-

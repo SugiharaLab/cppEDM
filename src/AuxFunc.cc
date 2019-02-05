@@ -5,19 +5,22 @@
 // Common code to Simplex and Smap that loads data,
 // embeds, computes neighbors.
 //----------------------------------------------------------
-DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
-                             Parameters  param, std::string columns ) {
+DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
+                             Parameters  param,
+                             std::string columns ) {
 
-    // Multivariate or embedded DataFrame - 
-    DataFrame<double> dataBlock; 
+    //----------------------------------------------------------
+    // Extract or embedd data block
+    //----------------------------------------------------------
+    DataFrame<double> dataBlock; // Multivariate or embedded DataFrame
 
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
         if ( param.columnNames.size() ) {
-            dataBlock = data.DataFrameFromColumnNames(param.columnNames);
+         dataBlock = originalData.DataFrameFromColumnNames(param.columnNames);
         }
         else if ( param.columnIndex.size() ) {
-            dataBlock = data.DataFrameFromColumnIndex(param.columnIndex);
+         dataBlock = originalData.DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
             throw std::runtime_error( "LoadDataEmbedNN(): colNames and colIndex "
@@ -26,7 +29,7 @@ DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( data,
+        dataBlock = Embed( originalData,
                            param.E,      param.tau,
                            columns,      param.verbose );
     }
@@ -36,14 +39,14 @@ DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
     //----------------------------------------------------------
     std::valarray<double> target_vec;
     if ( param.targetIndex ) {
-        target_vec = data.Column( param.targetIndex );
+        target_vec = originalData.Column( param.targetIndex );
     }
     else if ( param.targetName.size() ) {
-        target_vec = data.VectorColumnName( param.targetName );
+        target_vec = originalData.VectorColumnName( param.targetName );
     }
     else {
         // Default to first column, column i=0 is time
-        target_vec = data.Column( 1 );
+        target_vec = originalData.Column( 1 );
     }
 
     //----------------------------------------------------------
@@ -52,7 +55,8 @@ DataEmbedNN LoadDataEmbedNN( DataFrame< double > data,
     Neighbors neighbors = FindNeighbors( dataBlock, param );
 
     // Create struct to return the objects
-    DataEmbedNN dataEmbedNN = DataEmbedNN(dataBlock, target_vec, neighbors);
+    DataEmbedNN dataEmbedNN = DataEmbedNN(originalData, dataBlock, 
+                                          target_vec, neighbors);
 
     return dataEmbedNN;
 }

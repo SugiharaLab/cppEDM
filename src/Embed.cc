@@ -7,7 +7,7 @@
 //
 // side effects:        truncates the array by tau * (E-1) rows 
 //                      to remove nan values (partial data rows)
-// @param dataFile:     data file (csv)
+// @param originalData: the data to embed
 // @param E:            embedding dimension
 // @param tau:          time step delay
 // @param columns:      column names or indices to embed
@@ -19,12 +19,10 @@ DataFrame< double > Embed ( std::string path,
                             int         tau,
                             std::string columns,
                             bool        verbose ) {
-
-    //read in and delegate to Embed with DataFrame
+    
     DataFrame< double > toEmbed (path, dataFile);
-    DataFrame< double > embeddedDf = Embed (toEmbed, E, tau, columns, verbose);
-
-    return embeddedDf;
+    DataFrame< double > embedded = Embed (toEmbed, E, tau, columns, verbose); 
+    return embedded;
 }
 
 //---------------------------------------------------------

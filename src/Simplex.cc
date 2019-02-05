@@ -8,7 +8,7 @@
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
-DataFrame<double> Simplex( DataFrame< double > dataBlock,
+DataFrame<double> Simplex( DataFrame< double > data,
                            std::string pathOut,
                            std::string predictFile,
                            std::string lib,
@@ -30,9 +30,11 @@ DataFrame<double> Simplex( DataFrame< double > dataBlock,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( dataBlock, param, columns );
-    std::valarray<double> target_vec = dataEmbedNN.targetVec;
-    Neighbors             neighbors  = dataEmbedNN.neighbors;
+    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
+    DataFrame<double>     originalData  = dataEmbedNN.originalData;
+    DataFrame<double>     dataBlock     = dataEmbedNN.dataFrame;
+    std::valarray<double> target_vec    = dataEmbedNN.targetVec;
+    Neighbors             neighbors     = dataEmbedNN.neighbors;
 
     //----------------------------------------------------------
     // Simplex projection
@@ -120,7 +122,7 @@ DataFrame<double> Simplex( DataFrame< double > dataBlock,
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                dataBlock, target_vec );
+                                                originalData, target_vec );
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object
@@ -158,14 +160,11 @@ DataFrame<double> Simplex( std::string pathIn,
                            std::string target,
                            bool        embedded,
                            bool        verbose ) {
-    
-    //read in datafile and delegate
-    DataFrame< double > dataBlock (pathIn, dataFile);
-    //CS note may be expensive to store this in var instead of returning 
-    //since may copy in return
-    DataFrame< double > simplexOutput = Simplex (dataBlock, pathOut, 
-                                                 predictFile, lib, pred, E, Tp,
-                                                 knn, tau, columns, target,
-                                                 embedded, verbose);
+    //create DataFrame and delegate
+    DataFrame< double > toSimplex (pathIn, dataFile);
+    DataFrame< double > simplexOutput = Simplex (toSimplex, pathOut,
+                                        predictFile, lib, pred, E, Tp, knn, tau,
+                                        columns, target, embedded, verbose);
     return simplexOutput;
 }
+
