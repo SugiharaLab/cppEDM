@@ -11,8 +11,6 @@
 
 #include "DataFrame.h" // #include Common.h
 
-// Type definitions
-typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 // Enumerations
 enum class Method         { None, Embed, Simplex, SMap };
