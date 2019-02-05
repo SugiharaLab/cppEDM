@@ -11,7 +11,36 @@
 std::valarray< double > SVD( DataFrame< double > A, std::valarray< double > B );
 
 //----------------------------------------------------------------
-// 
+// Overload 1: Explicit data file path/name
+//----------------------------------------------------------------
+SMapValues SMap( std::string pathIn,
+                 std::string dataFile,
+                 std::string pathOut,
+                 std::string predictFile,
+                 std::string lib,
+                 std::string pred,
+                 int         E,
+                 int         Tp,
+                 int         knn,
+                 int         tau,
+                 double      theta,
+                 std::string columns,
+                 std::string target,
+                 std::string smapFile,
+                 std::string jacobians,
+                 bool        embedded,
+                 bool        verbose )
+{    //create DataFrame and delegate
+    DataFrame< double > toSMap (pathIn, dataFile);
+    SMapValues SMapOutput = SMap (toSMap, pathOut, predictFile,
+                            lib, pred, E, Tp, knn, tau, theta, 
+                            columns, target, smapFile, jacobians, 
+                            embedded, verbose);
+    return SMapOutput;
+}
+
+//----------------------------------------------------------------
+// Overload 2: DataFrame provided
 //----------------------------------------------------------------
 SMapValues SMap( DataFrame< double > data,
                  std::string pathOut,
@@ -41,10 +70,10 @@ SMapValues SMap( DataFrame< double > data,
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
     DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
-    DataFrame<double>     originalData  = dataEmbedNN.originalData;
-    DataFrame<double>     dataBlock     = dataEmbedNN.dataFrame;
-    std::valarray<double> target_vec    = dataEmbedNN.targetVec;
-    Neighbors             neighbors     = dataEmbedNN.neighbors;
+    DataFrame<double>     dataIn     = dataEmbedNN.dataIn;
+    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
+    std::valarray<double> target_vec = dataEmbedNN.targetVec;
+    Neighbors             neighbors  = dataEmbedNN.neighbors;
     
     // target_vec spans the entire dataBlock, subset targetLibVector
     // to library for row indexing used below:
@@ -163,42 +192,48 @@ SMapValues SMap( DataFrame< double > data,
     //----------------------------------------------------
     // Ouput
     //----------------------------------------------------
-    DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                originalData, target_vec );
+    DataFrame<double> dataOut = FormatOutput( param, N_row, predictions, 
+                                              dataIn, target_vec );
     
-    // Add time column to coefficients
+    // Prediction row slice
     std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
-    
+
+    // Create output DataFrame
     DataFrame< double > coefOut = DataFrame< double >( N_row, param.E + 2 );
+    
+    // Populate column names
     std::vector<std::string> coefNames;
     coefNames.push_back( "Time" );
     for ( size_t col = 0; col < coefficients.ColumnNames().size(); col++ ) {
         coefNames.push_back( coefficients.ColumnNames()[ col ] );
     }
     coefOut.ColumnNames() = coefNames;
-    coefOut.WriteColumn( 0, originalData.Column( 0 )[ pred_i ] );
+
+    // Write the time vector
+    coefOut.WriteColumn( 0, dataIn.Column( 0 )[ pred_i ] );
+    // Write the coefficients to the columns
     for ( size_t col = 1; col < coefOut.NColumns(); col++ ) {
         coefOut.WriteColumn( col, coefficients.Column( col - 1 ) );
     }
 
     if ( param.predictOutputFile.size() ) {
-        // Write to disk, first embed in a DataIO object
-        dataFrame.WriteData( param.pathOut, param.predictOutputFile );
+        // Write predictions to disk
+        dataOut.WriteData( param.pathOut, param.predictOutputFile );
     }
     if ( param.SmapOutputFile.size() ) {
-        // Write to disk, first embed in a DataIO object
+        // Write Smap coefficients to disk
         coefOut.WriteData( param.pathOut, param.SmapOutputFile );
     }
     
     SMapValues values = SMapValues();
-    values.predictions  = dataFrame;
+    values.predictions  = dataOut;
     values.coefficients = coefOut;
 
     return values;
 }
 
 //----------------------------------------------------------------
-// 
+// Singular Value Decomposition using Eigen C++ template library
 //----------------------------------------------------------------
 std::valarray < double > SVD( DataFrame< double >     A_,
                               std::valarray< double > B_ ) {
@@ -216,8 +251,29 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     double *b = &(B_[0]);
     Eigen::VectorXd B = Eigen::Map< Eigen::VectorXd >( b, B_.size() );
 
+    // https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
+    //-------------------------------------------------------------------
+    // The recommended method is the BDCSVD class, which scale well for
+    // large problems and automatically fall-back to the JacobiSVD class
+    // for smaller problems.
+
+    // JacobiSVD implements two-sided Jacobi iterations that are
+    // numerically very accurate, fast for small matrices, but very
+    // slow for larger ones.
+    //Eigen::VectorXd C =
+    //    A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
+
+    // BDCSVD implements a recursive divide & conquer strategy on top of
+    // an upper-bidiagonalization which remains fast for large problems.
+    // Warning:  this algorithm is unlikely to provide accurate result when
+    // compiled with unsafe math optimizations. For instance, this concerns
+    // Intel's compiler (ICC), which perfroms such optimization by default
+    // unless you compile with the -fp-model precise option. Likewise,
+    // the -ffast-math option of GCC or clang will significantly degrade
+    // the accuracy.
     Eigen::VectorXd C =
-        A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
+        A.bdcSvd( Eigen::ComputeThinU |  Eigen::ComputeThinV ).solve( B );
+    
 
     // Extract fit coefficients from Eigen::VectorXd to valarray<>
     std::valarray < double > C_( C.data(), A_.NColumns() );
@@ -231,33 +287,4 @@ std::valarray < double > SVD( DataFrame< double >     A_,
 #endif
     
     return C_;
-}
-
-//----------------------------------------------------------------
-// 
-//----------------------------------------------------------------
-SMapValues SMap( std::string pathIn,
-                 std::string dataFile,
-                 std::string pathOut,
-                 std::string predictFile,
-                 std::string lib,
-                 std::string pred,
-                 int         E,
-                 int         Tp,
-                 int         knn,
-                 int         tau,
-                 double      theta,
-                 std::string columns,
-                 std::string target,
-                 std::string smapFile,
-                 std::string jacobians,
-                 bool        embedded,
-                 bool        verbose )
-{    //create DataFrame and delegate
-    DataFrame< double > toSMap (pathIn, dataFile);
-    SMapValues SMapOutput = SMap (toSMap, pathOut, predictFile,
-                            lib, pred, E, Tp, knn, tau, theta, 
-                            columns, target, smapFile, jacobians, 
-                            embedded, verbose);
-    return SMapOutput;
 }

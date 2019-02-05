@@ -6,7 +6,32 @@
 #include "AuxFunc.h"
 
 //----------------------------------------------------------------
-// 
+// Overload 1: Explicit data file path/name
+//----------------------------------------------------------------
+DataFrame<double> Simplex( std::string pathIn,
+                           std::string dataFile,
+                           std::string pathOut,
+                           std::string predictFile,
+                           std::string lib,
+                           std::string pred,
+                           int         E,
+                           int         Tp,
+                           int         knn,
+                           int         tau,
+                           std::string columns,
+                           std::string target,
+                           bool        embedded,
+                           bool        verbose ) {
+    //create DataFrame and delegate
+    DataFrame< double > toSimplex (pathIn, dataFile);
+    DataFrame< double > simplexOutput = Simplex (toSimplex, pathOut,
+                                        predictFile, lib, pred, E, Tp, knn, tau,
+                                        columns, target, embedded, verbose);
+    return simplexOutput;
+}
+
+//----------------------------------------------------------------
+// Overload 2: DataFrame provided
 //----------------------------------------------------------------
 DataFrame<double> Simplex( DataFrame< double > data,
                            std::string pathOut,
@@ -31,10 +56,10 @@ DataFrame<double> Simplex( DataFrame< double > data,
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
     DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
-    DataFrame<double>     originalData  = dataEmbedNN.originalData;
-    DataFrame<double>     dataBlock     = dataEmbedNN.dataFrame;
-    std::valarray<double> target_vec    = dataEmbedNN.targetVec;
-    Neighbors             neighbors     = dataEmbedNN.neighbors;
+    DataFrame<double>     dataIn     = dataEmbedNN.dataIn;
+    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
+    std::valarray<double> target_vec = dataEmbedNN.targetVec;
+    Neighbors             neighbors  = dataEmbedNN.neighbors;
 
     //----------------------------------------------------------
     // Simplex projection
@@ -122,7 +147,7 @@ DataFrame<double> Simplex( DataFrame< double > data,
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                originalData, target_vec );
+                                                dataIn, target_vec );
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk, first embed in a DataIO object
@@ -142,29 +167,3 @@ DataFrame<double> Simplex( DataFrame< double > data,
     
     return dataFrame;
 }
-
-//----------------------------------------------------------------
-// 
-//----------------------------------------------------------------
-DataFrame<double> Simplex( std::string pathIn,
-                           std::string dataFile,
-                           std::string pathOut,
-                           std::string predictFile,
-                           std::string lib,
-                           std::string pred,
-                           int         E,
-                           int         Tp,
-                           int         knn,
-                           int         tau,
-                           std::string columns,
-                           std::string target,
-                           bool        embedded,
-                           bool        verbose ) {
-    //create DataFrame and delegate
-    DataFrame< double > toSimplex (pathIn, dataFile);
-    DataFrame< double > simplexOutput = Simplex (toSimplex, pathOut,
-                                        predictFile, lib, pred, E, Tp, knn, tau,
-                                        columns, target, embedded, verbose);
-    return simplexOutput;
-}
-

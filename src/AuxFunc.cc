@@ -5,9 +5,9 @@
 // Common code to Simplex and Smap that loads data,
 // embeds, computes neighbors.
 //----------------------------------------------------------
-DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
-                             Parameters  param,
-                             std::string columns ) {
+DataEmbedNN LoadDataEmbedNN( DataFrame<double> dataIn,
+                             Parameters        param,
+                             std::string       columns ) {
 
     //----------------------------------------------------------
     // Extract or embedd data block
@@ -17,21 +17,19 @@ DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
         if ( param.columnNames.size() ) {
-         dataBlock = originalData.DataFrameFromColumnNames(param.columnNames);
+         dataBlock = dataIn.DataFrameFromColumnNames(param.columnNames);
         }
         else if ( param.columnIndex.size() ) {
-         dataBlock = originalData.DataFrameFromColumnIndex(param.columnIndex);
+         dataBlock = dataIn.DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
-            throw std::runtime_error( "LoadDataEmbedNN(): colNames and colIndex "
-                                      " are empty" );
+            throw std::runtime_error( "LoadDataEmbedNN(): colNames and "
+                                      " colIndex are empty.\n" );
         }
     }
     else {
         // embedded = false: create the embedding block
-        dataBlock = Embed( originalData,
-                           param.E,      param.tau,
-                           columns,      param.verbose );
+        dataBlock = Embed( dataIn, param.E, param.tau, columns, param.verbose );
     }
     
     //----------------------------------------------------------
@@ -39,14 +37,14 @@ DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
     //----------------------------------------------------------
     std::valarray<double> target_vec;
     if ( param.targetIndex ) {
-        target_vec = originalData.Column( param.targetIndex );
+        target_vec = dataIn.Column( param.targetIndex );
     }
     else if ( param.targetName.size() ) {
-        target_vec = originalData.VectorColumnName( param.targetName );
+        target_vec = dataIn.VectorColumnName( param.targetName );
     }
     else {
         // Default to first column, column i=0 is time
-        target_vec = originalData.Column( 1 );
+        target_vec = dataIn.Column( 1 );
     }
 
     //----------------------------------------------------------
@@ -55,9 +53,8 @@ DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
     Neighbors neighbors = FindNeighbors( dataBlock, param );
 
     // Create struct to return the objects
-    DataEmbedNN dataEmbedNN = DataEmbedNN(originalData, dataBlock, 
-                                          target_vec, neighbors);
-
+    DataEmbedNN dataEmbedNN = DataEmbedNN( dataIn, dataBlock, 
+                                           target_vec, neighbors );
     return dataEmbedNN;
 }
 
@@ -70,7 +67,6 @@ DataFrame<double> FormatOutput( Parameters            param,
                                 DataFrame<double>     dataFrameIn,
                                 std::valarray<double> target_vec )
 {
-
     std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
     
     // Time vector with additional Tp points

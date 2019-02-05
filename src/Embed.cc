@@ -7,7 +7,6 @@
 //
 // side effects:        truncates the array by tau * (E-1) rows 
 //                      to remove nan values (partial data rows)
-// @param originalData: the data to embed
 // @param E:            embedding dimension
 // @param tau:          time step delay
 // @param columns:      column names or indices to embed
@@ -44,7 +43,7 @@ DataFrame< double > Embed ( DataFrame< double > dataFrameIn,
 
     if ( not param.columnIndex.size() and
          dataFrameIn.ColumnNameToIndex().empty() ) {
-        throw std::runtime_error( "Embed(DataFrame): columnNameIndex empty.\n" );
+        throw std::runtime_error("Embed(DataFrame): columnNameIndex empty.\n");
     }
 
     // Get column names for MakeBlock

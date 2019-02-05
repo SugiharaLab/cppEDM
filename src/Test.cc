@@ -6,7 +6,8 @@
 //#define EMBED_TEST
 #define SIMPLEX_TEST1
 #define SIMPLEX_TEST2
-#define SMAP_TEST
+#define SMAP_TEST1
+#define SMAP_TEST2
 
 //----------------------------------------------------------------
 // Intended to execute tests to validate the code.
@@ -79,7 +80,7 @@ int main( int argc, char *argv[] ) {
                   << "  MAE " << ve2.MAE << std::endl << std::endl;
 #endif
 
-#ifdef SMAP_TEST
+#ifdef SMAP_TEST1
         //----------------------------------------------------------
         // embedded = false : SMap embeds data file columns to E
         //----------------------------------------------------------
@@ -92,7 +93,6 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > predictions  = SMV.predictions;
         DataFrame< double > coefficients = SMV.coefficients;
         
-        predictions.MaxRowPrint() = 10; // Set number of rows to print
         std::cout << predictions;
 
         VectorError vesm = ComputeError(
@@ -101,6 +101,29 @@ int main( int argc, char *argv[] ) {
 
         std::cout << "rho " << vesm.rho << "  RMSE " << vesm.RMSE
                   << "  MAE " << vesm.MAE << std::endl << std::endl;
+#endif
+
+#ifdef SMAP_TEST2
+        //----------------------------------------------------------
+        // embedded = true : Circle 
+        //----------------------------------------------------------
+        SMapValues SMV2 = 
+            SMap( "../data/", "circle.csv", "./", "smap_circle.csv",
+                  "1 100", "101 198", 2, 1, 0, 1, 4.,
+                  "x y", "x", "smap_circ_coeff.csv", "",
+                  true, true );
+
+        DataFrame< double > predictions2  = SMV2.predictions;
+        DataFrame< double > coefficients2 = SMV2.coefficients;
+        
+        std::cout << predictions2;
+
+        VectorError vesm2 = ComputeError(
+            predictions2.VectorColumnName( "Observations" ),
+            predictions2.VectorColumnName( "Predictions"  ) );
+
+        std::cout << "rho " << vesm2.rho << "  RMSE " << vesm2.RMSE
+                  << "  MAE " << vesm2.MAE << std::endl << std::endl;
 #endif
 
     }

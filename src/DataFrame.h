@@ -18,7 +18,7 @@ extern std::vector<std::string> SplitString( std::string inString,
                                              std::string delimeters = "," );
 extern bool OnlyDigits( std::string str );
 
-// this is included in common rn but will be deleted once DataIO is excised
+// Type definition for CSV NamedData to pair column names/column data
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 //---------------------------------------------------------
@@ -343,7 +343,7 @@ public:
     }
 
     //------------------------------------------------------------------
-    //  method to read the data to file
+    //  Write data to file
     //  @param outputFilePath: path to the file to write to
     //  @param outputFileName: filename to write to 
     //  @return: none
@@ -368,11 +368,11 @@ public:
             }
         }
 
-        //set and empty
+        // set and empty
         fileLines.push_back( lineStr.str() );
         lineStr.str(std::string()); // would lineStr.flush() do the same?
 
-        //iterate through all numerical data to print
+        // iterate through all numerical data to print
         for (size_t rowIdx = 0; rowIdx < n_rows; rowIdx++) {
             for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
 
@@ -383,12 +383,12 @@ public:
                 }
             }
 
-            //set and empty
+            // set and empty
             fileLines.push_back( lineStr.str() );
             lineStr.str(std::string());
         }
 
-        //write contents to file
+        // write contents to file
         std::ofstream outputFile(outputFilePath + outputFileName);
         if (outputFile.is_open()) {
 
@@ -398,7 +398,7 @@ public:
             outputFile.close();
         }
 
-        //bad write if got to here
+        // bad write if got to here
         else {
             std::stringstream errMsg;
             errMsg << "DataFrame::WriteData(): bad file permissions: "
@@ -407,9 +407,10 @@ public:
         }
 
     }
+    
 private:
     //------------------------------------------------------------------
-    // method to setup the dataFrame
+    // method to setup DataFrame
     // @param csvInput from ReadData()
     // @return: dataFrame
     //------------------------------------------------------------------
@@ -429,11 +430,8 @@ private:
         columnNames = colNames;
         BuildColumnNameIndex();
 
-        // Initialize a DataFrame() object with (numRows, numCols, colNames)
-        //DataFrame<double> dataFrame = DataFrame<double>(numRows, numCols, colNames);
-
-        // Transfer each data value into the data frame
-        //    Another option is to use the writeColumn() DataFrame method
+        // Transfer each data value into the class valarray 
+        //    Another option is to use the writeColumn() method
         // csvInput is : pair< string, vector<double> >
         for ( NamedData::iterator iterate  = csvInput.begin(); 
                                   iterate != csvInput.end(); iterate++ ) {
@@ -444,8 +442,8 @@ private:
                 (*this)( rowIdx, colIdx ) = iterate->second[ rowIdx ];
             }
         }
-
     }
+    
     //----------------------------------------------------------------
     // 
     //----------------------------------------------------------------
@@ -488,6 +486,7 @@ private:
         
         // Container for data names/vectors
         NamedData namedData; // pair< string, vector< double >> NamedData;
+        
         // Container of column names in the same order as in csv file
         std::vector< std::string > colNames;
 
@@ -495,7 +494,8 @@ private:
         bool onlyDigits = true;
         std::vector<std::string> firstLineWords = SplitString( dataLines[0] );
         
-        for ( auto si = firstLineWords.begin(); si != firstLineWords.end(); ++si ){
+        for ( auto si =  firstLineWords.begin();
+                   si != firstLineWords.end(); ++si ){
 
             onlyDigits = OnlyDigits( *si );
             
@@ -503,13 +503,13 @@ private:
         }
         if ( onlyDigits ) {
             // create named columns with generic col names: V1, V2...
-            for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++ ) {
+            for (size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++){
                 colNames.push_back( "V" + std::to_string(colIdx) );
             }
         }
         else {
             // get named columns from header line
-            for ( size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++) {
+            for (size_t colIdx = 0; colIdx < firstLineWords.size(); colIdx++){
                 colNames.push_back( firstLineWords[colIdx] );  
             }
             // remove header line from read in lines so only numerical after
@@ -525,12 +525,12 @@ private:
         
         // Process each line in dataLines to fill in data vectors
         for ( size_t lineIdx = 0; lineIdx < dataLines.size(); lineIdx++ ) {
-            std::vector<std::string> words = SplitString( dataLines[ lineIdx ] );
+            std::vector<std::string> words = SplitString(dataLines[ lineIdx ]);
             for ( size_t colIdx = 0; colIdx < colNames.size(); colIdx++ ) {
-                namedData[ colIdx ].second.push_back( std::stod( words[colIdx] ) );
-            } 
+                namedData[ colIdx ].second.push_back(std::stod( words[colIdx]));
+            }
         }
-            
+
 #ifdef DEBUG_ALL
         std::cout << "------- ReadData() data from "
                   << fileName << " -------" << std::endl;
@@ -538,7 +538,7 @@ private:
             std::cout << ci->first << " ";
         } std::cout << std::endl;
 
-        for ( size_t row = 0; row < (namedData.begin()->second).size(); row++ ) {
+        for (size_t row = 0; row < (namedData.begin()->second).size(); row++){
             for ( auto ci = namedData.begin(); ci != namedData.end(); ++ci ) {
                 std::vector< double > vec = ci->second;
                 std::cout << vec[ row ] << " ";
@@ -548,10 +548,5 @@ private:
         
         return namedData;
     }
-    
 };
-
-
-
-
 #endif

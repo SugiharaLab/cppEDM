@@ -9,21 +9,22 @@
 // common initial processing in Simplex and Smap
 //----------------------------------------------------------------
 struct DataEmbedNN {
-    DataFrame<double>     originalData;
+    DataFrame<double>     dataIn;
     DataFrame<double>     dataFrame;
     std::valarray<double> targetVec;
     Neighbors             neighbors;
     
     // Constructor
-    DataEmbedNN( DataFrame<double>     originalData,
+    DataEmbedNN( DataFrame<double>     dataIn,
                  DataFrame<double>     dataFrame,
                  std::valarray<double> targetVec,
                  Neighbors             neighbors ) :
-        originalData( originalData ), dataFrame( dataFrame ), targetVec( targetVec ),
+        dataIn( dataIn ), dataFrame( dataFrame ), targetVec( targetVec ),
         neighbors( neighbors ) {}
 };
 
-DataEmbedNN LoadDataEmbedNN( DataFrame<double> originalData,
+// Prototypes
+DataEmbedNN LoadDataEmbedNN( DataFrame<double> dataIn,
                              Parameters  param,
                              std::string columns );
     
