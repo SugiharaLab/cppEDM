@@ -1,0 +1,24 @@
+
+General notes
+
+1) The OSX XCode compiler/linker seems to be incompatible with the C++11
+standard implementation allowing template classes to be distributed into
+declarations (.h) and implementation (.cc).  To support OSX, DataFrame.h
+contains both declarations and implemenations. See: libstdc++_Notes.txt.
+
+2) Eigen template library. The default SVD solver is the BDCSVD that scales
+to large problems. The Eigen documentation states:
+  This algorithm is unlikely to provide accurate results when
+  compiled with unsafe math optimizations. For instance, this concerns
+  Intel's compiler (ICC), which performs such optimization by default
+  unless you compile with the -fp-model precise option. Likewise,
+  the -ffast-math option of GCC or clang will significantly degrade
+  accuracy.
+  See: https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
+
+3) The code relies heavily on class and data containers without explicit
+heap allocation.  This facilitates garbage collection.  However, using
+copy-on-return for large data objects is likely a performance issue.
+If the code encounters massive data objects/large problems, this may pose
+a significant limitation.
+

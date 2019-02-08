@@ -24,7 +24,7 @@ double Distance( const std::valarray<double> &v1,
 
 // Return structure of FindNeighbors()
 struct Neighbors {
-    DataFrame<int>    neighbors;
+    DataFrame<size_t> neighbors;
     DataFrame<double> distances;
     Neighbors();
     ~Neighbors();

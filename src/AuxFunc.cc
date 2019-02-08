@@ -2,12 +2,12 @@
 #include "AuxFunc.h"
 
 //----------------------------------------------------------
-// Common code to Simplex and Smap that loads data,
-// embeds, computes neighbors.
+// Common code for Simplex and Smap that embeds, extracts
+// the target vector and computes neighbors.
 //----------------------------------------------------------
-DataEmbedNN LoadDataEmbedNN( DataFrame<double> dataIn,
-                             Parameters        param,
-                             std::string       columns ) {
+DataEmbedNN EmbedNN( DataFrame<double> dataIn,
+                     Parameters        param,
+                     std::string       columns ) {
 
     //----------------------------------------------------------
     // Extract or embedd data block
@@ -23,7 +23,7 @@ DataEmbedNN LoadDataEmbedNN( DataFrame<double> dataIn,
          dataBlock = dataIn.DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
-            throw std::runtime_error( "LoadDataEmbedNN(): colNames and "
+            throw std::runtime_error( "EmbedNN(): colNames and "
                                       " colIndex are empty.\n" );
         }
     }

@@ -37,7 +37,7 @@ Parameters::Parameters(
     std::string libSizes_str,
     int         sample,
     bool        random,
-    int         rseed,
+    unsigned    rseed,
     bool        noNeigh,
     bool        fwdTau
     ) :
@@ -117,6 +117,9 @@ void Parameters::Validate() {
         library = std::vector<size_t>( lib_end - lib_start + 1 );
         std::iota ( library.begin(), library.end(), lib_start - 1 );
     }
+    else {
+        library = std::vector<size_t>( 1, 0 );
+    }
 
     //--------------------------------------------------------------
     // Generate prediction indices: Apply zero-offset
@@ -133,6 +136,9 @@ void Parameters::Validate() {
         
         prediction = std::vector<size_t>( pred_end - pred_start + 1 );
         std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
+    }
+    else {
+        prediction = std::vector<size_t>( 1, 0 );
     }
     
 #ifdef DEBUG_ALL
@@ -201,9 +207,26 @@ void Parameters::Validate() {
                                 "integers.\n" );
             throw std::runtime_error( errMsg );
         }
-        for ( size_t i = 0; i < libsize_vec.size(); i++ ) {
-            librarySizes.push_back( std::stoi( libsize_vec[i] ) );
+        size_t start     = std::stoi( libsize_vec[0] );
+        size_t stop      = std::stoi( libsize_vec[1] );
+        size_t increment = std::stoi( libsize_vec[2] );
+        size_t N_lib     = std::floor((stop-start)/increment + 1/increment)+1;
+
+        // Create the librarySizes vector
+        librarySizes = std::vector<size_t>( N_lib, 0 );
+
+        // Fill in the sizes
+        size_t libSize = start;
+        for ( size_t i = 0; i < librarySizes.size(); i++ ) {
+            librarySizes[i] = libSize;
+            libSize = libSize + increment;
         }
+#ifdef DEBUG_ALL
+        std::cout << "Parameters(): CCM librarySizes: ";
+        for ( size_t i = 0; i < librarySizes.size(); i++ ) {
+            std::cout << librarySizes[i] << ", ";
+        } std::cout << std::endl;
+#endif
     }
 
     //--------------------------------------------------------------------

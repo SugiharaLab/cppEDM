@@ -8,6 +8,7 @@
 #define SIMPLEX_TEST2
 #define SMAP_TEST1
 #define SMAP_TEST2
+//#define CCM_TEST
 
 //----------------------------------------------------------------
 // Intended to execute tests to validate the code.
@@ -124,6 +125,18 @@ int main( int argc, char *argv[] ) {
 
         std::cout << "rho " << vesm2.rho << "  RMSE " << vesm2.RMSE
                   << "  MAE " << vesm2.MAE << std::endl << std::endl;
+#endif
+
+#ifdef CCM_TEST
+        //----------------------------------------------------------
+        // 
+        //----------------------------------------------------------
+        DataFrame< double > CCMD = 
+            CCM( "../data/", "sardine_anchovy_sst.csv", "./", "",
+                 3, 0, 0, 1, "anchovy", "np_sst", "70 70 10", 100,
+                 false, 0, false, true );
+
+        std::cout << CCMD;
 #endif
 
     }

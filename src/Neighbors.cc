@@ -31,9 +31,9 @@ struct Neighbors FindNeighbors(
         throw std::runtime_error( errMsg.str() );
     }
 
-    int N_library_rows    = parameters.library.size();
-    int N_prediction_rows = parameters.prediction.size();
-    int N_columns         = dataFrame.NColumns();
+    size_t N_library_rows    = parameters.library.size();
+    size_t N_prediction_rows = parameters.prediction.size();
+    size_t N_columns         = dataFrame.NColumns();
     
     // Maximum column index.
     // We assume that the dataFrame has been selected to the proper columns
@@ -60,11 +60,11 @@ struct Neighbors FindNeighbors(
 
     // Neighbors: struct on local stack to be returned by copy
     Neighbors neighbors = Neighbors();
-    neighbors.neighbors = DataFrame<int>   ( N_prediction_rows, parameters.knn );
-    neighbors.distances = DataFrame<double>( N_prediction_rows, parameters.knn );
+    neighbors.neighbors = DataFrame<size_t>(N_prediction_rows, parameters.knn);
+    neighbors.distances = DataFrame<double>(N_prediction_rows, parameters.knn);
 
     // Vectors to hold the indices and values from each comparison
-    std::valarray<int>    k_NN_neighbors( parameters.knn );
+    std::valarray<size_t> k_NN_neighbors( parameters.knn );
     std::valarray<double> k_NN_distances( parameters.knn );
 
     //-------------------------------------------------------------------
@@ -73,7 +73,7 @@ struct Neighbors FindNeighbors(
     //-------------------------------------------------------------------
     for ( size_t row_i = 0; row_i < parameters.prediction.size(); row_i++ ) {
         // Get the prediction vector for this pred_row index
-        int pred_row = parameters.prediction[ row_i ];
+        size_t pred_row = parameters.prediction[ row_i ];
         std::valarray<double> pred_vec = dataFrame.Row( pred_row );
         
 #ifdef JP_REMOVE //----------------------------------------
@@ -95,7 +95,7 @@ struct Neighbors FindNeighbors(
         //--------------------------------------------------------------
         for ( size_t row_j = 0; row_j < parameters.library.size(); row_j++ ) {
             // Get the library vector for this lib_row index
-            int lib_row = parameters.library[ row_j ];
+            size_t lib_row = parameters.library[ row_j ];
             std::valarray<double> lib_vec = dataFrame.Row( lib_row );
 
 #ifdef JP_REMOVE //----------------------------------------
@@ -155,7 +155,7 @@ struct Neighbors FindNeighbors(
 
         // Check for ties.  JP: Need to address this, not just warning
         // First sort a copy of k_NN_neighbors so unique() will work
-        std::valarray<int> k_NN_neighborCopy( k_NN_neighbors );
+        std::valarray<size_t> k_NN_neighborCopy( k_NN_neighbors );
         std::sort( begin( k_NN_neighborCopy ), end( k_NN_neighborCopy ) );
         
         // ui is iterator to first non unique element
@@ -210,7 +210,7 @@ double Distance( const std::valarray<double> &v1,
     else {
         std::stringstream errMsg;
         errMsg << "Distance() Invalid DistanceMetric: "
-               << static_cast<int>( metric );
+               << static_cast<size_t>( metric );
         throw std::runtime_error( errMsg.str() );
     }
 
@@ -225,7 +225,7 @@ void PrintDataFrameIn( const DataFrame<double> &dataFrame,
 {
     std::cout << "FindNeighbors(): library:" << std::endl;
     for ( size_t row = 0; row < parameters.library.size(); row++ ) {
-        int row_i = parameters.library[row];
+        size_t row_i = parameters.library[row];
         std::cout << "row " << row_i << " : ";
         for ( size_t col = 0; col < dataFrame.NColumns(); col++ ) {
             std::cout << dataFrame(row_i,col) << " "; 
@@ -233,7 +233,7 @@ void PrintDataFrameIn( const DataFrame<double> &dataFrame,
     }
     std::cout << "FindNeighbors(): prediction:" << std::endl;
     for ( size_t row = 0; row < parameters.prediction.size(); row++ ) {
-        int row_i = parameters.prediction[row];
+        size_t row_i = parameters.prediction[row];
         std::cout << "row " << row_i << " : ";
         for ( size_t col = 0; col < dataFrame.NColumns(); col++ ) {
             std::cout << dataFrame(row_i,col) << " "; 

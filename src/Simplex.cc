@@ -5,8 +5,12 @@
 #include "Embed.h"
 #include "AuxFunc.h"
 
+// Forward declaration
+DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN );
+
 //----------------------------------------------------------------
-// Overload 1: Explicit data file path/name
+// API Overload 1: Explicit data file path/name
+//   Implemented as a wrapper to API Overload 2:
 //----------------------------------------------------------------
 DataFrame<double> Simplex( std::string pathIn,
                            std::string dataFile,
@@ -22,16 +26,21 @@ DataFrame<double> Simplex( std::string pathIn,
                            std::string target,
                            bool        embedded,
                            bool        verbose ) {
-    //create DataFrame and delegate
-    DataFrame< double > toSimplex (pathIn, dataFile);
-    DataFrame< double > simplexOutput = Simplex (toSimplex, pathOut,
-                                        predictFile, lib, pred, E, Tp, knn, tau,
-                                        columns, target, embedded, verbose);
-    return simplexOutput;
+    
+    // Create DataFrame (constructor loads data)
+    DataFrame< double > dataFrameIn( pathIn, dataFile );
+
+    // Pass data frame to Simplex 
+    DataFrame< double > S = Simplex( dataFrameIn, pathOut,
+                                     predictFile, lib, pred,
+                                     E, Tp, knn, tau,
+                                     columns, target,
+                                     embedded, verbose);
+    return S;
 }
 
 //----------------------------------------------------------------
-// Overload 2: DataFrame provided
+// API Overload 2: DataFrame provided
 //----------------------------------------------------------------
 DataFrame<double> Simplex( DataFrame< double > data,
                            std::string pathOut,
@@ -53,17 +62,30 @@ DataFrame<double> Simplex( DataFrame< double > data,
                                    columns, target, embedded, verbose );
 
     //----------------------------------------------------------
-    // Load data, Embed, compute Neighbors
+    // Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
-    DataFrame<double>     dataIn     = dataEmbedNN.dataIn;
-    DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
-    std::valarray<double> target_vec = dataEmbedNN.targetVec;
-    Neighbors             neighbors  = dataEmbedNN.neighbors;
+    DataEmbedNN           embedNN    = EmbedNN( data, param, columns );
+    DataFrame<double>     dataIn     = embedNN.dataIn;
+    DataFrame<double>     dataBlock  = embedNN.dataFrame;
+    std::valarray<double> target_vec = embedNN.targetVec;
+    Neighbors             neighbors  = embedNN.neighbors;
 
-    //----------------------------------------------------------
-    // Simplex projection
-    //----------------------------------------------------------
+    DataFrame<double> S = SimplexProjection( param, embedNN );
+
+    return S;
+}
+
+//----------------------------------------------------------------
+// Simplex Projection
+//----------------------------------------------------------------
+DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
+
+    // Unpack the data, embedding (dataBlock), target & neighbors
+    DataFrame<double>     dataIn     = embedNN.dataIn;
+    DataFrame<double>     dataBlock  = embedNN.dataFrame;
+    std::valarray<double> target_vec = embedNN.targetVec;
+    Neighbors             neighbors  = embedNN.neighbors;
+
     size_t library_N_row = param.library.size();
     size_t N_row         = neighbors.neighbors.NRows();
 
@@ -150,17 +172,21 @@ DataFrame<double> Simplex( DataFrame< double > data,
                                                 dataIn, target_vec );
 
     if ( param.predictOutputFile.size() ) {
-        // Write to disk, first embed in a DataIO object
+        // Write to disk
         dataFrame.WriteData( param.pathOut, param.predictOutputFile );
     }
     
 #ifdef DEBUG_ALL
+    std::cout.precision( 4 );
+    std::cout.fill( ' ' );
+    std::cout.setf( std::ios::fixed, std::ios::floatfield );
     std::cout << "Simplex -----------------------------------\n";
-    std::cout << "time \tobserve \tpredict\n";
+    std::cout << std::setw(13) << "Time" << std::setw(13) << "Observe"
+              << std::setw(13) << "Predict\n";
     for ( size_t row = 0; row < N_row + param.Tp; row++ ) {
-        std::cout << time[row] << " \t"
-                  << observations[ row ] << " \t"
-                  << predictionsOut[ row ] << std::endl;
+        std::cout std::setw(13) << time[row] << " \t"
+                  std::setw(13) << observations[ row ] << " \t"
+                  std::setw(13) << predictionsOut[ row ] << std::endl;
     }
     std::cout << "-------------------------------------------\n";
 #endif

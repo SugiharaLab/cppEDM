@@ -69,7 +69,7 @@ SMapValues SMap( DataFrame< double > data,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = LoadDataEmbedNN( data, param, columns );
+    DataEmbedNN dataEmbedNN = EmbedNN( data, param, columns );
     DataFrame<double>     dataIn     = dataEmbedNN.dataIn;
     DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
     std::valarray<double> target_vec = dataEmbedNN.targetVec;

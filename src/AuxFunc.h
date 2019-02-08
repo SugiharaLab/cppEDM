@@ -14,7 +14,9 @@ struct DataEmbedNN {
     std::valarray<double> targetVec;
     Neighbors             neighbors;
     
-    // Constructor
+    // Constructors
+    DataEmbedNN() {}
+    
     DataEmbedNN( DataFrame<double>     dataIn,
                  DataFrame<double>     dataFrame,
                  std::valarray<double> targetVec,
@@ -24,9 +26,9 @@ struct DataEmbedNN {
 };
 
 // Prototypes
-DataEmbedNN LoadDataEmbedNN( DataFrame<double> dataIn,
-                             Parameters  param,
-                             std::string columns );
+DataEmbedNN EmbedNN( DataFrame<double> dataIn,
+                     Parameters  param,
+                     std::string columns );
     
 DataFrame<double> FormatOutput( Parameters            param,
                                 size_t                N_row,

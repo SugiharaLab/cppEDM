@@ -66,7 +66,7 @@ public:
     }
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns,
-            std::vector< std::string > columnNames ):
+               std::vector< std::string > columnNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
         columnNames( columnNames ), maxRowPrint( 10 )
     {

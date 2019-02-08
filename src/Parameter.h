@@ -36,10 +36,10 @@ public:  // JP Should be protected with accessors...
     
     int         MultiviewEnsemble;// Number of ensembles in multiview
 
-    std::vector<int> librarySizes;// CCM library sizes to evaluate
+    std::vector<size_t> librarySizes;// CCM library sizes to evaluate
     int         subSamples;       // CCM number of samples to draw
     bool        randomLib;        // CCM randomly select subsets if true
-    int         seed;             // CCM random selection RNG seed
+    unsigned    seed;             // CCM random selection RNG seed
     
     bool        noNeighborLimit;  // Strictly forbid neighbors outside library
     bool        forwardTau;       // Embed/block with t+tau instead t-tau
@@ -96,11 +96,11 @@ public:  // JP Should be protected with accessors...
         std::string libSizes_str = "",
         int         sample       = 0,
         bool        random       = true,
-        int         seed         = -1,
+        unsigned    seed         = 0,   // 0: Generate random seed in CCM
         bool        noNeighbor   = false,
         bool        forwardTau   = false
         );
-    
+
     ~Parameters();
 
     void Validate(); // Parameter validation and index offsets
