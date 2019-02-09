@@ -1,6 +1,8 @@
 
 #include "Embed.h"
 
+// NOTE: The returned data block does NOT have the time column
+
 //---------------------------------------------------------
 // Function to embed DataFrame columns in E dimensions.
 // Data is read from path/dataFile
