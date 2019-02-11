@@ -3,6 +3,10 @@
 #include <random>
 #include <chrono>
 
+#ifdef CCM_THREADED // Defined in makefile
+#include <thread>
+#endif
+
 #include "Parameter.h"
 #include "DataFrame.h"
 #include "Embed.h"
@@ -10,7 +14,13 @@
 #include "AuxFunc.h"
 
 // forward declaration
+#ifdef CCM_THREADED
+void CrossMap( Parameters p, DataFrame< double > df,
+               const DataFrame< double > & LibStats );
+#else
 DataFrame< double > CrossMap( Parameters p, DataFrame< double > df );
+#endif
+
 
 DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
                                   Parameters param );
@@ -79,11 +89,25 @@ DataFrame <double > CCM( std::string pathIn,
     //----------------------------------------------------------
     DataFrame< double > dataFrameIn( param.pathIn, param.dataFile );
 
-    // Put in array or pair to iteratate loop for OpenMP....
+#ifdef CCM_THREADED
+    DataFrame<double> col_to_target( param.librarySizes.size(), 4,
+                                     "LibSize rho RMSE MAE" );
+    DataFrame<double> target_to_col( param.librarySizes.size(), 4,
+                                     "LibSize rho RMSE MAE" );
+
+    std::thread CrossMapColTarget( CrossMap, param, dataFrameIn,
+                                   std::ref( col_to_target ) );
+    
+    std::thread CrossMapTargetCol( CrossMap, inverseParam, dataFrameIn,
+                                   std::ref( target_to_col ) );
+
+    CrossMapColTarget.join();
+    CrossMapTargetCol.join();
+#else    
     DataFrame< double > col_to_target = CrossMap( param, dataFrameIn );
 
     DataFrame< double > target_to_col = CrossMap( inverseParam, dataFrameIn );
-
+#endif
     
     //-----------------------------------------------------------------
     // Output
@@ -113,9 +137,18 @@ DataFrame <double > CCM( std::string pathIn,
 //----------------------------------------------------------------
 // Return DataFrame of rho, RMSE, MAE values for param.librarySizes
 //----------------------------------------------------------------
+#ifdef CCM_THREADED
+void CrossMap( Parameters paramCCM,
+               DataFrame< double > dataFrameIn,
+               const DataFrame< double > & LibStatsIn ) {
+    
+    DataFrame< double > & LibStats =
+        const_cast<DataFrame< double > &>(LibStatsIn);
+#else
 DataFrame< double > CrossMap( Parameters paramCCM,
                               DataFrame< double > dataFrameIn ) {
-
+#endif
+    
     if ( paramCCM.verbose ) {
         std::stringstream msg;
         msg << "CrossMap(): Simplex cross mapping from "
@@ -238,8 +271,10 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     // Predictions
     //----------------------------------------------------------
     // Output DataFrame
+#ifndef CCM_THREADED
     DataFrame<double> LibStats( paramCCM.librarySizes.size(), 4,
                                 "LibSize rho RMSE MAE" );
+#endif
     
     // Loop for library sizes
     for ( size_t lib_size_i = 0;
@@ -383,7 +418,9 @@ DataFrame< double > CrossMap( Parameters paramCCM,
         LibStats.WriteRow( lib_size_i, statVec );
     } // for ( lib_size : param.librarySizes ) 
 
+#ifndef CCM_THREADED
     return LibStats;
+#endif
 }
 
 //--------------------------------------------------------------------- 
