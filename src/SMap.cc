@@ -260,8 +260,8 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     // JacobiSVD implements two-sided Jacobi iterations that are
     // numerically very accurate, fast for small matrices, but very
     // slow for larger ones.
-    //Eigen::VectorXd C =
-    //    A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
+    Eigen::VectorXd C =
+        A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
 
     // BDCSVD implements a recursive divide & conquer strategy on top of
     // an upper-bidiagonalization which remains fast for large problems.
@@ -271,8 +271,8 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     // unless you compile with the -fp-model precise option. Likewise,
     // the -ffast-math option of GCC or clang will significantly degrade
     // the accuracy.
-    Eigen::VectorXd C =
-        A.bdcSvd( Eigen::ComputeThinU |  Eigen::ComputeThinV ).solve( B );
+    //Eigen::VectorXd C =
+    //    A.bdcSvd( Eigen::ComputeThinU |  Eigen::ComputeThinV ).solve( B );
     
 
     // Extract fit coefficients from Eigen::VectorXd to valarray<>

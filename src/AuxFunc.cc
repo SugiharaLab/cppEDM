@@ -4,6 +4,8 @@
 //----------------------------------------------------------
 // Common code for Simplex and Smap that embeds, extracts
 // the target vector and computes neighbors.
+// Note that the time column is not returned in the embedding
+// dataBlock.
 //----------------------------------------------------------
 DataEmbedNN EmbedNN( DataFrame<double> dataIn,
                      Parameters        param,
@@ -17,10 +19,10 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
         if ( param.columnNames.size() ) {
-         dataBlock = dataIn.DataFrameFromColumnNames(param.columnNames);
+            dataBlock = dataIn.DataFrameFromColumnNames(param.columnNames);
         }
         else if ( param.columnIndex.size() ) {
-         dataBlock = dataIn.DataFrameFromColumnIndex(param.columnIndex);
+            dataBlock = dataIn.DataFrameFromColumnIndex(param.columnIndex);
         }
         else {
             throw std::runtime_error( "EmbedNN(): colNames and "
@@ -29,6 +31,7 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
     }
     else {
         // embedded = false: create the embedding block
+        // dataBlock will have tau * (E-1) fewer rows than dataIn
         dataBlock = Embed( dataIn, param.E, param.tau, columns, param.verbose );
     }
     
@@ -46,7 +49,37 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
         // Default to first column, column i=0 is time
         target_vec = dataIn.Column( 1 );
     }
+    
+    //----------------------------------------------------------
+    // If data was embedded, remove dataIn, target rows as needed
+    //----------------------------------------------------------
+    if ( not param.embedded ) {
+        // If we support negtive tau, this will change
+        // For now, assume only positive tau is allowed
+        size_t shift = std::max(0, param.tau * (param.E - 1) );
+        
+        std::valarray<double> target_vec_embed( dataIn.NRows() - shift );
+        target_vec_embed = target_vec[ std::slice( shift,
+                                                   target_vec.size() - shift,
+                                                   1 ) ];
+        target_vec = target_vec_embed;
 
+        DataFrame<double> dataInEmbed( dataIn.NRows() - shift,
+                                       dataIn.NColumns(),
+                                       dataIn.ColumnNames() );
+        
+        for ( size_t row = 0; row < dataInEmbed.NRows(); row++ ) {
+            dataInEmbed.WriteRow( row, dataIn.Row( row + shift ) );
+        }
+        dataIn = dataInEmbed; // JP is this copy a problem?
+    }
+
+#ifdef DEBUG_ALL
+    std::cout << "EmbedNN():  dataIn(" << dataIn.NRows()
+              << ") dataBlock(" << dataBlock.NRows() << ") "
+              << "target_vec(" << target_vec.size() << ")\n";
+#endif
+    
     //----------------------------------------------------------
     // Nearest neighbors
     //----------------------------------------------------------

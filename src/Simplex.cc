@@ -65,8 +65,8 @@ DataFrame<double> Simplex( DataFrame< double > data,
     // Embed, compute Neighbors
     //----------------------------------------------------------
     DataEmbedNN           embedNN    = EmbedNN( data, param, columns );
-    DataFrame<double>     dataIn     = embedNN.dataIn;
-    DataFrame<double>     dataBlock  = embedNN.dataFrame;
+    DataFrame<double>     dataIn     = embedNN.dataIn;    // used for output
+    DataFrame<double>     dataBlock  = embedNN.dataFrame; // not used
     std::valarray<double> target_vec = embedNN.targetVec;
     Neighbors             neighbors  = embedNN.neighbors;
 
@@ -81,14 +81,25 @@ DataFrame<double> Simplex( DataFrame< double > data,
 DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
 
     // Unpack the data, embedding (dataBlock), target & neighbors
-    DataFrame<double>     dataIn     = embedNN.dataIn;
-    DataFrame<double>     dataBlock  = embedNN.dataFrame;
+    DataFrame<double>     dataIn     = embedNN.dataIn;    // used for output
+    DataFrame<double>     dataBlock  = embedNN.dataFrame; // not used
     std::valarray<double> target_vec = embedNN.targetVec;
     Neighbors             neighbors  = embedNN.neighbors;
 
     size_t library_N_row = param.library.size();
     size_t N_row         = neighbors.neighbors.NRows();
 
+#ifdef DEBUG_ALL
+    std::cout << "Simplex -----------------------------------\n";
+    std::cout << "Neighbors:\n";
+    std::cout << neighbors.neighbors;
+    std::cout << "Target:\n";
+    for ( size_t row = 0; row < 10; row++ ) {
+        std::cout << target_vec[ row ] << " ";
+    } std::cout << std::endl;
+    std::cout << "-------------------------------------------\n\n";
+#endif
+    
     if ( N_row != neighbors.distances.NRows() ) {
         std::stringstream errMsg;
         errMsg << "Simplex(): Number of neighbor rows " << N_row
@@ -184,10 +195,16 @@ DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
     std::cout << std::setw(13) << "Time" << std::setw(13) << "Observe"
               << std::setw(13) << "Predict\n";
     for ( size_t row = 0; row < N_row + param.Tp; row++ ) {
-        std::cout std::setw(13) << time[row] << " \t"
-                  std::setw(13) << observations[ row ] << " \t"
-                  std::setw(13) << predictionsOut[ row ] << std::endl;
+        std::cout << std::setw(13) << dataIn(row,0)
+                  << std::setw(13) << target_vec[ row ]
+                  << std::setw(13) << predictions[ row ] << std::endl;
     }
+    VectorError ve = ComputeError(
+        dataFrame.VectorColumnName( "Observations" ),
+        dataFrame.VectorColumnName( "Predictions"  ) );
+    std::cout << "-------------------------------------------\n";
+    std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
+              << "  MAE " << ve.MAE << std::endl;
     std::cout << "-------------------------------------------\n";
 #endif
     

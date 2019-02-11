@@ -108,12 +108,14 @@ struct Neighbors FindNeighbors(
             // If the library point is degenerate with the prediction,
             // ignore it.
             if ( lib_row == pred_row ) {
+#ifdef DEBUG_ALL
                 if ( parameters.verbose ) {
                     std::stringstream msg;
                     msg << "FindNeighbors(): Ignoring degenerate lib_row "
                         << lib_row << " and pred_row " << pred_row << std::endl;
                     std::cout << msg.str();
                 }
+#endif
                 continue;
             }
 

@@ -8,7 +8,7 @@
 #define SIMPLEX_TEST2
 #define SMAP_TEST1
 #define SMAP_TEST2
-//#define CCM_TEST
+#define CCM_TEST
 
 //----------------------------------------------------------------
 // Intended to execute tests to validate the code.
@@ -45,11 +45,14 @@ int main( int argc, char *argv[] ) {
 #ifdef SIMPLEX_TEST1
         //----------------------------------------------------------
         // embedded = true : data file is multivariable embedding
+        // ./Predict.py -i block_3sp.csv -r x_t -c x_t x_t-1 x_t-2
+        //   -l 1 100 -p 101 130 -T 1 -P -e -o block3sp_Embedded.csv
         //----------------------------------------------------------
         DataFrame<double> dataFrame = 
-            Simplex( "../data/", "block_3sp.csv", "./", "simplex_3sp.csv",
-                     "1 100", "101 198", 3, 1, 0, 1,
-                     "x_t y_t z_t", "x_t", true, true );
+            Simplex( "../data/", "block_3sp.csv", "./",
+                     "cppBlock3sp_Embedded.csv",
+                     "1 100", "101 195", 3, 1, 0, 1,
+                     "x_t x_t-1 x_t-2", "x_t", true, true );
         std::cout << dataFrame;
 
         VectorError ve = ComputeError(
@@ -64,10 +67,13 @@ int main( int argc, char *argv[] ) {
 #ifdef SIMPLEX_TEST2
         //----------------------------------------------------------
         // embedded = false : Simplex embeds data file columns to E
+        // ./Predict.py -i block_3sp.csv -r x_t -c x_t
+        // -l 1 100 -p 101 130 -T 1 -P -E 3 -o block3sp_E3.csv -P
         //----------------------------------------------------------
         DataFrame<double> dataFrameEmbed = 
-            Simplex( "../data/", "block_3sp.csv", "./", "simplex_3sp_Embed.csv",
-                     "1 100", "101 198", 3, 1, 0, 1,
+            Simplex( "../data/", "block_3sp.csv", "./",
+                     "cppBlock3sp_E3.csv",
+                     "1 100", "101 195", 3, 1, 0, 1,
                      "x_t y_t z_t", "x_t", false, true );
         
         dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
@@ -87,8 +93,8 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         SMapValues SMV = 
             SMap( "../data/", "block_3sp.csv", "./", "smap_3sp_Embed.csv",
-                  "1 100", "101 198", 3, 1, 0, 1, 4.,
-                  "x_t y_t z_t", "x_t", "smap_3sp_coeff.csv", "",
+                  "1 100", "101 195", 3, 1, 0, 1, 3.,
+                  "x_t", "x_t", "smap_3sp_coeff.csv", "",
                   false, true );
 
         DataFrame< double > predictions  = SMV.predictions;
@@ -132,9 +138,9 @@ int main( int argc, char *argv[] ) {
         // 
         //----------------------------------------------------------
         DataFrame< double > CCMD = 
-            CCM( "../data/", "sardine_anchovy_sst.csv", "./", "",
-                 3, 0, 0, 1, "anchovy", "np_sst", "70 70 10", 100,
-                 false, 0, false, true );
+            CCM( "../data/", "sardine_anchovy_sst.csv", "./", "ccm.csv",
+                 3, 0, 0, 1, "anchovy", "np_sst", "10 80 10", 100,
+                 true, 0, false, true );
 
         std::cout << CCMD;
 #endif

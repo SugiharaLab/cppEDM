@@ -82,7 +82,7 @@ DataFrame <double > CCM( std::string pathIn,
     // Put in array or pair to iteratate loop for OpenMP....
     DataFrame< double > col_to_target = CrossMap( param, dataFrameIn );
 
-    // DataFrame< double > target_to_col = CrossMap( inverseParam, dataFrameIn );
+    DataFrame< double > target_to_col = CrossMap( inverseParam, dataFrameIn );
 
     
     //-----------------------------------------------------------------
@@ -100,8 +100,13 @@ DataFrame <double > CCM( std::string pathIn,
 
     PredictLibRho.WriteColumn( 0, col_to_target.Column( 0 ) );
     PredictLibRho.WriteColumn( 1, col_to_target.Column( 1 ) );
-    //PredictLibRho.WriteColumn( 2, target_to_col.Column( 1 ) );
+    PredictLibRho.WriteColumn( 2, target_to_col.Column( 1 ) );
 
+    if ( param.predictOutputFile.size() ) {
+        // Write to disk
+        PredictLibRho.WriteData( param.pathOut, param.predictOutputFile );
+    }
+    
     return PredictLibRho;
 }
 
@@ -120,7 +125,7 @@ DataFrame< double > CrossMap( Parameters paramCCM,
             << paramCCM.libSizes_str << "] ";
         for ( size_t i = 0; i < paramCCM.librarySizes.size(); i++ ) {
             msg << paramCCM.librarySizes[ i ] << " ";
-        } msg << std::endl;
+        } msg << std::endl << std::endl;
 
         std::cout << msg.str();
     }
@@ -135,8 +140,43 @@ DataFrame< double > CrossMap( Parameters paramCCM,
 
     size_t N_row = dataBlock.NRows();
 
-#ifdef JP_REMOVE
-    std::cout << ">>>> dataFrameIn----------------------------------\n";
+    //----------------------------------------------------------
+    // Get target (library) vector
+    // Require the target to be specified by column name, not index
+    //----------------------------------------------------------
+    std::valarray<double> target_vec;
+    if ( paramCCM.targetIndex ) {
+       std::runtime_error("CrossMap() target must be specified by column name");
+    }
+    else {
+        target_vec = dataFrameIn.VectorColumnName( paramCCM.targetName );
+    }
+
+    // JP: This removal of partial data rows is also done in EmbedNN()
+    //     Should investigate how to avoid this duplication
+    //----------------------------------------------------------
+    // Remove dataFrameIn, target rows as needed
+    //----------------------------------------------------------
+    // If we support negtive tau, this will change
+    // For now, assume only positive tau is allowed
+    size_t shift = std::max(0, paramCCM.tau * (paramCCM.E - 1) );
+    
+    std::valarray<double> target_vec_embed( dataFrameIn.NRows() - shift );
+    target_vec_embed = target_vec[ std::slice( shift,
+                                               target_vec.size() - shift, 1 ) ];
+    target_vec = target_vec_embed;
+    
+    DataFrame<double> dataInEmbed( dataFrameIn.NRows() - shift,
+                                   dataFrameIn.NColumns(),
+                                   dataFrameIn.ColumnNames() );
+    
+    for ( size_t row = 0; row < dataInEmbed.NRows(); row++ ) {
+        dataInEmbed.WriteRow( row, dataFrameIn.Row( row + shift ) );
+    }
+    dataFrameIn = dataInEmbed; // JP is this copy a problem?
+
+#ifdef DEBUG_ALL
+    std::cout << ">>>> CrossMap() dataFrameIn-----------------------\n";
     std::cout << dataFrameIn;
     std::cout << "<<<< dataFrameIn----------------------------------\n";
     std::cout << ">>>> dataBlock------------------------------------\n";
@@ -155,18 +195,6 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     // Validate converts lib_str, pred_str to library & prediction vectors
     paramCCM.Validate();
 
-    //----------------------------------------------------------
-    // Get target (library) vector
-    // Require the target to be specified by column name, not index
-    //----------------------------------------------------------
-    std::valarray<double> target_vec;
-    if ( paramCCM.targetIndex ) {
-       std::runtime_error("CrossMap() target must be specified by column name");
-    }
-    else {
-        target_vec = dataFrameIn.VectorColumnName( paramCCM.targetName );
-    }
-
     //-----------------------------------------------------------------
     // Set the number of samples
     //-----------------------------------------------------------------
@@ -177,7 +205,7 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     }
     else {
         // Contiguous samples up to the size of the library
-        maxSamples = paramCCM.librarySizes[ paramCCM.librarySizes.size() - 1 ];
+        maxSamples = 1;
     }
 
     //-----------------------------------------------------------------
@@ -193,7 +221,6 @@ DataFrame< double > CrossMap( Parameters paramCCM,
         }
     }
     std::default_random_engine generator( paramCCM.seed );
-    std::uniform_int_distribution<size_t> distribution( 0, maxSamples - 1 );
             
     //-----------------------------------------------------------------
     // Distance for all possible pred : lib E-dimensional vector pairs
@@ -201,7 +228,7 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     //-----------------------------------------------------------------
     DataFrame< double > Distances = CCMDistances( dataBlock, paramCCM );
 
-#ifdef DEBUG
+#ifdef DEBUG_ALL
     std::cout << "CrossMap() " << paramCCM.columnNames[0] << " to "
               << paramCCM.targetName << " Distances: " << Distances.NRows()
               << " x " << Distances.NColumns() << std::endl;
@@ -219,7 +246,15 @@ DataFrame< double > CrossMap( Parameters paramCCM,
           lib_size_i < paramCCM.librarySizes.size(); lib_size_i++ ) {
 
         size_t lib_size = paramCCM.librarySizes[ lib_size_i ];
+
+        // Create RNG sampler for this lib_size
+        std::uniform_int_distribution<size_t> distribution( 0, N_row - 1 );
         
+#ifdef DEBUG_ALL
+        std::cout << "lib_size: " << lib_size
+                  << " ------------------------------------------\n";
+#endif
+            
         std::valarray< double > rho ( maxSamples );
         std::valarray< double > RMSE( maxSamples );
         std::valarray< double > MAE ( maxSamples );
@@ -237,14 +272,12 @@ DataFrame< double > CrossMap( Parameters paramCCM,
                 }
             }
             else {
-                // JP This is untested....
-                throw std::runtime_error( "Cross Map() Only random samples\n" );
-                
                 // Not random samples, contiguous samples increasing size
                 if ( lib_size >= N_row ) {
                     // library size exceeded, back down
                     lib_i.resize( N_row );
-                    std::iota( lib_i.begin(), lib_i.end(), N_row - 1 );
+                    std::iota( lib_i.begin(), lib_i.end(), 0 );
+                    lib_size = N_row;
                     
                     if ( paramCCM.verbose ) {
                         std::stringstream msg;
@@ -272,26 +305,53 @@ DataFrame< double > CrossMap( Parameters paramCCM,
                         lib_i.insert( lib_i.end(),
                                       lib_wrap.begin(),
                                       lib_wrap.end() );
+                        lib_size = lib_i.size();
                     }
                 }
             }
+            
+#ifdef DEBUG_ALL
+            std::cout << "lib_i: (" << lib_i.size() << ") ";
+            for ( size_t i = 0; i < lib_i.size(); i++ ) {
+                std::cout << lib_i[i] << " ";
+            } std::cout << std::endl;
+#endif
 
             //----------------------------------------------------------
             // Nearest neighbors : Local CCMNeighbors() function
             //----------------------------------------------------------
             Neighbors neighbors = CCMNeighbors( Distances, lib_i, paramCCM );
 
-#ifdef JP_REMOVE
+#ifdef DEBUG_ALL
+            std::cout << ">>>> CCM Distance ---------------------\n";
+            neighbors.distances.MaxRowPrint() = 10;
+            std::cout << neighbors.distances;
+            std::cout << "<<<< CCM Distance ---------------------\n";
             std::cout << ">>>> CCM Neighbor ---------------------\n";
+            neighbors.neighbors.MaxRowPrint() = 10;
             std::cout << neighbors.neighbors;
             std::cout << "<<<< CCM Neighbor ---------------------\n";
 #endif
+
+            //----------------------------------------------------------
+            // Subset dataFrameIn and target_vec to lib_i
+            //----------------------------------------------------------
+            DataFrame< double > dataFrameLib_i( lib_i.size(),
+                                                dataFrameIn.NColumns(),
+                                                dataFrameIn.ColumnNames() );
+            
+            for ( size_t i = 0; i < lib_i.size(); i++ ) {
+                dataFrameLib_i.WriteRow( i, dataFrameIn.Row( lib_i[ i ] ) ) ;
+            }
+
+            std::valarray<double> targetVec =
+                dataFrameLib_i.VectorColumnName( paramCCM.targetName );
             
             //----------------------------------------------------------
             // Pack embedding, target, neighbors for SimplexProjection
             //----------------------------------------------------------
-            DataEmbedNN embedNN = DataEmbedNN( dataFrameIn, dataBlock,
-                                               target_vec,  neighbors );
+            DataEmbedNN embedNN = DataEmbedNN( dataFrameLib_i, dataBlock,
+                                               targetVec,  neighbors );
 
             //----------------------------------------------------------
             // Simplex Projection
@@ -303,6 +363,7 @@ DataFrame< double > CrossMap( Parameters paramCCM,
                 S.VectorColumnName( "Predictions"  ) );
             
 #ifdef DEBUG_ALL
+            std::cout << "CCM Simplex ---------------------------------\n";
             std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl;
 #endif
@@ -311,30 +372,23 @@ DataFrame< double > CrossMap( Parameters paramCCM,
             RMSE[ n ] = ve.RMSE;
             MAE [ n ] = ve.MAE;
             
-            //std::cout << S;
-            
         } // for ( n = 0; n < maxSamples; n++ )
 
         std::valarray< double > statVec( 4 );
         statVec[ 0 ] = lib_size;
-        statVec[ 1 ] = rho.sum()  / rho.size();
-        statVec[ 2 ] = RMSE.sum() / RMSE.size();
-        statVec[ 3 ] = MAE.sum()  / MAE.size();
+        statVec[ 1 ] = rho.sum()  / maxSamples;
+        statVec[ 2 ] = RMSE.sum() / maxSamples;
+        statVec[ 3 ] = MAE.sum()  / maxSamples;
 
         LibStats.WriteRow( lib_size_i, statVec );
     } // for ( lib_size : param.librarySizes ) 
 
-    
-    //-----------------------------------------------------------------
-    // Output
-    //-----------------------------------------------------------------
-    
-    
     return LibStats;
 }
 
 //--------------------------------------------------------------------- 
 // Note that for CCM the library and prediction rows are the same.
+// Note that dataBlock does NOT have the time in column 0.
 //
 // Return Distances: a square matrix with distances.
 // Matrix elements D[i,j] hold the distance between the E-dimensional
@@ -352,9 +406,8 @@ DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
     for ( size_t row = 0; row < N_row; row++ ) {
         // Get E-dimensional vector from this library row
         std::valarray< double > v1_ = dataBlock.Row( row );
-        // Exclude the 1st column (j=0) of times
-        // JP should this be E + 1 ?
-        std::valarray< double > v1 = v1_[ std::slice( 1, E, 1 ) ];
+        // The first column (i=0) is NOT time, use it
+        std::valarray< double > v1 = v1_[ std::slice( 0, E, 1 ) ];
 
         for ( size_t col = 0; col < N_row; col++ ) {
             // Ignore the diagonal (row == col)
@@ -365,9 +418,8 @@ DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
             
             // Find distance between vector (v) and other library vector
             std::valarray< double > v2_ = dataBlock.Row( col );
-            // Exclude the 1st column (j=0) of times
-            // JP should this be E + 1 ?
-            std::valarray< double > v2 = v2_[ std::slice( 1, E, 1 ) ];
+            // The first column (i=0) is NOT time, use it
+            std::valarray< double > v2 = v2_[ std::slice( 0, E, 1 ) ];
             
             D( row, col ) = Distance( v1, v2, DistanceMetric::Euclidean );
             
@@ -399,14 +451,15 @@ Neighbors CCMNeighbors( DataFrame< double >   DistancesIn,
     size_t N_row = lib_i.size();
     size_t knn   = param.knn;
 
-#ifdef DEBUG
+#ifdef DEBUG_ALL
     std::cout << "CCMNeighbors Distances\n";
     for ( size_t r = 0; r < 5; r++ ) {
         for ( int c = 0; c < 5; c++ ) {
             std::cout << DistancesIn(r,c) << "  ";
         } std::cout << std::endl;
     }
-    std::cout << "N_row: " << N_row << std::endl;
+    std::cout << "lib_i N_row: " << N_row
+              << "  DistancesIn NRow: " << DistancesIn.NRows() << std::endl;
 #endif
     
     // Matrix to hold libraryMatrix row indices
@@ -423,12 +476,20 @@ Neighbors CCMNeighbors( DataFrame< double >   DistancesIn,
     std::valarray< double > knn_distances( knn );
     std::valarray< size_t > knn_neighbors( knn );
 
+#ifdef DEBUG_ALL
+    std::cout << "CCMNeighbors lib_i: ";
+    for ( size_t i = 0; i < lib_i.size(); i++ ) {
+        std::cout << lib_i[i] << " ";
+    } std::cout << std::endl << std::flush;
+#endif    
+
     for ( auto row_i : lib_i ) {
+  
         // Take Distances( row, col ) a row at a time
         // col represent the other row distance
         std::valarray< double > dist_row = DistancesIn.Row( row_i );
         
-        // These new column indices are with repsect to the lib_i vector
+        // These new column indices are with respect to the lib_i vector
         // not the original Distances with all other columns
         
         // Reset the neighbor and distance vectors for this pred row
@@ -438,17 +499,21 @@ Neighbors CCMNeighbors( DataFrame< double >   DistancesIn,
             knn_distances[ i ] = 1E300;
         }
 
-        for ( size_t col_i = 0; col_i < dist_row.size(); col_i++ ) {
-            double d_i = dist_row[ col_i ];
+        for ( size_t col_i = 0; col_i < N_row; col_i++ ) {
+            double d_i = dist_row[ lib_i[col_i] ];
             // If d_i is less than values in knn_distances, add to list
             auto max_it = std::max_element( begin( knn_distances ),
                                             end( knn_distances ) );
             if ( d_i < *max_it ) {
                 size_t max_i = std::distance( begin(knn_distances), max_it );
+
+                if ( col_i >= N_row - param.tau * param.E ) {
+                    continue;
+                }
+                
                 knn_neighbors[ max_i ] = col_i;  // Save the index
                 knn_distances[ max_i ] = d_i;    // Save the value
             }
-            
         }
         
         neighbors.WriteRow( row, knn_neighbors );
@@ -461,8 +526,8 @@ Neighbors CCMNeighbors( DataFrame< double >   DistancesIn,
     ccmNeighbors.neighbors = neighbors;
     ccmNeighbors.distances = distances;
 
-#ifdef DEBUG
-    std::cout << "knn_neighbors\n";
+#ifdef DEBUG_ALL
+    std::cout << "CCMNeighbors knn_neighbors\n";
     for ( size_t r = 0; r < 5; r++ ) {
         for ( int c = 0; c < ccmNeighbors.neighbors.NColumns(); c++ ) {
             std::cout << ccmNeighbors.neighbors(r,c) << "  ";

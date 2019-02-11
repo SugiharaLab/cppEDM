@@ -117,12 +117,12 @@ VectorError ComputeError( std::valarray< double > obsIn,
                           std::valarray< double > predIn ) {
 
 #ifdef DEBUG_ALL
-    std::cout << "ComputeError(): obs(" << obsIn.size() << "): ";
+    std::cout << std::endl << "ComputeError(): obsIn(" << obsIn.size() << "): ";
     for ( auto o : obsIn ) { std::cout << o << " "; }
     std::cout << std::endl;
-    std::cout << "ComputeError(): pred(" << predIn.size() << "): ";
+    std::cout << "ComputeError(): predIn(" << predIn.size() << "): ";
     for ( auto p : predIn ) { std::cout << p << " "; }
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
 #endif
 
     // Check for nan in vectors
@@ -153,12 +153,12 @@ VectorError ComputeError( std::valarray< double > obsIn,
     }
 
 #ifdef DEBUG_ALL
-    std::cout << "ComputeError(): obs(" << obs.size() << "): ";
+    std::cout << std::endl << "ComputeError(): obs(" << obs.size() << "): ";
     for ( auto o : obs ) { std::cout << o << " "; }
     std::cout << std::endl;
     std::cout << "ComputeError(): pred(" << pred.size() << "): ";
     for ( auto p : pred ) { std::cout << p << " "; }
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
 #endif
 
     size_t N = pred.size();
