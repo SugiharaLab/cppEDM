@@ -6,12 +6,12 @@ OBJ = Common.o AuxFunc.o Parameter.o Embed.o Interface.o Neighbors.o\
 LIB = libEDM.a
 
 CFLAGS = -std=c++11 -g -DDEBUG # -DDEBUG_ALL
-LFLAGS = -lstdc++ -L./
+LFLAGS = -L./ -lstdc++ -lEDM # -llapacke -llapack -lblas 
 
 all:	$(LIB)
 	ar -rcs $(LIB) $(OBJ)
-	$(CC) Test.cc -o Test $(CFLAGS) $(LFLAGS) -lEDM
-	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS) -lEDM
+	$(CC) Test.cc -o Test $(CFLAGS) $(LFLAGS)
+	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS)
 
 clean:
 	rm -f $(OBJ) $(LIB) Test CameronTesting

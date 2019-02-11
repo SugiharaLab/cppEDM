@@ -1,4 +1,6 @@
 
+//#define EIGEN_USE_LAPACKE_STRICT	
+
 #include <Eigen/Dense>
 
 #include "Common.h"
