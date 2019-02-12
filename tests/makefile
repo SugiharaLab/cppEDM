@@ -1,31 +1,29 @@
 
 CC  = g++
-OBJ = SimplexTest.o
 
-CFLAGS = -std=c++11 -g -D PRINT_DIFFERENCE_IN_RESULTS
+EXE = SimplexTest TestCommonTest
+OBJ = $(EXE:=.o)
+
+CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
 LFLAGS = -lstdc++ -L../src/ -I../src/ -lEDM
 
-all:	
-	#@echo "compiling src lib..."
-	#$(MAKE) -C ../src
-	@echo "compiling tester files..."
-	$(CC) SimplexTest.cc -o SimplexTest $(CFLAGS) $(LFLAGS) 
+all:
+	echo "use make (Test File Name w/o extension)"
+
+SimplexTest: SimplexTest.cc TestCommon.h
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+
+TestCommonTest: TestCommonTest.cc TestCommon.h
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
 
 clean:
-	rm -f $(OBJ) $(LIB) SimplexTest
+	rm -f $(OBJ) $(EXE)
 
 distclean:
-	rm -f $(OBJ) $(LIB) SimplexTest  *~ *.bak *.csv
-
-$(LIB): $(OBJ)
-
-SimplexTest.o: SimplexTest.cc
-	$(CC) -c SimplexTest.cc $(CFLAGS)
+	rm -f $(OBJ) *~ *.bak *.csv
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
 depend:
 	@echo ${SRCS}
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
-
-SimplexTest.o: TestCommon.h
