@@ -2,21 +2,27 @@
 
 #include <iostream>
 #include <string>
+#include <cmath>
 #include "Common.h"
 
 #define STR_LINE_SEP    "~~~~~~~~~~~~~~~~~~~~~~~"
 #define TAB_CHAR        '\t'            
 
+#define EPSILON .01
+
 //consts for using pyEDM paths
-const std::string dataPathArg   = "-pa ../data/";
+const std::string dataPathArg       = "../data/";
 //  pyOutputPath is relative to the data path for pyEDM 
-const std::string pyOutputArg  = "-os ../tests/tempOutput/pyOutput.csv"; 
-const std::string cppOutputPath = "tempOutput/cppOutput.csv"; 
+const std::string pyOutputFile      = "pyOutput.csv"; 
+const std::string pyOutputArg       = "-o ../tests/tempOutput/" + pyOutputFile; 
+const std::string cppOutputPath     = "../tests/tempOutput/"; 
+const std::string cppOutputFile     = "cppOutput.csv"; 
 
 //consts for different output color
 const std::string RED_TEXT("\033[0;31m");
 const std::string GREEN_TEXT("\033[1;32m");
 const std::string RESET_TEXT("\033[0m");
+
 
 //----------------------------------------------------------------
 // Method to check whether two DataFrames are equal
@@ -44,7 +50,7 @@ std::vector< int > CheckDataFrameEquality (DataFrame< double > data1,
     for (size_t rowIdx = 0; rowIdx < data1.NRows(); rowIdx++) {
         for (size_t colIdx = 0; colIdx < data1.NColumns(); colIdx++) {
             
-            if (data1(rowIdx,colIdx) != data2(rowIdx,colIdx)) {
+            if (std::abs(data1(rowIdx,colIdx) - data2(rowIdx,colIdx)) >= EPSILON ) {
                 badRows.push_back( rowIdx );
                 break;
             }
