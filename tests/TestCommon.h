@@ -7,6 +7,13 @@
 #define STR_LINE_SEP    "~~~~~~~~~~~~~~~~~~~~~~~"
 #define TAB_CHAR        '\t'            
 
+//consts for using pyEDM paths
+const std::string dataPathArg   = "-pa ../data/";
+//  pyOutputPath is relative to the data path for pyEDM 
+const std::string pyOutputArg  = "-os ../tests/tempOutput/pyOutput.csv"; 
+const std::string cppOutputPath = "tempOutput/cppOutput.csv"; 
+
+//consts for different output color
 const std::string RED_TEXT("\033[0;31m");
 const std::string GREEN_TEXT("\033[1;32m");
 const std::string RESET_TEXT("\033[0m");
@@ -126,5 +133,5 @@ void MakeTest (std::string testName, DataFrame< double > data1,
 #endif
     }
     
-    std::cout << RESET_TEXT << std::endl;
+    std::cout << RESET_TEXT << std::endl << std::flush;
 }
