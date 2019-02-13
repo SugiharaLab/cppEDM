@@ -12,6 +12,7 @@ all:	$(LIB)
 	ar -rcs $(LIB) $(OBJ)
 	$(CC) Test.cc -o Test $(CFLAGS) $(LFLAGS)
 	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS)
+	cp $(LIB) ../lib/
 
 clean:
 	rm -f $(OBJ) $(LIB) Test CameronTesting
@@ -66,16 +67,13 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h
-Common.o: Embed.h
+Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h Embed.h
+AuxFunc.o: AuxFunc.h Neighbors.h Common.h DataFrame.h Parameter.h Embed.h
 Parameter.o: Parameter.h Common.h DataFrame.h
-Embed.o: Embed.h Common.h DataFrame.h Parameter.h 
+Embed.o: Embed.h Common.h DataFrame.h Parameter.h
 Interface.o: Common.h DataFrame.h
 Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h
-Simplex.o: Common.h DataFrame.h Parameter.h Neighbors.h Embed.h
-Simplex.o: AuxFunc.h
+Simplex.o: Common.h DataFrame.h Parameter.h Neighbors.h Embed.h AuxFunc.h
 Eval.o: Common.h DataFrame.h
-CCM.o: Common.h DataFrame.h
+CCM.o: Parameter.h Common.h DataFrame.h Embed.h Neighbors.h AuxFunc.h
 Multiview.o: Common.h DataFrame.h
-SMap.o: Common.h DataFrame.h Parameter.h Embed.h Neighbors.h
-SMap.o: AuxFunc.h

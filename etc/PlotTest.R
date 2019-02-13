@@ -1,7 +1,7 @@
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
-Run = function( path = './' ) {
+Run = function( path = '../src/' ) {
   PlotSimplexSmap( path )
   PlotSMapCircle ( path )
   PlotCCM        ( path )
@@ -81,7 +81,12 @@ PlotSMapCircle = function( path = './' ) {
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
-PlotCCM = function( path = './' ) {
+PlotCCM = function(
+  path     = './',
+  file     = 'ccm.csv',
+  col_i    = 2,
+  target_i = 3
+) {
   
   if ( is.null( dev.list() ) || length( dev.list() ) == 2 ) {
     dev.new()
@@ -89,14 +94,14 @@ PlotCCM = function( path = './' ) {
          cex.axis = 1.5, cex.lab = 1.5, mfrow = c(1, 1) )
   }
 
-  c = read.csv( paste( path, 'ccm.csv', sep = '' ))
+  c = read.csv( paste( path, file, sep = '' ))
 
   # LibSize,anchovy:np_sst,np_sst:anchovy
-  plot( c $ LibSize, c[,2], type='l', lwd=3,
+  plot( c $ LibSize, c[,col_i], type='l', lwd=3,
         xlab='Library Size', ylab='rho', col = 'blue',
-        ylim = range( c[,2],c[,3] ) )
-  lines( c $ LibSize, c[,3], lwd=3, col = 'red' )
+        ylim = range( c[,col_i],c[,target_i] ) )
+  lines( c $ LibSize, c[,target_i], lwd=3, col = 'red' )
   abline( h = 0 )
-  legend( 'topleft', legend = c('anchovy:np_sst','np_sst:anchovy'),
+  legend( 'topleft', legend = c(names(c)[col_i], names(c)[target_i] ),
           cex = 1.5, fill=c('blue','red') )
 }
