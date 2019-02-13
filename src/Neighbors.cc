@@ -47,7 +47,7 @@ struct Neighbors FindNeighbors(
         parameters.library.begin(),    parameters.library.end(), 
         result.begin() );
     
-    if ( ii != result.begin() ) {
+    if ( ii != result.begin() and parameters.verbose ) {
         // Overlapping indices exist
         std::stringstream msg;
         msg << "WARNING: FindNeighbors(): Degenerate library and prediction "
