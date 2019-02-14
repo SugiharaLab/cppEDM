@@ -360,6 +360,20 @@ public:
         lineStr.setf( std::ios::fixed, std::ios::floatfield );
 
         //save col names line
+        if ( ColumnNames().size() == 0 ) {
+            std::cout << "DataFrame::WriteData(): This data frame has no column"
+                      << "names.  Column names will be created.\n";
+            for ( size_t i = 0; i < n_columns; i++ ) {
+                std::stringstream colname;
+                colname << "V" << i;
+                ColumnNames().push_back( colname.str() );
+            }
+        }
+        if ( ColumnNames().size() != n_columns ) {
+            throw std::runtime_error( "DataFrame::WriteData(): The number of "
+                                      " column names does not match the number "
+                                      " of data columns.\n" );
+        }
         for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
             lineStr << ColumnNames()[ colIdx ];
 
