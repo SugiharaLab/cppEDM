@@ -1,6 +1,7 @@
 //this file just provides some testing functions to be used in other testers
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <cmath>
 #include "Common.h"
@@ -9,7 +10,7 @@
 #define TAB_CHAR        '\t'            
 
 
-const float EPSILON = .3;
+const float EPSILON = .2;
 //consts for using pyEDM paths
 const std::string dataPath          = "../data/";
 const std::string tempFileDir       = "tempOutput/"; 
@@ -22,6 +23,7 @@ const std::string cppOutputFile     = "cppOutput.csv";
 //consts for different output color
 const std::string RED_TEXT("\033[0;31m");
 const std::string GREEN_TEXT("\033[1;32m");
+const std::string YELLOW_TEXT("\033[1;33m");
 const std::string RESET_TEXT("\033[0m");
 
 
@@ -102,20 +104,26 @@ void MakeTest (std::string testName, DataFrame< double > data1,
         int numBadRows = std::count_if(badRows.begin(), 
                 badRows.end(), [](int i){return i != 0;});
 
-        std::cout << RED_TEXT; 
-        std::cout << TAB_CHAR << "TEST FAILED. " << numBadRows 
-                              << " rows different ";
+        if ( numBadRows < 5) {
+            std::cout << YELLOW_TEXT; 
+            std::cout << TAB_CHAR << "TEST MARGINALLY FAILED. " ;
+        }
+        else {
+            std::cout << RED_TEXT; 
+            std::cout << TAB_CHAR << "TEST FAILED. " ;
+        }
+        std::cout << numBadRows << " rows different ";
         std::cout << std::endl;
 
 #ifdef PRINT_DIFFERENCE_IN_RESULTS
         std::cout << TAB_CHAR << TAB_CHAR << "Block 1 column names: ";
         for (auto colName : data1.ColumnNames()) { 
-            std::cout << colName << ' ';
+            std::cout << std::setw(10) << colName << TAB_CHAR;
         }
         std::cout << std::endl;
         std::cout << TAB_CHAR << TAB_CHAR << "Block 2 column names: ";
         for (auto colName : data2.ColumnNames()) { 
-            std::cout << colName << ' ';
+            std::cout << std::setw(10) << colName << TAB_CHAR;
         }
         std::cout << std::endl;
 
@@ -130,17 +138,16 @@ void MakeTest (std::string testName, DataFrame< double > data1,
 
             std::cout << TAB_CHAR << TAB_CHAR << "Block 1 row "<< *iterate << ": ";
             for (double elem : badRow1) {
-                std::cout << TAB_CHAR << elem << " ";
+                std::cout << std::setw(10) << TAB_CHAR << elem << " ";
             }
             std::cout << std::endl;
             std::cout << TAB_CHAR << TAB_CHAR << "Block 2 row "<< *iterate << ": ";
             for (double elem : badRow2) {
-                std::cout << TAB_CHAR << elem << " ";
+                std::cout << std::setw(10) << TAB_CHAR << elem << " ";
             }
-            std::cout << std::endl;
+            std::cout << std::endl << std::endl;
             
         }
-        
 
 #endif
     }
