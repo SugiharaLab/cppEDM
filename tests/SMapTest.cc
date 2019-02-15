@@ -22,7 +22,6 @@
    bool        verbose
    */
 
-//run the tests
 int main () {
 
     //to hold the pyEdm command and relevant args
@@ -33,34 +32,21 @@ int main () {
     DataFrame< double > pyOutput;
     DataFrame< double > cppDf;
     SMapValues smapVals;
-    std::string inputFile;
-    std::string cols;
-    std::string target;
-    std::string lib;
-    std::string pred;
-
+    
     ////////////////////////////////
     // test smap with simple circle test
     //  - already embedded 
     ////////////////////////////////
-    cols =      "x y";
-    target =    "x";
-    lib =       "1 100";
-    pred =      "101 198";
-    inputFile = "circle.csv";
     //generate pyEdm output
-    pyCmd = pySMapCmd + " -pa " + dataPathArg + " -i " + inputFile + 
-        " -r " + target + " -c " + cols + " -l " + lib + " -p " + pred + 
-        " -E " + "2" + " -k " + "97" + " -u " + "1" + " -T 1" + " -t " + "4 " + " -e " + pyOutputArg; 
+    pyCmd = pySMapCmd + " -pa " + dataPath + " -i circle.csv" + 
+        " -r x -c x y -l 1 100 -p 101 198" + 
+        " -E 2 -k 0 -u 1 -T 1 -k 97 -t 4 -e -v " + " -o " + pyOutputPath; 
     std::system (pyCmd.c_str());
-    pyOutput = DataFrame < double > ("tempOutput/",pyOutputFile);
-    std::cout << "PY OUTPUT: " << pyOutput;
+    pyOutput = DataFrame < double > (tempFileDir,pyOutputFile);
     //generate cpp output
-    cppDf = DataFrame < double > (dataPathArg, inputFile);
-    std::cout << "raw data\n"<< cppDf;
-    smapVals = SMap (cppDf, cppOutputPath, cppOutputFile, lib, pred, 2, 1, 0, 1, 4, cols, target, "", "", true, true);
+    cppDf = DataFrame < double > (dataPath, "circle.csv");
+    smapVals = SMap (cppDf, cppOutputPath, cppOutputFile, " 1 100 ", "101 198", 2, 1, 0, 1, 4, " x y ", "x", "", "", true, true);
     cppDf = smapVals.predictions;
-    std::cout << "cpp prediction data\n"<< cppDf;
     //run comparison
     MakeTest ("circle.csv test", pyOutput, cppDf);
 

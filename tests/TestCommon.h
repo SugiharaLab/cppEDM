@@ -8,14 +8,15 @@
 #define STR_LINE_SEP    "~~~~~~~~~~~~~~~~~~~~~~~"
 #define TAB_CHAR        '\t'            
 
-#define EPSILON .01
 
+const float EPSILON = .3;
 //consts for using pyEDM paths
-const std::string dataPathArg       = "../data/";
+const std::string dataPath          = "../data/";
+const std::string tempFileDir       = "tempOutput/"; 
 //  pyOutputPath is relative to the data path for pyEDM 
 const std::string pyOutputFile      = "pyOutput.csv"; 
-const std::string pyOutputArg       = "-o ../tests/tempOutput/" + pyOutputFile; 
-const std::string cppOutputPath     = "../tests/tempOutput/"; 
+const std::string pyOutputPath      = "../tests/" +tempFileDir + pyOutputFile; 
+const std::string cppOutputPath     = "../tests/"+tempFileDir; 
 const std::string cppOutputFile     = "cppOutput.csv"; 
 
 //consts for different output color
@@ -49,8 +50,10 @@ std::vector< int > CheckDataFrameEquality (DataFrame< double > data1,
     //check if any rows were different in the dataframes passed in
     for (size_t rowIdx = 0; rowIdx < data1.NRows(); rowIdx++) {
         for (size_t colIdx = 0; colIdx < data1.NColumns(); colIdx++) {
-            
-            if (std::abs(data1(rowIdx,colIdx) - data2(rowIdx,colIdx)) >= EPSILON ) {
+
+            float diff = std::abs(data1(rowIdx,colIdx) - data2(rowIdx,colIdx));
+
+            if ( diff >= EPSILON ) {
                 badRows.push_back( rowIdx );
                 break;
             }
@@ -96,8 +99,11 @@ void MakeTest (std::string testName, DataFrame< double > data1,
         std::cout << TAB_CHAR << "TEST PASSED. All rows same.";
     }
     else {
+        int numBadRows = std::count_if(badRows.begin(), 
+                badRows.end(), [](int i){return i != 0;});
+
         std::cout << RED_TEXT; 
-        std::cout << TAB_CHAR << "TEST FAILED. " << badRows.size() 
+        std::cout << TAB_CHAR << "TEST FAILED. " << numBadRows 
                               << " rows different ";
         std::cout << std::endl;
 

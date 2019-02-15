@@ -1,7 +1,7 @@
 
 CC  = g++
 
-EXE = SimplexTest TestCommonTest SMapTest
+EXE = SimplexTest TestCommonTest SMapTest CCMTest
 OBJ = $(EXE:=.o)
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
@@ -11,6 +11,9 @@ all:
 	echo "use make (Test File Name w/o extension)"
 
 SimplexTest: SimplexTest.cc TestCommon.h
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+
+CCMTest: CCMTest.cc TestCommon.h
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
 
 TestCommonTest: TestCommonTest.cc TestCommon.h
