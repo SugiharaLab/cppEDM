@@ -31,10 +31,64 @@ Neighbors CCMNeighbors( DataFrame< double > Distances,
 DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN );
 
 //----------------------------------------------------------------
-// API Wrapper for CrossMap()
+// API Overload 1: Explicit data file path/name
+//   Implemented as a wrapper to API Overload 2:
+//   which is a wrapper for CrossMap()
 //----------------------------------------------------------------
 DataFrame <double > CCM( std::string pathIn,
                          std::string dataFile,
+                         std::string pathOut,
+                         std::string predictFile,
+                         int         E,
+                         int         Tp,
+                         int         knn,
+                         int         tau,
+                         std::string columns,
+                         std::string target,
+                         std::string libSizes_str,
+                         int         sample,
+                         bool        random,
+                         unsigned    seed,
+                         bool        embedded,
+                         bool        verbose )
+{
+
+    if ( not columns.size() ) {
+        throw std::runtime_error("CCM() must specify the column to embed.");
+    }
+    if ( not target.size() ) {
+        throw std::runtime_error("CCM() must specify the target.");
+    }
+    
+    //----------------------------------------------------------
+    // Load data to dataFrameIn
+    //----------------------------------------------------------
+    DataFrame< double > dataFrameIn( pathIn, dataFile );
+
+    DataFrame <double > PredictLibRho = CCM( dataFrameIn,
+                                             pathOut,
+                                             predictFile,
+                                             E,
+                                             Tp,
+                                             knn,
+                                             tau,
+                                             columns,
+                                             target,
+                                             libSizes_str,
+                                             sample,
+                                             random,
+                                             seed,
+                                             embedded,
+                                             verbose );
+
+    return PredictLibRho;
+}
+
+//----------------------------------------------------------------
+// API Overload 2: DataFrame passed in
+//   Implemented a wrapper for CrossMap()
+//----------------------------------------------------------------
+DataFrame <double > CCM( DataFrame< double > dataFrameIn,
                          std::string pathOut,
                          std::string predictFile,
                          int         E,
@@ -57,7 +111,7 @@ DataFrame <double > CCM( std::string pathIn,
         throw std::runtime_error("CCM() must specify the target.");
     }
 
-    Parameters param = Parameters( Method::Simplex, pathIn, dataFile,
+    Parameters param = Parameters( Method::Simplex, "", "",
                                    pathOut, predictFile,
                                    "", "", E, Tp, knn, tau, 0,
                                    columns, target, embedded, verbose,
@@ -83,11 +137,6 @@ DataFrame <double > CCM( std::string pathIn,
     std::cout << "CCM() inverseParams:\n";
     std::cout << inverseParam;
 #endif
-
-    //----------------------------------------------------------
-    // Load data to dataFrameIn
-    //----------------------------------------------------------
-    DataFrame< double > dataFrameIn( param.pathIn, param.dataFile );
 
 #ifdef CCM_THREADED
     DataFrame<double> col_to_target( param.librarySizes.size(), 4,
@@ -135,6 +184,8 @@ DataFrame <double > CCM( std::string pathIn,
 }
 
 //----------------------------------------------------------------
+// CrossMap()
+// Worker function for CCM.
 // Return DataFrame of rho, RMSE, MAE values for param.librarySizes
 //----------------------------------------------------------------
 #ifdef CCM_THREADED

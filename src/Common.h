@@ -124,9 +124,7 @@ DataFrame<double> CCM( std::string pathIn       = "./data/",
                        bool        embedded     = true,
                        bool        verbose      = true );
 
-#ifdef ADD_WHEN_READY
 DataFrame<double> CCM( DataFrame< double >,
-                       std::string pathIn       = "./",
                        std::string pathOut      = "./",
                        std::string predictFile  = "",
                        int         E            = 0,
@@ -141,5 +139,4 @@ DataFrame<double> CCM( DataFrame< double >,
                        unsigned    seed         = 0,
                        bool        embedded     = true,
                        bool        verbose      = true );
-#endif
 #endif
