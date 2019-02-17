@@ -1,4 +1,6 @@
 
+// g++ Test.cc -o Test -std=c++11 -g -DDEBUG -DCCM_THREADED -I../src -L../lib -lstdc++ -lEDM  -lpthread
+
 #include "Common.h"
 #include "Neighbors.h"
 #include "Embed.h"
