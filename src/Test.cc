@@ -3,30 +3,40 @@
 #include "Neighbors.h"
 #include "Embed.h"
 
+//----------------------------------------------------------------
+// Suite of tests for API functionality
+// Does not evaluate numerical results or accuracy.
+//----------------------------------------------------------------
 //#define EMBED_TEST
 #define SIMPLEX_TEST1
 #define SIMPLEX_TEST2
 #define SMAP_TEST1
 #define SMAP_TEST2
 #define CCM_TEST
+#define EMBED_DIMENSION
+#define PREDICT_INTERVAL
+#define PREDICT_NONLINEAR
 
 //----------------------------------------------------------------
-// Intended to execute tests to validate the code.
-// For now, it's open for use as a library test.
+// 
 //----------------------------------------------------------------
 int main( int argc, char *argv[] ) {
     
     try {
 #ifdef EMBED_TEST
+        //----------------------------------------------------------
         // Embedding of data file
+        //----------------------------------------------------------
         DataFrame< double > EmbedFrame = Embed( "../data/", "block_3sp.csv",
                                                 2, 1, "x_t y_t z_t", true );
         std::cout << EmbedFrame;
         
+        //----------------------------------------------------------
         // Embedding of DataFrame object not read from disk
         // Load data into DataIO dataFrame, then subset dataFrame 
         // based on column names in Parameters, then pass to Embed.
         // Could bypass Parameters and select dataFrame with explicit colNames
+        //----------------------------------------------------------
         Parameters param = Parameters( Method::Simplex,
                                        "../data/", "block_3sp.csv", "", "",
                                        "1 100", "190 198", 2, 1, 4, 1, 0,
@@ -135,7 +145,8 @@ int main( int argc, char *argv[] ) {
 
 #ifdef CCM_TEST
         //----------------------------------------------------------
-        // 
+        // ./CCM.py -i sardine_anchovy_sst.csv -c anchovy -r np_sst
+        // -E 3 -s 100 -L 10 80 10 -R
         //----------------------------------------------------------
         DataFrame< double > CCMD = 
             CCM( "../data/", "sardine_anchovy_sst.csv", "./", "ccm.csv",
@@ -143,6 +154,48 @@ int main( int argc, char *argv[] ) {
                  true, 0, false, true );
 
         std::cout << CCMD;
+#endif
+
+#ifdef EMBED_DIMENSION
+        //----------------------------------------------------------
+        // ./EmbedDimension.py -i TentMap_rEDM.csv -c TentMap
+        // -l 1 100 -p 201 500 -T 1
+        //----------------------------------------------------------
+        DataFrame< double > EMBD = 
+            EmbedDimension( "../data/", "TentMap_rEDM.csv",
+                            "./", "EmbedDimOut.csv",
+                            "1 100", "201 500", 1, 1,
+                            "TentMap", "", false, true );
+                
+        std::cout << EMBD;
+#endif
+
+#ifdef PREDICT_INTERVAL
+        //----------------------------------------------------------
+        // ./PredictDecay.py -i TentMap_rEDM.csv -c TentMap
+        // -l 1 100 -p 201 500 -E 2
+        //----------------------------------------------------------
+        DataFrame< double > PD = 
+            PredictInterval( "../data/", "TentMap_rEDM.csv",
+                             "./", "PredictIntervalOut.csv",
+                             "1 100", "201 500", 2, 1,
+                             "TentMap", "", false, true );
+                
+        std::cout << PD;
+#endif
+
+#ifdef PREDICT_NONLINEAR
+        //----------------------------------------------------------
+        // ./SMapNL.py -i TentMapErr_rEDM.csv -c TentMap
+        // -l 1 100 -p 201 500 -T 1 -E 2 
+        //----------------------------------------------------------
+        DataFrame< double > NL = 
+            PredictNonlinear( "../data/", "TentMapNoise_rEDM.csv",
+                              "./", "PredictNonlinearOut.csv",
+                              "1 100", "201 500", 2, 1, 1,
+                              "TentMap", "", false, true );
+                
+        std::cout << NL;
 #endif
 
     }

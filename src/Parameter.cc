@@ -258,7 +258,7 @@ void Parameters::Validate() {
         }
         else {
             // knn = 0
-            knn = prediction.size() - Tp;
+            knn = library.size() - Tp;
             std::stringstream msg;
             msg << "Parameters::Validate(): Set knn = " << knn
                 << " for SMap. " << std::endl;
