@@ -235,10 +235,12 @@ void Parameters::Validate() {
     if ( method == Method::Simplex ) {
         if ( knn < 1 ) {
             knn = E + 1;
-            std::stringstream msg;
-            msg << "Parameters::Validate(): Set knn = " << knn
-                << " (E+1) for Simplex. " << std::endl;
-            std::cout << msg.str();
+            if ( verbose ) {
+                std::stringstream msg;
+                msg << "Parameters::Validate(): Set knn = " << knn
+                    << " (E+1) for Simplex. " << std::endl;
+                std::cout << msg.str();
+            }
         }
         if ( knn < E + 1 ) {
             std::stringstream errMsg;
@@ -259,10 +261,12 @@ void Parameters::Validate() {
         else {
             // knn = 0
             knn = library.size() - Tp;
-            std::stringstream msg;
-            msg << "Parameters::Validate(): Set knn = " << knn
-                << " for SMap. " << std::endl;
-            std::cout << msg.str();
+            if ( verbose ) {
+                std::stringstream msg;
+                msg << "Parameters::Validate(): Set knn = " << knn
+                    << " for SMap. " << std::endl;
+                std::cout << msg.str();
+            }
         }
         if ( not embedded and columnNames.size() > 1 ) {
             std::string msg( "Parameters::Validate() WARNING:  "
