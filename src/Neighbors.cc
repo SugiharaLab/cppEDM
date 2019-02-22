@@ -39,23 +39,26 @@ struct Neighbors FindNeighbors(
     // We assume that the dataFrame has been selected to the proper columns
     size_t maxCol_i = N_columns - 1;
 
-    // Identify degenerate library : prediction points by
-    // set_intersection() of lib & pred indices, needs a result vector
-    std::vector< double > result( N_library_rows + N_prediction_rows, 0 );
-    std::vector< double >::iterator ii = set_intersection (
-        parameters.prediction.begin(), parameters.prediction.end(),
-        parameters.library.begin(),    parameters.library.end(), 
-        result.begin() );
-    
-    if ( ii != result.begin() and parameters.verbose ) {
-        // Overlapping indices exist
-        std::stringstream msg;
-        msg << "WARNING: FindNeighbors(): Degenerate library and prediction "
-            << "data found. Overlap indices: ";
-        for ( auto ri = result.begin(); ri != ii; ++ri ) {
-            msg << *ri << " ";
-        } msg << std::endl;
-        std::cout << msg.str();
+    if ( parameters.verbose ) {
+        // Identify degenerate library : prediction points by
+        // set_intersection() of lib & pred indices, needs a result vector
+        std::vector< double > result( N_library_rows + N_prediction_rows, 0 );
+        
+        std::vector< double >::iterator ii = set_intersection (
+            parameters.prediction.begin(), parameters.prediction.end(),
+            parameters.library.begin(),    parameters.library.end(), 
+            result.begin() );
+        
+        if ( ii != result.begin() ) {
+            // Overlapping indices exist
+            std::stringstream msg;
+            msg << "WARNING: FindNeighbors(): Degenerate library and "
+                << " prediction data found. Overlap indices: ";
+            for ( auto ri = result.begin(); ri != ii; ++ri ) {
+                msg << *ri << " ";
+            } msg << std::endl;
+            std::cout << msg.str();
+        }
     }
 
     // Neighbors: struct on local stack to be returned by copy
@@ -63,30 +66,24 @@ struct Neighbors FindNeighbors(
     neighbors.neighbors = DataFrame<size_t>(N_prediction_rows, parameters.knn);
     neighbors.distances = DataFrame<double>(N_prediction_rows, parameters.knn);
 
-    // Vectors to hold the indices and values from each comparison
+    // Vectors to hold indices and values from each comparison
     std::valarray<size_t> k_NN_neighbors( parameters.knn );
     std::valarray<double> k_NN_distances( parameters.knn );
 
     //-------------------------------------------------------------------
-    // For each prediction vector (row in prediction DataFrame) find the list
-    // of library indices that are within k_NN points
+    // For each prediction vector (row in prediction DataFrame) find the
+    // list of library indices that are within k_NN points
     //-------------------------------------------------------------------
     for ( size_t row_i = 0; row_i < parameters.prediction.size(); row_i++ ) {
         // Get the prediction vector for this pred_row index
         size_t pred_row = parameters.prediction[ row_i ];
         std::valarray<double> pred_vec = dataFrame.Row( pred_row );
         
-#ifdef JP_REMOVE //----------------------------------------
-        std::cout << "Predict row " << pred_row << " : " ;
-        for ( size_t i = 0; i < pred_vec.size(); i++ ) {
-            std::cout << pred_vec[i] << " ";
-        } std::cout << std::endl;
-#endif // JP REMOVE ----------------------------------------
-
         // Reset the neighbor and distance vectors for this pred row
         for ( size_t i = 0; i < parameters.knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
-            // JP: I don't like this. std::numeric_limits<double>::max() ~1E308
+            // JP: I don't like this. But it should be faster than sort() ?
+            // std::numeric_limits<double>::max() ~1E308
             k_NN_distances[ i ] = 1E300;
         }
 
@@ -97,13 +94,6 @@ struct Neighbors FindNeighbors(
             // Get the library vector for this lib_row index
             size_t lib_row = parameters.library[ row_j ];
             std::valarray<double> lib_vec = dataFrame.Row( lib_row );
-
-#ifdef JP_REMOVE //----------------------------------------
-            std::cout << "Library row " << lib_row << " : " ;
-            for ( size_t k = 0; k < lib_vec.size(); k++ ) {
-                std::cout << lib_vec[k] << " ";
-            }
-#endif // JP REMOVE ----------------------------------------
             
             // If the library point is degenerate with the prediction,
             // ignore it.
@@ -133,10 +123,6 @@ struct Neighbors FindNeighbors(
             double d_i = Distance( lib_vec, pred_vec,
                                    DistanceMetric::Euclidean );
 
-#ifdef JP_REMOVE //----------------------------------------
-            std::cout << "  D=" << d_i << std::endl;
-#endif //JP REMOVE ----------------------------------------
-
             // If d_i is less than values in k_NN_distances, add to list
             auto max_it = std::max_element( begin( k_NN_distances ),
                                             end( k_NN_distances ) );
@@ -161,13 +147,12 @@ struct Neighbors FindNeighbors(
         std::sort( begin( k_NN_neighborCopy ), end( k_NN_neighborCopy ) );
         
         // ui is iterator to first non unique element
-        auto ui = std::unique( begin(k_NN_neighborCopy),
-                               end  (k_NN_neighborCopy) );
+        auto ui = std::unique( begin( k_NN_neighborCopy ),
+                               end  ( k_NN_neighborCopy ) );
         
         if ( std::distance( begin( k_NN_neighborCopy ), ui ) !=
              k_NN_neighborCopy.size() ) {
-            std::cout << "WARNING: FindNeighbors(): Degenerate neighbors."
-                      << std::endl;
+            std::cout << "WARNING: FindNeighbors(): Degenerate neighbors./n";
         }
 
         // Write the neighbor indices and distance values

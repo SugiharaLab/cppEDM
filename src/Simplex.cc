@@ -188,17 +188,7 @@ DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
     }
     
 #ifdef DEBUG_ALL
-    std::cout.precision( 4 );
-    std::cout.fill( ' ' );
-    std::cout.setf( std::ios::fixed, std::ios::floatfield );
-    std::cout << "Simplex -----------------------------------\n";
-    std::cout << std::setw(13) << "Time" << std::setw(13) << "Observe"
-              << std::setw(13) << "Predict\n";
-    for ( size_t row = 0; row < N_row + param.Tp; row++ ) {
-        std::cout << std::setw(13) << dataIn(row,0)
-                  << std::setw(13) << target_vec[ row ]
-                  << std::setw(13) << predictions[ row ] << std::endl;
-    }
+    std::cout << dataFrame;
     VectorError ve = ComputeError(
         dataFrame.VectorColumnName( "Observations" ),
         dataFrame.VectorColumnName( "Predictions"  ) );

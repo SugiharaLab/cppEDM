@@ -10,8 +10,6 @@ LFLAGS = -L./ -lstdc++ -lEDM -lpthread # -llapacke -llapack -lblas
 
 all:	$(LIB)
 	ar -rcs $(LIB) $(OBJ)
-	$(CC) Test.cc -o Test $(CFLAGS) $(LFLAGS)
-	$(CC) CameronTesting.cc -o CameronTesting $(CFLAGS) $(LFLAGS)
 	cp $(LIB) ../lib/
 
 clean:
@@ -54,12 +52,6 @@ Multiview.o: Multiview.cc
 
 SMap.o: SMap.cc
 	$(CC) -c SMap.cc $(CFLAGS)
-
-Test.o: Test.cc
-	$(CC) -c Test.cc $(CFLAGS)
-
-CameronTesting.o: CameronTesting.cc
-	$(CC) -c CameronTesting.cc $(CFLAGS)
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
 depend:

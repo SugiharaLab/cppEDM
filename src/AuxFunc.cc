@@ -18,6 +18,7 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
 
     if ( param.embedded ) {
         // Data is multivariable block, no embedding needed
+        // Select the specified columns 
         if ( param.columnNames.size() ) {
             dataBlock = dataIn.DataFrameFromColumnNames(param.columnNames);
         }
@@ -30,7 +31,7 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
         }
     }
     else {
-        // embedded = false: create the embedding block
+        // embedded = false: Create the embedding block
         // dataBlock will have tau * (E-1) fewer rows than dataIn
         dataBlock = Embed( dataIn, param.E, param.tau, columns, param.verbose );
     }
@@ -71,14 +72,8 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
         for ( size_t row = 0; row < dataInEmbed.NRows(); row++ ) {
             dataInEmbed.WriteRow( row, dataIn.Row( row + shift ) );
         }
-        dataIn = dataInEmbed; // JP is this copy a problem?
+        dataIn = dataInEmbed;
     }
-
-#ifdef DEBUG_ALL
-    std::cout << "EmbedNN():  dataIn(" << dataIn.NRows()
-              << ") dataBlock(" << dataBlock.NRows() << ") "
-              << "target_vec(" << target_vec.size() << ")\n";
-#endif
     
     //----------------------------------------------------------
     // Nearest neighbors
