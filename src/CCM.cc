@@ -4,6 +4,10 @@
 #include <chrono>
 
 #ifdef CCM_THREADED // Defined in makefile
+// Two explicit CrossMap() threads are invoked. One for forward mapping, 
+// one for inverse mapping.  The call signature of CrossMap() is
+// dependent on which path is used.  This should probably be unified 
+// to use the same signature.
 #include <thread>
 #endif
 
@@ -321,8 +325,8 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     //----------------------------------------------------------
     // Predictions
     //----------------------------------------------------------
-    // Output DataFrame
 #ifndef CCM_THREADED
+    // Output DataFrame
     DataFrame<double> LibStats( paramCCM.librarySizes.size(), 4,
                                 "LibSize rho RMSE MAE" );
 #endif
@@ -407,17 +411,6 @@ DataFrame< double > CrossMap( Parameters paramCCM,
             // Nearest neighbors : Local CCMNeighbors() function
             //----------------------------------------------------------
             Neighbors neighbors = CCMNeighbors( Distances, lib_i, paramCCM );
-
-#ifdef DEBUG_ALL
-            std::cout << ">>>> CCM Distance ---------------------\n";
-            neighbors.distances.MaxRowPrint() = 10;
-            std::cout << neighbors.distances;
-            std::cout << "<<<< CCM Distance ---------------------\n";
-            std::cout << ">>>> CCM Neighbor ---------------------\n";
-            neighbors.neighbors.MaxRowPrint() = 10;
-            std::cout << neighbors.neighbors;
-            std::cout << "<<<< CCM Neighbor ---------------------\n";
-#endif
 
             //----------------------------------------------------------
             // Subset dataFrameIn and target_vec to lib_i

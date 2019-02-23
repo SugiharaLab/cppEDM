@@ -221,12 +221,6 @@ void Parameters::Validate() {
             librarySizes[i] = libSize;
             libSize = libSize + increment;
         }
-#ifdef DEBUG_ALL
-        std::cout << "Parameters(): CCM librarySizes: ";
-        for ( size_t i = 0; i < librarySizes.size(); i++ ) {
-            std::cout << librarySizes[i] << ", ";
-        } std::cout << std::endl;
-#endif
     }
 
     //--------------------------------------------------------------------
@@ -323,9 +317,8 @@ void Parameters::Validate() {
 }
 
 //------------------------------------------------------------------
-// Print to ostream
-//  @param os: the stream to print to
-//  @return  : the stream passed in
+// Stream to ostream
+//  @param os: the output stream
 //------------------------------------------------------------------
 std::ostream& operator<< ( std::ostream &os, Parameters &p ) {
 
@@ -361,7 +354,7 @@ std::ostream& operator<< ( std::ostream &os, Parameters &p ) {
     return os;
 }
 
-#ifdef DEBUG
+#ifdef DEBUG_ALL
 //------------------------------------------------------------------
 // 
 //------------------------------------------------------------------

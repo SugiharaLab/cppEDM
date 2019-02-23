@@ -1,10 +1,29 @@
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
-Run = function( path = '../src/' ) {
+Run = function( path = './' ) {
   PlotSimplexSmap( path )
   PlotSMapCircle ( path )
   PlotCCM        ( path )
+  PlotEval       ( path )
+}
+
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+Clean = function( path = './' ) {
+  files = c( "Test",
+             "cppBlock3sp_E3.csv",
+             "cppBlock3sp_Embedded.csv",
+             "smap_3sp_Embed.csv",
+             "smap_3sp_coeff.csv",
+             "smap_circ_coeff.csv",
+             "smap_circle.csv",
+             "ccm.csv",
+             "EmbedDimOut.csv",
+             "PredictIntervalOut.csv",
+             "PredictNonlinearOut.csv" )
+
+  file.remove( files )
 }
 
 #---------------------------------------------------------------------
@@ -29,16 +48,19 @@ PlotSimplexSmap = function( path = './' ) {
 
   plot ( df1$Time, df1$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df1$Time, df1$Predictions, col = 'red', lwd = 3 )
+  abline( h = 0 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
   plot ( df2$Time, df2$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df2$Time, df2$Predictions, col = 'red', lwd = 3 )
+  abline( h = 0 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
   plot ( df3$Time, df3$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df3$Time, df3$Predictions, col = 'red', lwd = 3 )
+  abline( h = 0 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "SMap" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
@@ -47,8 +69,7 @@ PlotSimplexSmap = function( path = './' ) {
   plot ( df4$Time, df4$C1, type = 'l', lwd = 3, ylab = 'SMap C2' )
   abline( h = 0 )
   plot ( df4$Time, df4$C2, type = 'l', lwd = 3, ylab = 'SMap C2' )
-  abline( h = 0 )
-  
+  abline( h = 0 )  
 } 
 
 #---------------------------------------------------------------------
@@ -104,4 +125,32 @@ PlotCCM = function(
   abline( h = 0 )
   legend( 'topleft', legend = c(names(c)[col_i], names(c)[target_i] ),
           cex = 1.5, fill=c('blue','red') )
+}
+
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+PlotEval = function(
+  path = './'
+) {
+  
+  if ( is.null( dev.list() ) || length( dev.list() ) == 3 ) {
+    dev.new()
+    par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
+         cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
+  }
+
+  E.rho     = read.csv( paste( path, "EmbedDimOut.csv",         sep = '' ) )
+  Tp.rho    = read.csv( paste( path, "PredictIntervalOut.csv",  sep = '' ) )
+  Theta.rho = read.csv( paste( path, "PredictNonlinearOut.csv", sep = '' ) )
+  
+  #----------------------------------------------------
+  plot( E.rho $ E, E.rho $ rho, type='l', lwd = 3,
+        xlab='E', ylab='rho', col = 'blue' )
+
+  plot( Tp.rho $ Tp, Tp.rho $ rho, type='l', lwd = 3,
+        xlab='Tp', ylab='rho', col = 'blue' )
+
+  plot( Theta.rho $ Theta, Theta.rho $ rho, type='l', lwd = 3,
+        xlab='Theta', ylab='rho', col = 'blue' )
+
 }

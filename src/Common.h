@@ -32,9 +32,8 @@ struct SMapValues {
 //-------------------------------------------------------------
 // Prototypes
 // Primary API functions generally have two call-signatures.
-// The first takes a path, file name pair as the first two
-// arguments specifying the data file image on disk to be loaded
-// and converted to a data frame.
+// The first takes a path, file name pair specifying the data
+// file image on disk to be loaded and converted to a data frame.
 // The second replaces these two arguments with a DataFrame object.
 //
 // NOTE: These are the first declarations seen by the compiler
@@ -48,6 +47,8 @@ std::vector<std::string> SplitString( std::string inString,
 
 VectorError ComputeError( std::valarray< double > obs,
                           std::valarray< double > pred );
+
+// API functions Embed() and MakeBlock() are in Embed.h Embed.cc
 
 DataFrame<double> Simplex( std::string pathIn       = "./data/",
                            std::string dataFile     = "",
@@ -126,7 +127,7 @@ DataFrame<double> CCM( std::string pathIn       = "./data/",
                        std::string libSizes_str = "",
                        int         sample       = 0,
                        bool        random       = true,
-                       unsigned    seed         = 0,
+                       unsigned    seed         = 0,     // seed=0: use RNG
                        bool        embedded     = false,
                        bool        verbose      = true );
 
@@ -142,7 +143,7 @@ DataFrame<double> CCM( DataFrame< double >,
                        std::string libSizes_str = "",
                        int         sample       = 0,
                        bool        random       = true,
-                       unsigned    seed         = 0,
+                       unsigned    seed         = 0,     // seed=0: use RNG
                        bool        embedded     = false,
                        bool        verbose      = true );
 
@@ -222,5 +223,4 @@ DataFrame<double> PredictNonlinear( DataFrame< double >,
                                     std::string targetName  = "",
                                     bool        embedded    = false,
                                     bool        verbose     = true );
-
 #endif

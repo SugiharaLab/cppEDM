@@ -5,7 +5,8 @@
 // where *.h provides declarations, *.cc methods.  This is solely to
 // accomodate the OSX XCode environment which seems unable to deal
 // with c++11 standard template implemenations.
-// A possible solution is to link against libc++ on OSX. See ../etc/.
+// A possible solution is to link against libc++ on OSX.
+// See ../etc/Notes, ../etc/libstdc++_Notes.txt.
 
 #include <iomanip>
 #include <fstream>
@@ -21,11 +22,11 @@ extern bool OnlyDigits( std::string str );
 // Type definition for CSV NamedData to pair column names/column data
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
-//---------------------------------------------------------
+//----------------------------------------------------------------
 // DataFrame class
 // Data container is a single, contiguous valarray.
-// DataFrame access is through the () operator: (row,col).
-//---------------------------------------------------------
+// DataFrame element access is through the () operator: (row,col).
+//----------------------------------------------------------------
 template <class T>
 class DataFrame {
     
@@ -45,10 +46,25 @@ public:
     DataFrame () {}
     
     //-----------------------------------------------------------------
+    // Load data from CSV file path/fileName, populate DataFrame
+    //-----------------------------------------------------------------
+    DataFrame( std::string path, std::string fileName ):
+         maxRowPrint( 10 )
+    {
+        NamedData csvInput = ReadData (path, fileName);
+        SetupDataFrame (csvInput); // Process csvInput into a DataFrame
+    }
+    
+    //-----------------------------------------------------------------
+    // Empty DataFrame of size (row, columns), no column names
+    //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
         maxRowPrint( 10 ) {}
     
+    //-----------------------------------------------------------------
+    // Empty DataFrame of size (rows, columns) with column names in a
+    // single whitespace delimited string. 
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns, std::string colNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
@@ -56,14 +72,10 @@ public:
     {
         BuildColumnNameIndex( colNames );
     }
+    
     //-----------------------------------------------------------------
-    DataFrame( std::string path, std::string fileName ):
-         maxRowPrint( 10 )
-    {
-        //SetupDataFrame will take care of our member vars we need to setup
-        NamedData csvInput = ReadData (path, fileName);
-        SetupDataFrame (csvInput);
-    }
+    // Empty DataFrame of size (rows, columns) with column names in a
+    // string vector.
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns,
                std::vector< std::string > columnNames ):
@@ -74,7 +86,7 @@ public:
     }
    
     //-----------------------------------------------------------------
-    // Fortran style access operators M(row,col)
+    // Fortran style element access operators M(row,col)
     //-----------------------------------------------------------------
     T &operator()( size_t row, size_t column ) {
         return elements[ row * n_columns + column ];
@@ -103,8 +115,8 @@ public:
         return columnNameToIndex;
     }
 
-    size_t &MaxRowPrint()       { return maxRowPrint; }
     size_t  MaxRowPrint() const { return maxRowPrint; }
+    size_t &MaxRowPrint()       { return maxRowPrint; }
     
     //-----------------------------------------------------------------
     // Return column from index col
@@ -185,7 +197,7 @@ public:
     DataFrame< double > DataFrameFromColumnNames(
         std::vector<std::string> colNames ) {
 
-        // vector of column indices for dataDataFrame.DataFrameFromColumnIndex()
+        // vector of column indices for DataFrameFromColumnIndex()
         std::vector<size_t> col_i_vec;
         
         // Map column names to indices
@@ -295,19 +307,10 @@ public:
         for ( size_t i = 0; i < columnNames.size(); i++ ) {
             columnNameToIndex[ columnNames[i] ] = i;
         }
-        
-#ifdef DEBUG_ALL
-        std::cout << "DataFrame::BuildColumnNameIndex()\n";
-        for ( size_t i = 0; i < columnNames.size(); i++ ) {
-            std::cout << columnNames[i] << " : "
-                      << columnNameToIndex[ columnNames[i] ] << "   ";
-            columnNameToIndex[ columnNames[i] ] = i;
-        } std::cout << std::endl;
-#endif
     }
     
     //------------------------------------------------------------------
-    // Print DataFrame to ostream
+    // Stream DataFrame to ostream
     //------------------------------------------------------------------
     friend std::ostream& operator <<( std::ostream& os, const DataFrame& D ) {
         // precision should be a parameter
@@ -348,7 +351,8 @@ public:
     //  @param outputFileName: filename to write to 
     //  @return: none
     //------------------------------------------------------------------
-    void WriteData(std::string outputFilePath, std::string outputFileName) {
+    void WriteData( std::string outputFilePath, std::string outputFileName ) {
+        
         //to hold the lines to print to the output file
         std::vector< std::string > fileLines;
 
@@ -422,10 +426,10 @@ public:
 
     }
 
+private:
     //------------------------------------------------------------------
-    // method to setup DataFrame
+    // Process csvInput to populate DataFrame
     // @param csvInput from ReadData()
-    // @return: dataFrame
     //------------------------------------------------------------------
     void SetupDataFrame ( NamedData csvInput ) {
 
@@ -437,9 +441,9 @@ public:
         }
         
         // setup DataFrame members
-        n_rows = csvInput.begin()->second.size();
-        n_columns = csvInput.size();
-        elements = std::valarray <T> (n_rows * n_columns);
+        n_rows      = csvInput.begin()->second.size();
+        n_columns   = csvInput.size();
+        elements    = std::valarray <T> (n_rows * n_columns);
         columnNames = colNames;
         BuildColumnNameIndex();
 
@@ -457,12 +461,10 @@ public:
         }
     }
     
-private:
-    
     //----------------------------------------------------------------
     // 
     //----------------------------------------------------------------
-    NamedData ReadData(std::string path, std::string fileName) {
+    NamedData ReadData( std::string path, std::string fileName ) {
         
         // Create input file stream and open file for input
         std::ifstream dataStrm( path + fileName );

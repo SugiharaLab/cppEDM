@@ -1,5 +1,5 @@
 
-//#define EIGEN_USE_LAPACKE_STRICT	
+//#define EIGEN_USE_LAPACKE_STRICT
 
 #include <Eigen/Dense>
 
@@ -10,7 +10,8 @@
 #include "AuxFunc.h"
 
 // forward declaration
-std::valarray< double > SVD( DataFrame< double > A, std::valarray< double > B );
+std::valarray< double > SVD( DataFrame    < double > A,
+                             std::valarray< double > B );
 
 //----------------------------------------------------------------
 // Overload 1: Explicit data file path/name
@@ -237,7 +238,7 @@ SMapValues SMap( DataFrame< double > data,
 //----------------------------------------------------------------
 // Singular Value Decomposition using Eigen C++ template library
 //----------------------------------------------------------------
-std::valarray < double > SVD( DataFrame< double >     A_,
+std::valarray < double > SVD( DataFrame    < double > A_,
                               std::valarray< double > B_ ) {
 
     // Eigen::Map<> allows "raw" initialization from a pointer
@@ -248,7 +249,9 @@ std::valarray < double > SVD( DataFrame< double >     A_,
     Eigen::Map< Eigen::Matrix< double,
                                Eigen::Dynamic,
                                Eigen::Dynamic,
-                               Eigen::RowMajor> > A(a,A_.NRows(),A_.NColumns());
+                               Eigen::RowMajor> > A( a,
+                                                     A_.NRows(),
+                                                     A_.NColumns() );
 
     double *b = &(B_[0]);
     Eigen::VectorXd B = Eigen::Map< Eigen::VectorXd >( b, B_.size() );

@@ -17,7 +17,8 @@ std::string ToLower( std::string str ) {
 }
 
 //----------------------------------------------------------------
-// true : str has only digits   false : str has non-digits
+// true  : str has only digits
+// false : str has non-digits
 //----------------------------------------------------------------
 bool OnlyDigits( std::string str ) {
 
@@ -49,7 +50,7 @@ bool OnlyDigits( std::string str ) {
 // Arguments: inString    : string to be split
 //            delimeters  : string of delimeters
 //
-// Note:  A typical delimeter string: delimeters = " \t,\n:;()"
+// Note:  A typical delimeter string: delimeters = " \t,\n;"
 //           
 // Return: vector of tokens
 //----------------------------------------------------------------
@@ -116,15 +117,6 @@ std::vector<std::string> SplitString( std::string inString,
 VectorError ComputeError( std::valarray< double > obsIn,
                           std::valarray< double > predIn ) {
 
-#ifdef DEBUG_ALL
-    std::cout << std::endl << "ComputeError(): obsIn(" << obsIn.size() << "): ";
-    for ( auto o : obsIn ) { std::cout << o << " "; }
-    std::cout << std::endl;
-    std::cout << "ComputeError(): predIn(" << predIn.size() << "): ";
-    for ( auto p : predIn ) { std::cout << p << " "; }
-    std::cout << std::endl << std::endl;
-#endif
-
     // Check for nan in vectors
     size_t nanObs  = 0;
     size_t nanPred = 0;
@@ -140,6 +132,8 @@ VectorError ComputeError( std::valarray< double > obsIn,
 
     // JP: Assume that nan are at the beginning of predictions and
     //     at the end of observations... probably not a robust assumption
+    //     but this is the case if the data were prepared from Embed()
+    //     and there were initially no nans
     std::valarray<double> pred( predIn.size() - 2 * nanPred );
     std::valarray<double> obs ( predIn.size() - 2 * nanPred );
     if ( nanPred > 0 ) {
@@ -152,18 +146,9 @@ VectorError ComputeError( std::valarray< double > obsIn,
         obs  = std::valarray<double>( obsIn );
     }
 
-#ifdef DEBUG_ALL
-    std::cout << std::endl << "ComputeError(): obs(" << obs.size() << "): ";
-    for ( auto o : obs ) { std::cout << o << " "; }
-    std::cout << std::endl;
-    std::cout << "ComputeError(): pred(" << pred.size() << "): ";
-    for ( auto p : pred ) { std::cout << p << " "; }
-    std::cout << std::endl << std::endl;
-#endif
-
     size_t N = pred.size();
-        
-    std::valarray< double > two( 2, N );
+
+    std::valarray< double > two( 2, N ); // Vector of 2's for squaring
 
     double sumPred    = pred.sum();
     double sumObs     = obs.sum();
@@ -174,7 +159,8 @@ VectorError ComputeError( std::valarray< double > obsIn,
     double sumErr     = abs( obs - pred ).sum();
     double sumSqrErr  = pow( obs - pred, two ).sum();
     double sumProd    = ( obs * pred ).sum();
-    double rho;
+    
+    double rho; // Pearson correlation coefficient
 
     if ( sumSqrPred * N == sumSqrPred ) {
         rho = 0;

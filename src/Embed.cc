@@ -3,8 +3,12 @@
 
 // NOTE: The returned data block does NOT have the time column
 
-//---------------------------------------------------------
-// Function to embed DataFrame columns in E dimensions.
+//----------------------------------------------------------------
+// API Overload 1: Explicit data file path/name
+//   Implemented as a wrapper to API Overload 2:
+//   which is a wrapper for MakeBlock()
+//----------------------------------------------------------------
+// Embed DataFrame columns in E dimensions.
 // Data is read from path/dataFile
 //
 // side effects:        truncates the array by tau * (E-1) rows 
@@ -12,8 +16,8 @@
 // @param E:            embedding dimension
 // @param tau:          time step delay
 // @param columns:      column names or indices to embed
-// @return:             DataFrame with embedded data
-//---------------------------------------------------------
+// @return:             DataFrame with embedded data block
+//----------------------------------------------------------------
 DataFrame< double > Embed ( std::string path,
                             std::string dataFile,
                             int         E,
@@ -26,11 +30,11 @@ DataFrame< double > Embed ( std::string path,
     return embedded;
 }
 
-//---------------------------------------------------------
-// Embed dataFrame
-// dataFrame is passed in as a parameter
+//----------------------------------------------------------------
+// API Overload 2: DataFrame provided
+//   Implemented as a wrapper for MakeBlock()
 // Note: dataFrame must have the columnNameToIndex map 
-//---------------------------------------------------------
+//----------------------------------------------------------------
 DataFrame< double > Embed ( DataFrame< double > dataFrameIn,
                             int                 E,
                             int                 tau,
