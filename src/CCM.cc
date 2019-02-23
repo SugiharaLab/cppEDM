@@ -484,16 +484,27 @@ DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
 
     DataFrame< double > D = DataFrame< double >( N_row, N_row );
 
+    // Initialise D to DISTANCE_MAX to avoid sort() : Add init constructor?
+    std::valarray< double > row_init( DISTANCE_MAX, N_row );
+    for ( size_t row = 0; row < N_row; row++ ) {
+        D.WriteRow( row, row_init );
+    }
+
     for ( size_t row = 0; row < N_row; row++ ) {
         // Get E-dimensional vector from this library row
         std::valarray< double > v1_ = dataBlock.Row( row );
         // The first column (i=0) is NOT time, use it
         std::valarray< double > v1 = v1_[ std::slice( 0, E, 1 ) ];
 
-        for ( size_t col = 0; col < N_row; col++ ) {
-            // Ignore the diagonal (row == col)
+        // Only compute upper triangular D, the diagonal and
+        // lower left are redundant: (col < N_row - 1); row >= col
+        for ( size_t col = 0; col < N_row - 1; col++ ) {
+            // Avoid redundant computations
+            if ( row > col ) {
+                continue;  // Computed in upper triangle, copied below
+            }
             if ( row == col ) {
-                D( row, col ) = 1E300;
+                D( row, col ) = DISTANCE_MAX;
                 continue;
             }
             
@@ -576,8 +587,8 @@ Neighbors CCMNeighbors( DataFrame< double >   DistancesIn,
         // Reset the neighbor and distance vectors for this pred row
         for ( size_t i = 0; i < knn; i++ ) {
             knn_neighbors[ i ] = 0;
-            // JP: I don't like this. std::numeric_limits<double>::max() ~1E308
-            knn_distances[ i ] = 1E300;
+            // This avoids the need to sort the distances of this row
+            knn_distances[ i ] = DISTANCE_MAX;
         }
 
         for ( size_t col_i = 0; col_i < N_row; col_i++ ) {

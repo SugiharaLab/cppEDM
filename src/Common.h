@@ -11,6 +11,15 @@
 
 #include "DataFrame.h" // #include Common.h
 
+// Normally, macros are eschewed
+// Define the initial maximum distance for neigbor distances to avoid sort()
+// Note: std::numeric_limits<double>::max() ~1E308
+//       std::numeric_limits<float> ::max() ~1E38
+//       std::numeric_limits<int64> ::max() ~1E18
+//       std::numeric_limits<int>   ::max() ~1E9
+#define DISTANCE_MAX   1E300
+#define DISTANCE_LIMIT 1E299  // Must be less than DISTANCE_MAX, but large
+
 // Enumerations
 enum class Method         { None, Embed, Simplex, SMap };
 enum class DistanceMetric { Euclidean, Manhattan };

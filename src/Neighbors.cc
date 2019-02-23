@@ -82,9 +82,8 @@ struct Neighbors FindNeighbors(
         // Reset the neighbor and distance vectors for this pred row
         for ( size_t i = 0; i < parameters.knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
-            // JP: I don't like this. But it should be faster than sort() ?
-            // std::numeric_limits<double>::max() ~1E308
-            k_NN_distances[ i ] = 1E300;
+            // JP: Used to avoid sort()
+            k_NN_distances[ i ] = DISTANCE_MAX;
         }
 
         //--------------------------------------------------------------
@@ -134,7 +133,7 @@ struct Neighbors FindNeighbors(
         } // for ( row_j = 0; row_j < library.size(); row_j++ )
         
         if ( *std::max_element( begin( k_NN_distances ),
-                                end  ( k_NN_distances ) ) > 1E299 ) {
+                                end  ( k_NN_distances ) ) > DISTANCE_LIMIT ) {
             std::stringstream errMsg;
             errMsg << "FindNeighbors(): Library is too small to resolve "
                    << parameters.knn << " knn neighbors." << std::endl;
