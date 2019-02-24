@@ -500,12 +500,8 @@ DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
         // lower left are redundant: (col < N_row - 1); row >= col
         for ( size_t col = 0; col < N_row - 1; col++ ) {
             // Avoid redundant computations
-            if ( row > col ) {
-                continue;  // Computed in upper triangle, copied below
-            }
-            if ( row == col ) {
-                D( row, col ) = DISTANCE_MAX;
-                continue;
+            if ( row >= col ) {
+                continue; // Computed in upper triangle, copied below
             }
             
             // Find distance between vector (v) and other library vector
