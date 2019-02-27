@@ -77,10 +77,19 @@ Parameters::Parameters(
     seed             ( rseed ),
     noNeighborLimit  ( noNeigh ),
     forwardTau       ( fwdTau ),
-    validated        ( false )
+
+    // Set validated flad and instantiate Version
+    validated        ( false ),
+    version          ( 0, 0, 1, "2019-02-26" )
 {
+    // Constructor code
     if ( method != Method::None ) {
+
         Validate();
+        
+        if ( verbose ) {
+            version.ShowVersion();
+        }
     }
 }
 

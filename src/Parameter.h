@@ -5,6 +5,7 @@
 #include <numeric>
 
 #include "Common.h"
+#include "Version.h"
 
 //------------------------------------------------------------
 //
@@ -60,6 +61,8 @@ public:  // JP Should be protected with accessors...
     std::string target_str;
     std::string libSizes_str;
     std::string jacobian_str;
+
+    Version version;  // Version object, instantiated in constructor
 
     friend std::ostream& operator<<(std::ostream &os, Parameters &params);
 

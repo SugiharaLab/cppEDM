@@ -59,13 +59,17 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h Embed.h
-AuxFunc.o: AuxFunc.h Neighbors.h Common.h DataFrame.h Parameter.h Embed.h
-Parameter.o: Parameter.h Common.h DataFrame.h
-Embed.o: Embed.h Common.h DataFrame.h Parameter.h
+Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h Version.h
+Common.o: Embed.h
+AuxFunc.o: AuxFunc.h Neighbors.h Common.h DataFrame.h Parameter.h Version.h
+AuxFunc.o: Embed.h
+Parameter.o: Parameter.h Common.h DataFrame.h Version.h
+Embed.o: Embed.h Common.h DataFrame.h Parameter.h Version.h
 Interface.o: Common.h DataFrame.h
-Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h
-Simplex.o: Common.h DataFrame.h Parameter.h Neighbors.h Embed.h AuxFunc.h
+Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h Version.h
+Simplex.o: Common.h DataFrame.h Parameter.h Version.h Neighbors.h Embed.h
+Simplex.o: AuxFunc.h
 Eval.o: Common.h DataFrame.h
-CCM.o: Parameter.h Common.h DataFrame.h Embed.h Neighbors.h AuxFunc.h
+CCM.o: Parameter.h Common.h DataFrame.h Version.h Embed.h Neighbors.h
+CCM.o: AuxFunc.h
 Multiview.o: Common.h DataFrame.h

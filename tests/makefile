@@ -5,10 +5,9 @@ EXE = SimplexTest TestCommonTest SMapTest CCMTest
 OBJ = $(EXE:=.o)
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
-LFLAGS = -lstdc++ -L../src/ -I../src/ -lEDM
+LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread
 
-all:
-	echo "use make (Test File Name w/o extension)"
+all:	$(EXE)
 
 SimplexTest: SimplexTest.cc TestCommon.h
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
