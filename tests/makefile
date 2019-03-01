@@ -1,31 +1,33 @@
 
 CC  = g++
 
-EXE = SimplexTest TestCommonTest SMapTest CCMTest
-OBJ = $(EXE:=.o)
+EXE =  SimplexTest TestCommonTest SMapTest CCMTest
+OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
 LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread
 
 all:	$(EXE)
 
-SimplexTest: SimplexTest.cc TestCommon.h
-	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+# Need to figure out how to build TestCommon.o automatically
+SimplexTest: SimplexTest.cc
+	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
-CCMTest: CCMTest.cc TestCommon.h
-	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+CCMTest: CCMTest.cc
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
-TestCommonTest: TestCommonTest.cc TestCommon.h
-	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+TestCommonTest: TestCommonTest.cc
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
-SMapTest: SMapTest.cc TestCommon.h
-	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS)
+SMapTest: SMapTest.cc
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 clean:
-	rm -f $(OBJ) $(EXE)
+	rm -f TestCommon.o $(OBJ) $(EXE)
 
 distclean:
-	rm -f $(OBJ) *~ *.bak *.csv
+	rm -f TestCommon.o $(OBJ) $(EXE) *~ *.bak *.csv ./data/*_cppEDM.csv
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
 depend:

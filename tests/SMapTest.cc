@@ -24,30 +24,44 @@
 
 int main () {
 
-    //to hold the pyEdm command and relevant args
-    const std::string pySMapCmd ("pyEDM/Predict.py -m smap ");
-    std::string pyCmd;
-
-    //temp to hold the csv data for cpp and pyEdm compare
-    DataFrame< double > pyOutput;
-    DataFrame< double > cppDf;
-    SMapValues smapVals;
-    
-    ////////////////////////////////
+    //---------------------------------------------------------
     // test smap with simple circle test
     //  - already embedded 
-    ////////////////////////////////
-    //generate pyEdm output
-    pyCmd = pySMapCmd + " -pa " + dataPath + " -i circle.csv" + 
-        " -r x -c x y -l 1 100 -p 101 198" + 
-        " -E 2 -k 0 -u 1 -T 1 -k 97 -t 4 -e -v " + " -o " + pyOutputPath; 
-    std::system (pyCmd.c_str());
-    pyOutput = DataFrame < double > (tempFileDir,pyOutputFile);
+    //---------------------------------------------------------
+    // Load pyEdm output from:
+    //   ./Predict.py -i circle.csv -r x -c x y -e -m smap -t 4
+    //   -l 1 100 -p 101 198 -T 1 -P -o Smap_circle_pyEDM.csv
+    //---------------------------------------------------------
+    DataFrame < double > pyOutput( "./data/", "Smap_circle_pyEDM.csv" );
+    
     //generate cpp output
-    cppDf = DataFrame < double > (dataPath, "circle.csv");
-    smapVals = SMap (cppDf, cppOutputPath, cppOutputFile, " 1 100 ", "101 198", 2, 1, 0, 1, 4, " x y ", "x", "", "", true, true);
-    cppDf = smapVals.predictions;
+    DataFrame < double > circleData( "../data/", "circle.csv" );
+    
+    SMapValues smapVals = SMap ( circleData,
+                                 "./data/", "Smap_circle_cppEDM.csv",
+                                 " 1 100 ", "101 198", 2, 1, 0, 1, 4,
+                                 "x y", "x", "", "", true, true );
+    
+    DataFrame < double > cppOutput = smapVals.predictions;
+    
     //run comparison
-    MakeTest ("circle.csv test", pyOutput, cppDf);
+    MakeTest ( "circle.csv test", pyOutput, cppOutput );
 
+
+    //---------------------------------------------------------
+    // Load pyEdm output from:
+    //   ./Predict.py -i block_3sp.csv -r x_t -c x_t y_t z_t -e -m smap -t 2
+    //   -l 1 99 -p 100 198 -T 1 -P -o Smap_embd_block_3sp_pyEDM.csv
+    //---------------------------------------------------------
+    pyOutput = DataFrame <double> ("./data/", "Smap_embd_block_3sp_pyEDM.csv");
+
+    smapVals = SMap ( "../data/", "block_3sp.csv",
+                      "./data/", "Smap_embd_block_3sp_cppEDM.csv",
+                      " 1 99 ", "100 198", 3, 1, 0, 1, 2,
+                      "x_t y_t z_t", "x_t", "", "", true, true );
+
+    cppOutput = smapVals.predictions;
+    
+    //run comparison
+    MakeTest ( "block_3sp test", pyOutput, cppOutput );    
 }
