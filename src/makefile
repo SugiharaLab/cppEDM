@@ -5,7 +5,7 @@ OBJ = Common.o AuxFunc.o Parameter.o Embed.o Interface.o Neighbors.o\
 
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g -DDEBUG -DCCM_THREADED # -DDEBUG_ALL
+CFLAGS = -std=c++11 -g -DCCM_THREADED # -DDEBUG -DDEBUG_ALL
 LFLAGS = -L./ -lstdc++ -lEDM -lpthread # -llapacke -llapack -lblas 
 
 all:	$(LIB)
@@ -13,10 +13,10 @@ all:	$(LIB)
 	cp $(LIB) ../lib/
 
 clean:
-	rm -f $(OBJ) $(LIB) Test CameronTesting
+	rm -f $(OBJ) $(LIB)
 
 distclean:
-	rm -f $(OBJ) $(LIB) Test  CameronTesting *~ *.bak *.csv
+	rm -f $(OBJ) $(LIB) *~ *.bak *.csv
 
 $(LIB): $(OBJ)
 
