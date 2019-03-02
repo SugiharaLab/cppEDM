@@ -10,7 +10,7 @@ Functionality includes:
 
 <!-- * Multiview embedding (Ye and Sugihara 2016) -->
 
-A C++11 standard compiler and the [Eigen C++ template library](http://eigen.tuxfamily.org/) are needed to build the library by running `make` in the src/ directory.  This copies libEDM.a into the lib/ directory, where it can be linked to user applications.  EDM functions are accessed from the libEDM.a library through the API described in the [documentation](doc/cppEDM.pdf) or in [Common.h](src/Common.h).  Example invocations can be found in [Test.cc](etc/Test.cc) and [tests/](tests\).
+A C++11 standard compiler and the [Eigen C++ template library](http://eigen.tuxfamily.org/) are needed to build the library by running `make` in the src/ directory.  This copies libEDM.a into the lib/ directory, where it can be linked to user applications.  EDM functions are accessed from the libEDM.a library through the API described in the [documentation](doc/cppEDM.pdf) or in [Common.h](src/Common.h).  Example invocations can be found in [Test.cc](etc/Test.cc) and [tests/](tests/).
 
 ---
 ### References
