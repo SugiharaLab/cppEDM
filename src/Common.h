@@ -167,7 +167,8 @@ DataFrame<double> EmbedDimension( std::string pathIn      = "./data/",
                                   std::string colNames    = "",
                                   std::string targetName  = "",
                                   bool        embedded    = false,
-                                  bool        verbose     = true );
+                                  bool        verbose     = true,
+                                  unsigned    nThreads    = 4 );
 
 DataFrame<double> EmbedDimension( DataFrame< double >,
                                   std::string pathOut     = "./",
@@ -179,7 +180,8 @@ DataFrame<double> EmbedDimension( DataFrame< double >,
                                   std::string colNames    = "",
                                   std::string targetName  = "",
                                   bool        embedded    = false,
-                                  bool        verbose     = true );
+                                  bool        verbose     = true,
+                                  unsigned    nThreads    = 4 );
 
 DataFrame<double> PredictInterval( std::string pathIn      = "./data/",
                                    std::string dataFile    = "",
@@ -192,7 +194,8 @@ DataFrame<double> PredictInterval( std::string pathIn      = "./data/",
                                    std::string colNames    = "",
                                    std::string targetName  = "",
                                    bool        embedded    = false,
-                                   bool        verbose     = true );
+                                   bool        verbose     = true,
+                                   unsigned    nThreads    = 4 );
 
 DataFrame<double> PredictInterval( DataFrame< double >,
                                    std::string pathOut     = "./",
@@ -204,7 +207,8 @@ DataFrame<double> PredictInterval( DataFrame< double >,
                                    std::string colNames    = "",
                                    std::string targetName  = "",
                                    bool        embedded    = false,
-                                   bool        verbose     = true );
+                                   bool        verbose     = true,
+                                   unsigned    nThreads    = 4 );
 
 DataFrame<double> PredictNonlinear( std::string pathIn      = "./data/",
                                     std::string dataFile    = "",
@@ -218,7 +222,8 @@ DataFrame<double> PredictNonlinear( std::string pathIn      = "./data/",
                                     std::string colNames    = "",
                                     std::string targetName  = "",
                                     bool        embedded    = false,
-                                    bool        verbose     = true );
+                                    bool        verbose     = true,
+                                    unsigned    nThreads    = 4 );
 
 DataFrame<double> PredictNonlinear( DataFrame< double >,
                                     std::string pathOut     = "./",
@@ -231,5 +236,6 @@ DataFrame<double> PredictNonlinear( DataFrame< double >,
                                     std::string colNames    = "",
                                     std::string targetName  = "",
                                     bool        embedded    = false,
-                                    bool        verbose     = true );
+                                    bool        verbose     = true,
+                                    unsigned    nThreads    = 4 );
 #endif

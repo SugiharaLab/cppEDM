@@ -8,6 +8,11 @@
 //----------------------------------------------------------------
 // Suite of tests for API functionality
 // Does not evaluate numerical results or accuracy.
+//
+// After running Test, visual inspection can be done via R:
+//    > source( "PlotTest.R" )
+//    > Run()
+//    > Clean() 
 //----------------------------------------------------------------
 //#define EMBED_TEST
 #define SIMPLEX_TEST1
@@ -167,7 +172,7 @@ int main( int argc, char *argv[] ) {
             EmbedDimension( "../data/", "TentMap_rEDM.csv",
                             "./", "EmbedDimOut.csv",
                             "1 100", "201 500", 1, 1,
-                            "TentMap", "", false, true );
+                            "TentMap", "", false, false, 4 );
                 
         std::cout << EMBD;
 #endif
@@ -181,7 +186,7 @@ int main( int argc, char *argv[] ) {
             PredictInterval( "../data/", "TentMap_rEDM.csv",
                              "./", "PredictIntervalOut.csv",
                              "1 100", "201 500", 2, 1,
-                             "TentMap", "", false, true );
+                             "TentMap", "", false, false, 4 );
                 
         std::cout << PD;
 #endif
@@ -195,8 +200,9 @@ int main( int argc, char *argv[] ) {
             PredictNonlinear( "../data/", "TentMapNoise_rEDM.csv",
                               "./", "PredictNonlinearOut.csv",
                               "1 100", "201 500", 2, 1, 1,
-                              "TentMap", "", false, true );
-                
+                              "TentMap", "", false, false, 4 );
+
+        NL.MaxRowPrint() = 15;
         std::cout << NL;
 #endif
 

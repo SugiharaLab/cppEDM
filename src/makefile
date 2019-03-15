@@ -16,7 +16,7 @@ clean:
 	rm -f $(OBJ) $(LIB)
 
 distclean:
-	rm -f $(OBJ) $(LIB) *~ *.bak *.csv
+	rm -f $(OBJ) $(LIB) ../lib/$(LIB) *~ *.bak *.csv
 
 $(LIB): $(OBJ)
 
