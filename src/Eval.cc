@@ -5,18 +5,20 @@
 
 #include "Common.h"
 
-// Thread Work Queue : Vector of int
-typedef std::vector< int > WorkQueue;
-
-// atomic counter for all threads
-std::atomic<std::size_t> count_i(0); // initialize to 0
-std::mutex mtx;
+namespace EDM_Eval {
+    // Thread Work Queue : Vector of int
+    typedef std::vector< int > WorkQueue;
+    
+    // atomic counter for all threads
+    std::atomic<std::size_t> count_i(0); // initialize to 0
+    std::mutex mtx;
+}
 
 //----------------------------------------------------------------
 // Forward declaration:
 // Worker thread for EmbedDimension() and PredictInterval()
 //----------------------------------------------------------------
-void SimplexThread( WorkQueue           &wq,
+void SimplexThread( EDM_Eval::WorkQueue &wq,
                     DataFrame< double > &data,
                     DataFrame< double > &E_rho,
                     std::string          lib,
@@ -33,7 +35,7 @@ void SimplexThread( WorkQueue           &wq,
 // Forward declaration:
 // Worker thread for PredictNonLinear()
 //----------------------------------------------------------------
-void SMapThread( WorkQueue             &wq,
+void SMapThread( EDM_Eval::WorkQueue   &wq,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
                  std::valarray<double>  ThetaValues,
@@ -105,7 +107,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     DataFrame<double> E_rho( 10, 2, "E rho" );
 
     // build work queue
-    WorkQueue wq( 10 );
+    EDM_Eval::WorkQueue wq( 10 );
 
     // Insert dimension values into work queue
     for ( auto i = 0; i < 10; i++ ) {
@@ -139,7 +141,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     }
     
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         E_rho.WriteData( pathOut, predictFile );
@@ -205,7 +207,7 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
     DataFrame<double> Tp_rho( 10, 2, "Tp rho" );
 
     // build work queue
-    WorkQueue wq( 10 );
+    EDM_Eval::WorkQueue wq( 10 );
 
     // Insert Tp values into work queue
     for ( auto i = 0; i < 10; i++ ) {
@@ -239,7 +241,7 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
     }
     
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         Tp_rho.WriteData( pathOut, predictFile );
@@ -251,7 +253,7 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
 //----------------------------------------------------------------
 // Worker thread for EmbedDimension() and PredictInterval()
 //----------------------------------------------------------------
-void SimplexThread( WorkQueue           &wq,
+void SimplexThread( EDM_Eval::WorkQueue &wq,
                     DataFrame< double > &data,
                     DataFrame< double > &DF_rho,
                     std::string          lib,
@@ -265,7 +267,7 @@ void SimplexThread( WorkQueue           &wq,
                     bool                 verbose )
 {
     
-    std::size_t i = std::atomic_fetch_add( &count_i, std::size_t(1) );
+    std::size_t i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
 
     // Decide if E or Tp are in the WorkQueue
     bool wq_E  = (E  < 1) ? true : false;
@@ -303,7 +305,7 @@ void SimplexThread( WorkQueue           &wq,
         }
         
         if ( verbose ) {
-            std::unique_lock<std::mutex> lck( mtx );
+            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
             std::cout << "SimplexThread() wq_E(" << wq_E << ") wq_Tp(" << wq_Tp 
                       << ")  E " << E << "  Tp " << Tp 
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
@@ -311,7 +313,7 @@ void SimplexThread( WorkQueue           &wq,
             lck.unlock();
         }
     
-        i = std::atomic_fetch_add( &count_i, std::size_t(1) );
+        i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
     }
 }
 
@@ -358,18 +360,18 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
 // API Overload 2: DataFrame provided
 //----------------------------------------------------------------
 DataFrame<double> PredictNonlinear( DataFrame< double > data,
-                                    std::string pathOut,
-                                    std::string predictFile,
-                                    std::string lib,
-                                    std::string pred,
-                                    int         E,
-                                    int         Tp,
-                                    int         tau,
-                                    std::string colNames,
-                                    std::string targetName,
-                                    bool        embedded,
-                                    bool        verbose,
-                                    unsigned    nThreads ) {
+                                    std::string         pathOut,
+                                    std::string         predictFile,
+                                    std::string         lib,
+                                    std::string         pred,
+                                    int                 E,
+                                    int                 Tp,
+                                    int                 tau,
+                                    std::string         colNames,
+                                    std::string         targetName,
+                                    bool                embedded,
+                                    bool                verbose,
+                                    unsigned            nThreads ) {
 
     std::valarray<double> ThetaValues( { 0.01, 0.1, 0.3, 0.5, 0.75, 1,
                                           1.5, 2, 3, 4, 5, 6, 7, 8, 9 } );
@@ -378,7 +380,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
     DataFrame<double> Theta_rho( ThetaValues.size(), 2, "Theta rho" );
 
     // build work queue
-    WorkQueue wq( ThetaValues.size() );
+    EDM_Eval::WorkQueue wq( ThetaValues.size() );
 
     // Insert ThetaValues indexes into work queue
     for ( auto i = 0; i < ThetaValues.size(); i++ ) {
@@ -413,7 +415,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
     }
 
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         Theta_rho.WriteData( pathOut, predictFile );
@@ -425,7 +427,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
 //----------------------------------------------------------------
 // Worker thread for PredictNonlinear()
 //----------------------------------------------------------------
-void SMapThread( WorkQueue             &wq,
+void SMapThread( EDM_Eval::WorkQueue   &wq,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
                  std::valarray<double>  ThetaValues,
@@ -440,7 +442,7 @@ void SMapThread( WorkQueue             &wq,
                  bool                   verbose )
 {
     
-    std::size_t i = std::atomic_fetch_add( &count_i, std::size_t(1) );
+    std::size_t i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
 
     while( i < wq.size() ) {
         
@@ -473,13 +475,13 @@ void SMapThread( WorkQueue             &wq,
         Theta_rho.WriteRow( i, std::valarray<double>({ theta, ve.rho }));
         
         if ( verbose ) {
-            std::unique_lock<std::mutex> lck( mtx );
+            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
             std::cout << "Theta " << theta
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl << std::endl;
             lck.unlock();
         }
     
-        i = std::atomic_fetch_add( &count_i, std::size_t(1) );
+        i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
     }
 }
