@@ -116,6 +116,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
 
     unsigned maxThreads = std::thread::hardware_concurrency();
     if ( maxThreads < nThreads ) { nThreads = maxThreads; }
+    if ( nThreads > 10 )         { nThreads = 10;         }
     
     // thread container
     std::vector< std::thread > threads;
@@ -216,6 +217,7 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
 
     unsigned maxThreads = std::thread::hardware_concurrency();
     if ( maxThreads < nThreads ) { nThreads = maxThreads; }
+    if ( nThreads > 10 )         { nThreads = 10;         }
     
     // thread container
     std::vector< std::thread > threads;
@@ -389,6 +391,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
 
     unsigned maxThreads = std::thread::hardware_concurrency();
     if ( maxThreads < nThreads ) { nThreads = maxThreads; }
+    if ( nThreads > 15 )         { nThreads = 15;         }
     
     // thread container
     std::vector< std::thread > threads;
