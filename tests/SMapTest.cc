@@ -1,26 +1,6 @@
-//file to test the smap algo against pyedm
+// SMap test
 
 #include "TestCommon.h"
-
-//smap params for reference
-/*
-   DataFrame< double > data,
-   std::string pathOut,
-   std::string predictFile,
-   std::string lib,
-   std::string pred,
-   int         E,
-   int         Tp,
-   int         knn,
-   int         tau,
-   double      theta,
-   std::string columns,
-   std::string target,
-   std::string smapFile,
-   std::string jacobians,
-   bool        embedded,
-   bool        verbose
-   */
 
 int main () {
 
@@ -34,7 +14,7 @@ int main () {
     //---------------------------------------------------------
     DataFrame < double > pyOutput( "./data/", "Smap_circle_pyEDM.csv" );
     
-    //generate cpp output
+    // Generate cpp output
     DataFrame < double > circleData( "../data/", "circle.csv" );
     
     SMapValues smapVals = SMap ( circleData,
@@ -44,7 +24,7 @@ int main () {
     
     DataFrame < double > cppOutput = smapVals.predictions;
     
-    //run comparison
+    // Comparison
     MakeTest ( "circle.csv test", pyOutput, cppOutput );
 
 
@@ -62,6 +42,6 @@ int main () {
 
     cppOutput = smapVals.predictions;
     
-    //run comparison
+    // Comparison
     MakeTest ( "block_3sp test", pyOutput, cppOutput );    
 }

@@ -1,26 +1,10 @@
-//this file is used to test the functionality of the simplex algorithm
+// Test simplex algorithm
 
 #include "TestCommon.h"
 
-/* simplex signature for reference 
-DataFrame<double> Simplex( DataFrame< double > data,
-                           std::string pathOut,
-                           std::string predictFile,
-                           std::string lib,
-                           std::string pred,
-                           int         E,
-                           int         Tp,
-                           int         knn,
-                           int         tau,
-                           std::string columns,
-                           std::string target,
-                           bool        embedded,
-                           bool        verbose ) {
-*/
-
 int main () {
 
-    //temp to hold the csv data for cpp and pyEdm compare
+    // Declare DataFrames to hold file and computed output
     DataFrame< double > pyOutput;
     DataFrame< double > cppOutput;
 
@@ -32,12 +16,12 @@ int main () {
     //----------------------------------------------------------
     pyOutput = DataFrame < double >("./data/","Smplx_embd_block_3sp_pyEDM.csv");
     
-    //generate cpp output
+    // Generate cpp output
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_embd_block_3sp_cppEDM.csv",
                           "1 99","100 198", 3, 1, 0, 1,
                           "x_t y_t z_t", "x_t", true, true );
-    //run comparison
+    // Comparison
     MakeTest ( "block_3sp.csv embedded data test", pyOutput, cppOutput );
 
     //----------------------------------------------------------
@@ -48,11 +32,11 @@ int main () {
     //----------------------------------------------------------
     pyOutput = DataFrame < double > ("./data/","Smplx_E3_block_3sp_pyEDM.csv");
     
-    //generate cpp output
+    // Generate cpp output
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_E3_block_3sp_cppEDM.csv",
                           "1 100", "101 195", 3, 1, 0, 1,
                           "x_t", "x_t", false, true );
-    //run comparison
+    // Comparison
     MakeTest ( "block_3sp.csv dynamic embedding test", pyOutput, cppOutput );
 }

@@ -1,6 +1,4 @@
-// this file is used to test the functionality of the testing code.
-// might seem redundant but if somebody thinks there's a discrepancy
-// with the testing code this is the place to check
+// Test functionality of the testing code.
 
 #include "TestCommon.h"
 
