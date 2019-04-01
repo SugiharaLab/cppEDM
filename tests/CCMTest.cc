@@ -29,16 +29,17 @@ int main () {
     DataFrame< double > cppOutput;
     
     //---------------------------------------------------------
-    // Load pyEdm output from:
-    // ./CCM.py -i sardine_anchovy_sst.csv -c anchovy -r np_sst -E 3 -L 10 75 5 
+    // Load cppEdm output
     //---------------------------------------------------------
-    pyOutput = DataFrame < double > ( "./data/", "CCM_anch_sst_pyEDM.csv" );
+    cppOutput = DataFrame < double > ( "./data/",
+                                       "CCM_anch_sst_cppEDM_valid.csv" );
     
-    //generate cpp output
-    cppOutput = CCM( "../data/", "sardine_anchovy_sst.csv",
-                     "./data/", "CCM_anch_sst_cppEDM.csv",
-                     3, 0, 0, 1, "anchovy", "np_sst", "10 75 5", 1,
-                     false, 0, false, true );
-    //run comparison
-    MakeTest ("sardine_anchovy_sst test", pyOutput, cppOutput );
+    //generate new cpp output
+    DataFrame < double > output = CCM( "../data/", "sardine_anchovy_sst.csv",
+                                       "./data/", "CCM_anch_sst_cppEDM.csv",
+                                       3, 0, 0, 1, "anchovy", "np_sst",
+                                       "10 75 5", 1, false, 0, false, true );
+    
+    // comparison
+    MakeTest ("CCM sardine_anchovy_sst test", cppOutput, output );
 }
