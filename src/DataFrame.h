@@ -19,7 +19,7 @@ extern std::vector<std::string> SplitString( std::string inString,
                                              std::string delimeters = "," );
 extern bool OnlyDigits( std::string str );
 
-// Type definition for CSV NamedData to pair column names/column data
+// Type definition for CSV NamedData to pair column names & column data
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
 
 //----------------------------------------------------------------
@@ -41,9 +41,14 @@ class DataFrame {
     
 public:
     //-----------------------------------------------------------------
+    // Destructor
+    //-----------------------------------------------------------------
+    ~DataFrame() {}
+    
+    //-----------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------
-    DataFrame () {}
+    DataFrame() {}
     
     //-----------------------------------------------------------------
     // Load data from CSV file path/fileName, populate DataFrame
@@ -242,8 +247,14 @@ public:
     
         if ( N != n_columns ) {
             std::stringstream errMsg;
-            errMsg << "DataFrame::insertRow(): row argument must be "
-                   << n_columns << ". " << N << " were provided.\n";
+            errMsg << "DataFrame::WriteRow(): array must have "
+                   << n_columns << " elements. " << N << " were provided.\n";
+            throw std::runtime_error( errMsg.str() );
+        }
+        if ( row >= n_rows ) {
+            std::stringstream errMsg;
+            errMsg << "DataFrame::WriteRow(): row argument must be less than "
+                   << n_rows << ". " << row << " was provided.\n";
             throw std::runtime_error( errMsg.str() );
         }
         for ( size_t i = 0; i < N; i++ ) {
@@ -259,8 +270,14 @@ public:
     
         if ( N != n_rows ) {
             std::stringstream errMsg;
-            errMsg << "DataFrame::insertColumn(): col argument must be "
-                   << n_rows << ". " << N << " were provided.\n";
+            errMsg << "DataFrame::WriteColumn(): array must have "
+                   << n_rows << " elements. " << N << " were provided.\n";
+            throw std::runtime_error( errMsg.str() );
+        }
+        if ( col >= n_columns ) {
+            std::stringstream errMsg;
+            errMsg<<"DataFrame::WriteColumn(): col argument must be less than "
+                   << n_columns << ". " << col << " was provided.\n";
             throw std::runtime_error( errMsg.str() );
         }
         for ( size_t i = 0; i < N; i++ ) {
@@ -353,17 +370,17 @@ public:
     //------------------------------------------------------------------
     void WriteData( std::string outputFilePath, std::string outputFileName ) {
         
-        //to hold the lines to print to the output file
+        // Vector of strings to hold image of DataFrame for file output
         std::vector< std::string > fileLines;
 
-        //tmp string to hold one line at a time
+        // Stream to ingest each line (row) of the DataFrame
         std::stringstream lineStr;
 
         // Set stream precision. This should be a parameter.
         lineStr.precision( 4 );
         lineStr.setf( std::ios::fixed, std::ios::floatfield );
 
-        //save col names line
+        // Create column name header if needed
         if ( ColumnNames().size() == 0 ) {
             std::cout << "DataFrame::WriteData(): This data frame has no column"
                       << "names.  Column names will be created.\n";
@@ -378,7 +395,9 @@ public:
                                       " column names does not match the number "
                                       " of data columns.\n" );
         }
-        for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
+        
+        // Push column name from each column into the string stream
+        for ( size_t colIdx = 0; colIdx < n_columns; colIdx++ ) {
             lineStr << ColumnNames()[ colIdx ];
 
             if ( colIdx != n_columns - 1 ) {
@@ -386,44 +405,45 @@ public:
             }
         }
 
-        // set and empty
+        // Push column name header into fileLines container
         fileLines.push_back( lineStr.str() );
-        lineStr.str(std::string()); // would lineStr.flush() do the same?
 
-        // iterate through all numerical data to print
-        for (size_t rowIdx = 0; rowIdx < n_rows; rowIdx++) {
-            for (size_t colIdx = 0; colIdx < n_columns; colIdx++) {
+        // Reset the stringstream content
+        lineStr.str( std::string() );
 
-                lineStr << (*this) (rowIdx, colIdx);
+        // Iterate through rows of numerical data
+        for ( size_t rowIdx = 0; rowIdx < n_rows; rowIdx++ ) {
+            for ( size_t colIdx = 0; colIdx < n_columns; colIdx++ ) {
+
+                lineStr << (*this) ( rowIdx, colIdx );
 
                 if ( colIdx != n_columns - 1 ) {
                     lineStr << ",";
                 }
             }
 
-            // set and empty
+            // Push row data into fileLines container
             fileLines.push_back( lineStr.str() );
-            lineStr.str(std::string());
+            lineStr.str( std::string() );
         }
 
-        // write contents to file
-        std::ofstream outputFile(outputFilePath + outputFileName);
-        if (outputFile.is_open()) {
-
-            std::copy(fileLines.begin(), fileLines.end(),
-                    std::ostream_iterator<std::string>(outputFile,"\n"));
+        // Write contents to file
+        std::ofstream outputFile( outputFilePath + outputFileName );
+    
+        if ( outputFile.is_open() ) {
+            
+            std::copy( fileLines.begin(), fileLines.end(),
+                       std::ostream_iterator<std::string>(outputFile,"\n") );
 
             outputFile.close();
         }
-
-        // bad write if got to here
         else {
+            // Error in state of open() on outputFile
             std::stringstream errMsg;
-            errMsg << "DataFrame::WriteData(): bad file permissions: "
+            errMsg << "DataFrame::WriteData(): Failed to open file: "
                 << outputFilePath + outputFileName << ". \n";
             throw std::runtime_error( errMsg.str() );
         }
-
     }
 
 private:
@@ -472,13 +492,13 @@ private:
         //make sure file access is good before reading
         if ( not dataStrm.is_open() ) {
             std::stringstream errMsg;
-            errMsg << "ERROR: ReadData() file " << path + fileName
+            errMsg << "ERROR: DataFrame::ReadData() file " << path + fileName
                    << " is not open for reading." << std::endl;
             throw std::runtime_error( errMsg.str() );
         }
         if ( not dataStrm.good() ) {
             std::stringstream errMsg;
-            errMsg << "ERROR: ReadData() file " << path + fileName
+            errMsg << "ERROR: DataFrame::ReadData() file " << path + fileName
                    << " is not ready for reading." << std::endl;
             throw std::runtime_error( errMsg.str() );
         }

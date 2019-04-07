@@ -238,4 +238,31 @@ DataFrame<double> PredictNonlinear( DataFrame< double >,
                                     bool        embedded    = false,
                                     bool        verbose     = true,
                                     unsigned    nThreads    = 4 );
+
+DataFrame<double> Multiview( std::string pathIn      = "./",
+                             std::string dataFile    = "",
+                             std::string pathOut     = "./",
+                             std::string predictFile = "",
+                             std::string lib         = "1  10",
+                             std::string pred        = "11 20",
+                             int         E           = 0,
+                             int         Tp          = 1,
+                             int         tau         = 1,
+                             std::string columns     = "",
+                             std::string target      = "",
+                             bool        verbose     = false,
+                             unsigned    nThreads    = 4 );
+
+DataFrame<double> Multiview( DataFrame< double >,
+                             std::string pathOut     = "./",
+                             std::string predictFile = "",
+                             std::string lib         = "1  10",
+                             std::string pred        = "11 20",
+                             int         E           = 0,
+                             int         Tp          = 1,
+                             int         tau         = 1,
+                             std::string columns     = "",
+                             std::string target      = "",
+                             bool        verbose     = false,
+                             unsigned    nThreads    = 4 );
 #endif

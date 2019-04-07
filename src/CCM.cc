@@ -228,18 +228,6 @@ DataFrame< double > CrossMap( Parameters paramCCM,
 
     size_t N_row = dataBlock.NRows();
 
-    //----------------------------------------------------------
-    // Get target (library) vector
-    // Require the target to be specified by column name, not index
-    //----------------------------------------------------------
-    std::valarray<double> target_vec;
-    if ( paramCCM.targetIndex ) {
-       std::runtime_error("CrossMap() target must be specified by column name");
-    }
-    else {
-        target_vec = dataFrameIn.VectorColumnName( paramCCM.targetName );
-    }
-
     // JP: This removal of partial data rows is also done in EmbedNN()
     //     Should investigate how to avoid this duplication
     //----------------------------------------------------------
@@ -249,11 +237,6 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     // For now, assume only positive tau is allowed
     size_t shift = std::max(0, paramCCM.tau * (paramCCM.E - 1) );
     
-    std::valarray<double> target_vec_embed( dataFrameIn.NRows() - shift );
-    target_vec_embed = target_vec[ std::slice( shift,
-                                               target_vec.size() - shift, 1 ) ];
-    target_vec = target_vec_embed;
-    
     DataFrame<double> dataInEmbed( dataFrameIn.NRows() - shift,
                                    dataFrameIn.NColumns(),
                                    dataFrameIn.ColumnNames() );
@@ -261,12 +244,11 @@ DataFrame< double > CrossMap( Parameters paramCCM,
     for ( size_t row = 0; row < dataInEmbed.NRows(); row++ ) {
         dataInEmbed.WriteRow( row, dataFrameIn.Row( row + shift ) );
     }
-    dataFrameIn = dataInEmbed; // JP is this copy a problem?
 
 #ifdef DEBUG_ALL
-    std::cout << ">>>> CrossMap() dataFrameIn-----------------------\n";
-    std::cout << dataFrameIn;
-    std::cout << "<<<< dataFrameIn----------------------------------\n";
+    std::cout << ">>>> CrossMap() dataInEmbed-----------------------\n";
+    std::cout << dataInEmbed;
+    std::cout << "<<<< dataInEmbed----------------------------------\n";
     std::cout << ">>>> dataBlock------------------------------------\n";
     std::cout << dataBlock;
     std::cout << "<<<< dataBlock------------------------------------\n";
@@ -413,14 +395,14 @@ DataFrame< double > CrossMap( Parameters paramCCM,
             Neighbors neighbors = CCMNeighbors( Distances, lib_i, paramCCM );
 
             //----------------------------------------------------------
-            // Subset dataFrameIn and target_vec to lib_i
+            // Subset dataInEmbed to lib_i
             //----------------------------------------------------------
             DataFrame< double > dataFrameLib_i( lib_i.size(),
-                                                dataFrameIn.NColumns(),
-                                                dataFrameIn.ColumnNames() );
+                                                dataInEmbed.NColumns(),
+                                                dataInEmbed.ColumnNames() );
             
             for ( size_t i = 0; i < lib_i.size(); i++ ) {
-                dataFrameLib_i.WriteRow( i, dataFrameIn.Row( lib_i[ i ] ) ) ;
+                dataFrameLib_i.WriteRow( i, dataInEmbed.Row( lib_i[ i ] ) ) ;
             }
 
             std::valarray<double> targetVec =

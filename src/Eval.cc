@@ -9,8 +9,10 @@ namespace EDM_Eval {
     // Thread Work Queue : Vector of int
     typedef std::vector< int > WorkQueue;
     
-    // atomic counter for all threads
-    std::atomic<std::size_t> count_i(0); // initialize to 0
+    // atomic counters for all threads
+    std::atomic<std::size_t> tp_count_i   (0); // initialize to 0
+    std::atomic<std::size_t> embed_count_i(0); // initialize to 0
+    std::atomic<std::size_t> smap_count_i (0); // initialize to 0
     std::mutex mtx;
 }
 
@@ -142,7 +144,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     }
     
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::embed_count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         E_rho.WriteData( pathOut, predictFile );
@@ -243,7 +245,7 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
     }
     
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::tp_count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         Tp_rho.WriteData( pathOut, predictFile );
@@ -260,27 +262,37 @@ void SimplexThread( EDM_Eval::WorkQueue &wq,
                     DataFrame< double > &DF_rho,
                     std::string          lib,
                     std::string          pred,
-                    int                  E,
-                    int                  Tp,
+                    int                  E,       // one of E and Tp must be
+                    int                  Tp,      // zero
                     int                  tau,
                     std::string          colNames,
                     std::string          targetName,
                     bool                 embedded,
                     bool                 verbose )
 {
+    if ( E != 0 and Tp != 0 ) {
+        throw std::runtime_error("SimplexThread() One of E or Tp must be 0.\n");
+    }
     
-    std::size_t i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
+    std::size_t i;
 
     // Decide if E or Tp are in the WorkQueue
-    bool wq_E  = (E  < 1) ? true : false;
-    bool wq_Tp = (Tp < 1) ? true : false;
-        
+    bool wq_E  = false;
+    bool wq_Tp = false;
+    if ( E  < 1 ) {
+        wq_E = true;
+        i  = std::atomic_fetch_add( &EDM_Eval::embed_count_i, std::size_t(1) );
+    }
+    else if (Tp < 1) {
+        wq_Tp = true;
+        i  = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
+    }
+    
     while( i < wq.size() ) {
         
         // WorkQueue stores E or Tp
         if      ( wq_E  ) { E  = wq[ i ]; }
         else if ( wq_Tp ) { Tp = wq[ i ]; }
-        else { throw std::runtime_error( "Invalid E, Tp parameters\n" ); }
                   
         DataFrame<double> S = Simplex( data,
                                        "",          // pathOut,
@@ -315,7 +327,12 @@ void SimplexThread( EDM_Eval::WorkQueue &wq,
             lck.unlock();
         }
     
-        i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
+        if ( wq_E ) {
+            i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
+        }
+        else if ( wq_Tp ) {
+            i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
+        }
     }
 }
 
@@ -418,7 +435,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
     }
 
     // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::count_i, std::size_t(0) );
+    std::atomic_store( &EDM_Eval::smap_count_i, std::size_t(0) );
     
     if ( predictFile.size() ) {
         Theta_rho.WriteData( pathOut, predictFile );
@@ -445,7 +462,8 @@ void SMapThread( EDM_Eval::WorkQueue   &wq,
                  bool                   verbose )
 {
     
-    std::size_t i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
+    std::size_t i =
+        std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );
 
     while( i < wq.size() ) {
         
@@ -485,6 +503,6 @@ void SMapThread( EDM_Eval::WorkQueue   &wq,
             lck.unlock();
         }
     
-        i = std::atomic_fetch_add( &EDM_Eval::count_i, std::size_t(1) );
+        i = std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );
     }
 }

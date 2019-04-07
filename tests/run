@@ -1,0 +1,6 @@
+#!/bin/bash
+make
+./SimplexTest
+./SMapTest
+./CCMTest
+make distclean

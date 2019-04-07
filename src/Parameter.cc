@@ -3,7 +3,7 @@
 
 //----------------------------------------------------------------
 // Constructor
-// Default arguments in Parameter.h
+// Default values set in Parameter.h
 //----------------------------------------------------------------
 Parameters::Parameters(
     Method      method,
@@ -41,7 +41,7 @@ Parameters::Parameters(
     bool        noNeigh,
     bool        fwdTau
     ) :
-    // default variable initialization from parameter arguments
+    // Variable initialization from Parameters arguments
     method           ( method ),
     pathIn           ( pathIn ),
     dataFile         ( dataFile ),
@@ -78,9 +78,9 @@ Parameters::Parameters(
     noNeighborLimit  ( noNeigh ),
     forwardTau       ( fwdTau ),
 
-    // Set validated flad and instantiate Version
+    // Set validated flag and instantiate Version
     validated        ( false ),
-    version          ( 0, 0, 2, "2019-03-15" )
+    version          ( 0, 0, 3, "2019-04-07" )
 {
     // Constructor code
     if ( method != Method::None ) {

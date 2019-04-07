@@ -27,7 +27,7 @@ DataFrame<double> Simplex( std::string pathIn,
                            bool        embedded,
                            bool        verbose ) {
     
-    // Create DataFrame (constructor loads data)
+    // DataFrame constructor loads data
     DataFrame< double > dataFrameIn( pathIn, dataFile );
 
     // Pass data frame to Simplex 
@@ -64,11 +64,7 @@ DataFrame<double> Simplex( DataFrame< double > data,
     //----------------------------------------------------------
     // Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN           embedNN    = EmbedNN( data, param, columns );
-    DataFrame<double>     dataIn     = embedNN.dataIn;    // used for output
-    DataFrame<double>     dataBlock  = embedNN.dataFrame; // not used
-    std::valarray<double> target_vec = embedNN.targetVec;
-    Neighbors             neighbors  = embedNN.neighbors;
+    DataEmbedNN embedNN = EmbedNN( data, param );
 
     DataFrame<double> S = SimplexProjection( param, embedNN );
 
@@ -80,9 +76,8 @@ DataFrame<double> Simplex( DataFrame< double > data,
 //----------------------------------------------------------------
 DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
 
-    // Unpack the data, embedding (dataBlock), target & neighbors
-    DataFrame<double>     dataIn     = embedNN.dataIn;    // used for output
-    DataFrame<double>     dataBlock  = embedNN.dataFrame; // not used
+    // Unpack the data, (embedding dataBlock not used), target & neighbors
+    DataFrame<double>     dataIn     = embedNN.dataIn;  // used for output
     std::valarray<double> target_vec = embedNN.targetVec;
     Neighbors             neighbors  = embedNN.neighbors;
 

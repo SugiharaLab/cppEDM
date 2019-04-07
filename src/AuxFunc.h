@@ -27,8 +27,7 @@ struct DataEmbedNN {
 
 // Prototypes
 DataEmbedNN EmbedNN( DataFrame<double> dataIn,
-                     Parameters  param,
-                     std::string columns );
+                     Parameters        param );
     
 DataFrame<double> FormatOutput( Parameters            param,
                                 size_t                N_row,

@@ -1,5 +1,16 @@
 
-//#define EIGEN_USE_LAPACKE_STRICT
+//-------------------------------------------------------------------------
+// Eigen can internally call LAPACKE instead of Eigen::JacobiSVD()
+// https://eigen.tuxfamily.org/dox/TopicUsingBlasLapack.html
+//-------------------------------------------------------------------------
+// #define EIGEN_USE_LAPACKE_STRICT
+// EIGEN_USE_LAPACKE: Enables the use of external Lapack routines via
+// the Lapacke C interface to Lapack (compatible with F77 LAPACK interface).
+// EIGEN_USE_LAPACKE_STRICT: Same as EIGEN_USE_LAPACKE but algorithms of
+// lower numerical robustness are disabled. This currently concerns only
+// JacobiSVD which otherwise would be replaced by gesvd that is less robust
+// than Jacobi rotations.
+//-------------------------------------------------------------------------
 
 #include <Eigen/Dense>
 
@@ -15,6 +26,7 @@ std::valarray< double > SVD( DataFrame    < double > A,
 
 //----------------------------------------------------------------
 // Overload 1: Explicit data file path/name
+//   Implemented as a wrapper to API Overload 2:
 //----------------------------------------------------------------
 SMapValues SMap( std::string pathIn,
                  std::string dataFile,
@@ -33,12 +45,14 @@ SMapValues SMap( std::string pathIn,
                  std::string jacobians,
                  bool        embedded,
                  bool        verbose )
-{    //create DataFrame and delegate
-    DataFrame< double > toSMap (pathIn, dataFile);
-    SMapValues SMapOutput = SMap (toSMap, pathOut, predictFile,
-                            lib, pred, E, Tp, knn, tau, theta, 
-                            columns, target, smapFile, jacobians, 
-                            embedded, verbose);
+{
+    // DataFrame constructor loads data
+    DataFrame< double > dataFrameIn( pathIn, dataFile );
+    
+    SMapValues SMapOutput = SMap( dataFrameIn, pathOut, predictFile,
+                                  lib, pred, E, Tp, knn, tau, theta, 
+                                  columns, target, smapFile, jacobians, 
+                                  embedded, verbose );
     return SMapOutput;
 }
 
@@ -72,7 +86,9 @@ SMapValues SMap( DataFrame< double > data,
     //----------------------------------------------------------
     // Load data, Embed, compute Neighbors
     //----------------------------------------------------------
-    DataEmbedNN dataEmbedNN = EmbedNN( data, param, columns );
+    DataEmbedNN dataEmbedNN = EmbedNN( data, param );
+
+    // Unpack the dataEmbedNN for convenience
     DataFrame<double>     dataIn     = dataEmbedNN.dataIn;
     DataFrame<double>     dataBlock  = dataEmbedNN.dataFrame;
     std::valarray<double> target_vec = dataEmbedNN.targetVec;
@@ -262,12 +278,6 @@ std::valarray < double > SVD( DataFrame    < double > A_,
     // large problems and automatically fall-back to the JacobiSVD class
     // for smaller problems.
 
-    // JacobiSVD implements two-sided Jacobi iterations that are
-    // numerically very accurate, fast for small matrices, but very
-    // slow for larger ones.
-    Eigen::VectorXd C =
-        A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
-
     // BDCSVD implements a recursive divide & conquer strategy on top of
     // an upper-bidiagonalization which remains fast for large problems.
     // Warning:  this algorithm is unlikely to provide accurate result when
@@ -276,9 +286,14 @@ std::valarray < double > SVD( DataFrame    < double > A_,
     // unless you compile with the -fp-model precise option. Likewise,
     // the -ffast-math option of GCC or clang will significantly degrade
     // the accuracy.
-    //Eigen::VectorXd C =
+    // Eigen::VectorXd C =
     //    A.bdcSvd( Eigen::ComputeThinU |  Eigen::ComputeThinV ).solve( B );
     
+    // JacobiSVD implements two-sided Jacobi iterations that are
+    // numerically very accurate, fast for small matrices, but very
+    // slow for larger ones.
+    Eigen::VectorXd C =
+        A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( B );
 
     // Extract fit coefficients from Eigen::VectorXd to valarray<>
     std::valarray < double > C_( C.data(), A_.NColumns() );

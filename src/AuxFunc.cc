@@ -8,9 +8,8 @@
 // dataBlock.
 //----------------------------------------------------------
 DataEmbedNN EmbedNN( DataFrame<double> dataIn,
-                     Parameters        param,
-                     std::string       columns ) {
-
+                     Parameters        param  )
+{
     //----------------------------------------------------------
     // Extract or embedd data block
     //----------------------------------------------------------
@@ -33,7 +32,8 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
     else {
         // embedded = false: Create the embedding block
         // dataBlock will have tau * (E-1) fewer rows than dataIn
-        dataBlock = Embed( dataIn, param.E, param.tau, columns, param.verbose );
+        dataBlock = Embed( dataIn, param.E, param.tau,
+                           param.columns_str, param.verbose );
     }
     
     //----------------------------------------------------------
