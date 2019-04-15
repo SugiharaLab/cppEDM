@@ -8,8 +8,13 @@
 // dataBlock.
 //----------------------------------------------------------
 DataEmbedNN EmbedNN( DataFrame<double> dataIn,
-                     Parameters        param  )
+                     Parameters        param,
+                     bool              checkDataRows )
 {
+    if ( checkDataRows ) {
+        CheckDataRows( param, dataIn, "EmbedNN" );
+    }
+    
     //----------------------------------------------------------
     // Extract or embedd data block
     //----------------------------------------------------------
@@ -93,8 +98,13 @@ DataFrame<double> FormatOutput( Parameters            param,
                                 size_t                N_row,
                                 std::valarray<double> predictions,
                                 DataFrame<double>     dataFrameIn,
-                                std::valarray<double> target_vec )
+                                std::valarray<double> target_vec,
+                                bool                  checkDataRows )
 {
+    if ( checkDataRows ) {
+        CheckDataRows( param, dataFrameIn, "FormatOutput" );
+    }
+    
     std::slice pred_i = std::slice( param.prediction[0], N_row, 1 );
     
     // Time vector with additional Tp points
@@ -102,7 +112,15 @@ DataFrame<double> FormatOutput( Parameters            param,
     std::valarray<double> time( N_row + param.Tp );
     
     // Insert times from prediction. Time is the 1st column
-    time = dataFrameIn.Column( 0 )[ pred_i ];
+    time[ std::slice( 0, N_row, 1 ) ] = dataFrameIn.Column( 0 )[ pred_i ];
+
+#ifdef DEBUG_ALL
+    std::cout << "FormatOutput() >>>> " << time.size() << " >>> ";
+    for( auto i = 0; i < time.size(); i++ ) {
+        std::cout << time[i] << ",";
+    } std::cout << std::endl;
+#endif
+    
     // Insert Tp times at end
     for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
         time[ i ] = time[ i - 1 ] + param.Tp;
@@ -132,4 +150,35 @@ DataFrame<double> FormatOutput( Parameters            param,
     dataFrame.WriteColumn( 2, predictionsOut );
     
     return dataFrame;
+}
+
+//----------------------------------------------------------
+// 
+//----------------------------------------------------------
+void CheckDataRows( Parameters        param,
+                    DataFrame<double> dataFrameIn,
+                    std::string       call )
+{
+    //-----------------------------------------------------------------
+    // Validate the dataFrameIn rows against the lib and pred indices
+    //-----------------------------------------------------------------
+    // param.prediction has been zero-offset in Validate() : +1
+    size_t prediction_max_i = param.prediction[param.prediction.size()-1] + 1;
+    size_t library_max_i    = param.library   [param.library.size()   -1] + 1;
+
+    if ( dataFrameIn.Column( 0 ).size() < prediction_max_i ) {
+        std::stringstream errMsg;
+        errMsg << call << "(): The prediction index "
+               << prediction_max_i
+               << " exceeds the number of data rows "
+               << dataFrameIn.Column( 0 ).size();
+        throw std::runtime_error( errMsg.str() );
+    }
+    if ( dataFrameIn.Column( 0 ).size() < library_max_i ) {
+        std::stringstream errMsg;
+        errMsg << call << "(): The library index " << library_max_i
+               << " exceeds the number of data rows "
+               << dataFrameIn.Column( 0 ).size();
+        throw std::runtime_error( errMsg.str() );
+    }
 }

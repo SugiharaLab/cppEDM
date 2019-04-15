@@ -17,6 +17,7 @@
 //#define EMBED_TEST
 #define SIMPLEX_TEST1
 #define SIMPLEX_TEST2
+#define MULTIVIEW_TEST
 #define SMAP_TEST1
 #define SMAP_TEST2
 #define CCM_TEST
@@ -51,11 +52,14 @@ int main( int argc, char *argv[] ) {
         std::cout << param;
         
         DataFrame< double > dio ( param.pathIn, param.dataFile );
-        DataFrame< double > D = dio.DataFrameFromColumnNames(
-            param.columnNames );
+        DataFrame< double > D =
+            dio.DataFrameFromColumnNames( param.columnNames );
+        
+        std::cout << "block_3sp.csv Embed():\n";
         std::cout << D;
 
         DataFrame< double > EmbedFrame2 = Embed( D, 2, 1, "x_t y_t z_t", true );
+        std::cout << "block_3sp.csv DataFrame Embed():\n";
         std::cout << EmbedFrame2;
 #endif
 
@@ -76,6 +80,7 @@ int main( int argc, char *argv[] ) {
             dataFrame.VectorColumnName( "Observations" ),
             dataFrame.VectorColumnName( "Predictions"  ) );
 
+        std::cout << "Simplex embedded block_3sp.csv:\n";
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl << std::endl;
         
@@ -100,8 +105,38 @@ int main( int argc, char *argv[] ) {
             dataFrameEmbed.VectorColumnName( "Observations" ),
             dataFrameEmbed.VectorColumnName( "Predictions"  ) );
         
+        std::cout << "Simplex E=3 block_3sp.csv:\n";
         std::cout << "rho " << ve2.rho << "  RMSE " << ve2.RMSE
                   << "  MAE " << ve2.MAE << std::endl << std::endl;
+#endif
+
+#ifdef MULTIVIEW_TEST
+        //----------------------------------------------------------
+        // ./Multiview.py -i block_3sp.csv -E 3 -r x_t -c x_t y_t z_t
+        // -l 1 100 -p 101 198 -T 1 -P
+        //----------------------------------------------------------
+        MultiviewValues MV =
+            Multiview( "../data/", "block_3sp.csv",
+                       "./", "MultiviewBlock3sp.csv",
+                       "1 100", "101 198",
+                       3,             // E
+                       1,             // Tp
+                       0,             // knn
+                       1,             // tau
+                       "x_t y_t z_t", // columns
+                       "x_t",         // target,
+                       0,             // multiview
+                       false,         // verbose,
+                       1 );           // nThreads
+        
+        DataFrame< double > MVPredictions = MV.Predictions;
+        VectorError vemv =
+            ComputeError( MVPredictions.VectorColumnName( "Observations" ),
+                          MVPredictions.VectorColumnName( "Predictions"  ));
+
+        std::cout << "Multiview() block_3sp.csv:\nrho " << vemv.rho
+                  << "  MAE " << vemv.MAE
+                  << "  RMSE " << vemv.RMSE << std::endl;
 #endif
 
 #ifdef SMAP_TEST1
@@ -123,6 +158,7 @@ int main( int argc, char *argv[] ) {
             predictions.VectorColumnName( "Observations" ),
             predictions.VectorColumnName( "Predictions"  ) );
 
+        std::cout << "SMap E=3 block_3sp.csv:\n";
         std::cout << "rho " << vesm.rho << "  RMSE " << vesm.RMSE
                   << "  MAE " << vesm.MAE << std::endl << std::endl;
 #endif
@@ -146,6 +182,7 @@ int main( int argc, char *argv[] ) {
             predictions2.VectorColumnName( "Observations" ),
             predictions2.VectorColumnName( "Predictions"  ) );
 
+        std::cout << "SMap embedded circle.csv:\n";
         std::cout << "rho " << vesm2.rho << "  RMSE " << vesm2.RMSE
                   << "  MAE " << vesm2.MAE << std::endl << std::endl;
 #endif
@@ -160,6 +197,7 @@ int main( int argc, char *argv[] ) {
                  3, 0, 0, 1, "anchovy", "np_sst", "10 80 10", 100,
                  true, 0, false, true );
 
+        std::cout << "CCM sardine_anchovy_sst.csv:\n";
         std::cout << CCMD;
 #endif
 
@@ -174,6 +212,7 @@ int main( int argc, char *argv[] ) {
                             "1 100", "201 500", 1, 1,
                             "TentMap", "", false, false, 4 );
                 
+        std::cout << "EmbedDimension TentMap_rEDM.csv:\n";
         std::cout << EMBD;
 #endif
 
@@ -188,6 +227,7 @@ int main( int argc, char *argv[] ) {
                              "1 100", "201 500", 2, 1,
                              "TentMap", "", false, false, 4 );
                 
+        std::cout << "PredictInterval TentMap_rEDM.csv:\n";
         std::cout << PD;
 #endif
 
@@ -203,6 +243,7 @@ int main( int argc, char *argv[] ) {
                               "TentMap", "", false, false, 4 );
 
         NL.MaxRowPrint() = 15;
+        std::cout << "PredictNonlinear TentMapNoise_rEDM.csv:\n";
         std::cout << NL;
 #endif
 

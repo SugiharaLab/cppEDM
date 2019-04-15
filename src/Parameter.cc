@@ -80,7 +80,7 @@ Parameters::Parameters(
 
     // Set validated flag and instantiate Version
     validated        ( false ),
-    version          ( 0, 0, 3, "2019-04-07" )
+    version          ( 0, 1, 0, "2019-04-15" )
 {
     // Constructor code
     if ( method != Method::None ) {
@@ -117,7 +117,8 @@ void Parameters::Validate() {
     if ( lib_str.size() ) {
         std::vector<std::string> lib_vec = SplitString( lib_str, " \t," );
         if ( lib_vec.size() != 2 ) {
-            std::string errMsg("Parameters(): library must be two integers.\n");
+            std::string errMsg( "Parameters::Validate(): "
+                                "library must be two integers.\n" );
             throw std::runtime_error( errMsg );
         }
         int lib_start = std::stoi( lib_vec[0] );
@@ -136,8 +137,8 @@ void Parameters::Validate() {
     if ( pred_str.size() ) {
         std::vector<std::string> pred_vec = SplitString( pred_str, " \t," );
         if ( pred_vec.size() != 2 ) {
-            std::string errMsg("Parameters(): prediction must be two "
-                               "integers.\n");
+            std::string errMsg( "Parameters::Validate(): "
+                                "prediction must be two integers.\n");
             throw std::runtime_error( errMsg );
         }
         int pred_start = std::stoi( pred_vec[0] );
@@ -148,6 +149,19 @@ void Parameters::Validate() {
     }
     else {
         prediction = std::vector<size_t>( 1, 0 );
+    }
+    
+    if ( method == Method::Simplex or method == Method::SMap ) {
+        if ( not library.size() ) {
+            std::string errMsg( "Parameters::Validate(): "
+                                "library indices not found.\n" );
+            throw std::runtime_error( errMsg );
+        }
+        if ( not prediction.size() ) {
+            std::string errMsg( "Parameters::Validate(): "
+                                "prediction indices not found.\n" );
+            throw std::runtime_error( errMsg );
+        }
     }
     
 #ifdef DEBUG_ALL
@@ -198,8 +212,8 @@ void Parameters::Validate() {
     if ( jacobian_str.size() > 0 ) {
         std::vector<std::string> jac_vec = SplitString( jacobian_str, " \t," );
         if ( jac_vec.size() < 2 ) {
-            std::string errMsg( "Parameters(): jacobians must be at least "
-                                "two integers.\n" );
+            std::string errMsg( "Parameters::Validate(): "
+                                "jacobians must be at least two integers.\n" );
             throw std::runtime_error( errMsg );
         }
         jacobians = std::vector<size_t>( jac_vec.size() );
@@ -212,8 +226,8 @@ void Parameters::Validate() {
     if ( libSizes_str.size() > 0 ) {
         std::vector<std::string> libsize_vec = SplitString(libSizes_str," \t,");
         if ( libsize_vec.size() != 3 ) {
-            std::string errMsg( "Parameters(): librarySizes must be three "
-                                "integers.\n" );
+            std::string errMsg( "Parameters::Validate(): "
+                                "CCM librarySizes must be three integers.\n" );
             throw std::runtime_error( errMsg );
         }
         size_t start     = std::stoi( libsize_vec[0] );

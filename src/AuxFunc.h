@@ -27,11 +27,17 @@ struct DataEmbedNN {
 
 // Prototypes
 DataEmbedNN EmbedNN( DataFrame<double> dataIn,
-                     Parameters        param );
+                     Parameters        param,
+                     bool              checkDataRows = true );
     
 DataFrame<double> FormatOutput( Parameters            param,
                                 size_t                N_row,
                                 std::valarray<double> predictions,
                                 DataFrame<double>     dataFrameIn,
-                                std::valarray<double> target_vec );
+                                std::valarray<double> target_vec,
+                                bool                  checkDataRows = true );
+
+void CheckDataRows( Parameters        param,
+                    DataFrame<double> dataFrameIn,
+                    std::string       call );
 #endif

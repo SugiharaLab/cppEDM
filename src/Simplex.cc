@@ -6,7 +6,9 @@
 #include "AuxFunc.h"
 
 // Forward declaration
-DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN );
+DataFrame<double> SimplexProjection( Parameters  param,
+                                     DataEmbedNN embedNN,
+                                     bool        checkDataRows = true );
 
 //----------------------------------------------------------------
 // API Overload 1: Explicit data file path/name
@@ -74,7 +76,8 @@ DataFrame<double> Simplex( DataFrame< double > data,
 //----------------------------------------------------------------
 // Simplex Projection
 //----------------------------------------------------------------
-DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
+DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN,
+                                     bool checkDataRows ) {
 
     // Unpack the data, (embedding dataBlock not used), target & neighbors
     DataFrame<double>     dataIn     = embedNN.dataIn;  // used for output
@@ -175,7 +178,8 @@ DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN ) {
     // Ouput
     //----------------------------------------------------
     DataFrame<double> dataFrame = FormatOutput( param, N_row, predictions, 
-                                                dataIn, target_vec );
+                                                dataIn, target_vec,
+                                                checkDataRows );
 
     if ( param.predictOutputFile.size() ) {
         // Write to disk

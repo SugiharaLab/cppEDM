@@ -12,7 +12,7 @@
 //------------------------------------------------------------
 class Parameters {
 
-public:  // JP Should be protected with accessors...
+public:  // Not protected with accessors.
     Method      method;             // Simplex or SMap enum class
     std::vector<size_t> library;    // library row indices
     std::vector<size_t> prediction; // prediction row indices

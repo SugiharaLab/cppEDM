@@ -18,26 +18,41 @@ namespace EDM_Eval {
 
 //----------------------------------------------------------------
 // Forward declaration:
-// Worker thread for EmbedDimension() and PredictInterval()
+// Worker thread for EmbedDimension()
 //----------------------------------------------------------------
-void SimplexThread( EDM_Eval::WorkQueue &wq,
-                    DataFrame< double > &data,
-                    DataFrame< double > &E_rho,
-                    std::string          lib,
-                    std::string          pred,
-                    int                  E,
-                    int                  Tp,
-                    int                  tau,
-                    std::string          colNames,
-                    std::string          targetName,
-                    bool                 embedded,
-                    bool                 verbose );
+void EmbedThread( EDM_Eval::WorkQueue &workQ,
+                  DataFrame< double > &data,
+                  DataFrame< double > &E_rho,
+                  std::string          lib,
+                  std::string          pred,
+                  int                  Tp,
+                  int                  tau,
+                  std::string          colNames,
+                  std::string          targetName,
+                  bool                 embedded,
+                  bool                 verbose );
+
+//----------------------------------------------------------------
+// Forward declaration:
+// Worker thread for PredictInterval()
+//----------------------------------------------------------------
+void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
+                            DataFrame< double > &data,
+                            DataFrame< double > &Tp_rho,
+                            std::string          lib,
+                            std::string          pred,
+                            int                  E,
+                            int                  tau,
+                            std::string          colNames,
+                            std::string          targetName,
+                            bool                 embedded,
+                            bool                 verbose );
 
 //----------------------------------------------------------------
 // Forward declaration:
 // Worker thread for PredictNonLinear()
 //----------------------------------------------------------------
-void SMapThread( EDM_Eval::WorkQueue   &wq,
+void SMapThread( EDM_Eval::WorkQueue   &workQ,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
                  std::valarray<double>  ThetaValues,
@@ -108,12 +123,12 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     // Container for results
     DataFrame<double> E_rho( 10, 2, "E rho" );
 
-    // build work queue
-    EDM_Eval::WorkQueue wq( 10 );
+    // Build work queue
+    EDM_Eval::WorkQueue workQ( 10 );
 
     // Insert dimension values into work queue
     for ( auto i = 0; i < 10; i++ ) {
-        wq[ i ] = i + 1;
+        workQ[ i ] = i + 1;
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
@@ -122,14 +137,13 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     
     // thread container
     std::vector< std::thread > threads;
-    for ( unsigned i = 0; i < nThreads; ++i ) {
-        threads.push_back( std::thread( SimplexThread,
-                                        std::ref( wq ),
+    for ( unsigned i = 0; i < nThreads; i++ ) {
+        threads.push_back( std::thread( EmbedThread,
+                                        std::ref( workQ ),
                                         std::ref( data ),
                                         std::ref( E_rho ),
                                         lib,
                                         pred,
-                                        0,       // E must be 0
                                         Tp,
                                         tau,
                                         colNames,
@@ -143,14 +157,69 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
         thrd.join();
     }
     
-    // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::embed_count_i, std::size_t(0) );
-    
     if ( predictFile.size() ) {
         E_rho.WriteData( pathOut, predictFile );
     }
     
     return E_rho;
+}
+
+//----------------------------------------------------------------
+// Worker thread for EmbedDimension()
+//----------------------------------------------------------------
+void EmbedThread( EDM_Eval::WorkQueue &workQ,
+                  DataFrame< double > &data,
+                  DataFrame< double > &E_rho,
+                  std::string          lib,
+                  std::string          pred,
+                  int                  Tp,
+                  int                  tau,
+                  std::string          colNames,
+                  std::string          targetName,
+                  bool                 embedded,
+                  bool                 verbose )
+{
+    
+    std::size_t i = std::atomic_fetch_add( &EDM_Eval::embed_count_i,
+                                           std::size_t(1) );
+    
+    while( i < workQ.size() ) {
+        
+        // WorkQueue stores E
+        int E = workQ[ i ];
+      
+        DataFrame<double> S = Simplex( data,
+                                       "",          // pathOut,
+                                       "",          // predictFile,
+                                       lib,
+                                       pred,
+                                       E,
+                                       Tp,
+                                       0,           // knn = 0
+                                       tau,
+                                       colNames,
+                                       targetName,
+                                       embedded,
+                                       verbose );
+        
+        VectorError ve = ComputeError( S.VectorColumnName( "Observations" ),
+                                       S.VectorColumnName( "Predictions"  ) );
+
+        E_rho.WriteRow( i, std::valarray<double>({ (double) E, ve.rho }));
+        
+        if ( verbose ) {
+            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
+            std::cout << "EmbedThread() workQ[" << workQ[i] << "]  E " << E 
+                      << "  rho " << ve.rho << "  RMSE " << ve.RMSE
+                      << "  MAE " << ve.MAE << std::endl << std::endl;
+            lck.unlock();
+        }
+    
+        i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
+    }
+    
+    // Reset counter
+    std::atomic_store( &EDM_Eval::embed_count_i, std::size_t(0) );
 }
 
 //-----------------------------------------------------------------
@@ -209,12 +278,12 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
     // Container for results
     DataFrame<double> Tp_rho( 10, 2, "Tp rho" );
 
-    // build work queue
-    EDM_Eval::WorkQueue wq( 10 );
+    // Build work queue
+    EDM_Eval::WorkQueue workQ( 10 );
 
     // Insert Tp values into work queue
     for ( auto i = 0; i < 10; i++ ) {
-        wq[ i ] = i + 1;
+        workQ[ i ] = i + 1;
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
@@ -224,14 +293,13 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
     // thread container
     std::vector< std::thread > threads;
     for ( unsigned i = 0; i < nThreads; ++i ) {
-        threads.push_back( std::thread( SimplexThread,
-                                        std::ref( wq ),
+        threads.push_back( std::thread( PredictIntervalThread,
+                                        std::ref( workQ ),
                                         std::ref( data ),
                                         std::ref( Tp_rho ),
                                         lib,
                                         pred,
                                         E,
-                                        0,       // Tp must be 0
                                         tau,
                                         colNames,
                                         targetName,
@@ -244,9 +312,6 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
         thrd.join();
     }
     
-    // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::tp_count_i, std::size_t(0) );
-    
     if ( predictFile.size() ) {
         Tp_rho.WriteData( pathOut, predictFile );
     }
@@ -255,44 +320,27 @@ DataFrame<double> PredictInterval( DataFrame< double > data,
 }
 
 //----------------------------------------------------------------
-// Worker thread for EmbedDimension() and PredictInterval()
+// Worker thread for PredictInterval()
 //----------------------------------------------------------------
-void SimplexThread( EDM_Eval::WorkQueue &wq,
-                    DataFrame< double > &data,
-                    DataFrame< double > &DF_rho,
-                    std::string          lib,
-                    std::string          pred,
-                    int                  E,       // one of E and Tp must be
-                    int                  Tp,      // zero
-                    int                  tau,
-                    std::string          colNames,
-                    std::string          targetName,
-                    bool                 embedded,
-                    bool                 verbose )
+void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
+                            DataFrame< double > &data,
+                            DataFrame< double > &Tp_rho,
+                            std::string          lib,
+                            std::string          pred,
+                            int                  E,
+                            int                  tau,
+                            std::string          colNames,
+                            std::string          targetName,
+                            bool                 embedded,
+                            bool                 verbose )
 {
-    if ( E != 0 and Tp != 0 ) {
-        throw std::runtime_error("SimplexThread() One of E or Tp must be 0.\n");
-    }
+    std::size_t i = std::atomic_fetch_add( &EDM_Eval::tp_count_i,
+                                           std::size_t(1) );
     
-    std::size_t i;
-
-    // Decide if E or Tp are in the WorkQueue
-    bool wq_E  = false;
-    bool wq_Tp = false;
-    if ( E  < 1 ) {
-        wq_E = true;
-        i  = std::atomic_fetch_add( &EDM_Eval::embed_count_i, std::size_t(1) );
-    }
-    else if (Tp < 1) {
-        wq_Tp = true;
-        i  = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
-    }
-    
-    while( i < wq.size() ) {
+    while( i < workQ.size() ) {
         
-        // WorkQueue stores E or Tp
-        if      ( wq_E  ) { E  = wq[ i ]; }
-        else if ( wq_Tp ) { Tp = wq[ i ]; }
+        // WorkQueue stores Tp
+        int Tp = workQ[ i ];
                   
         DataFrame<double> S = Simplex( data,
                                        "",          // pathOut,
@@ -311,29 +359,22 @@ void SimplexThread( EDM_Eval::WorkQueue &wq,
         VectorError ve = ComputeError( S.VectorColumnName( "Observations" ),
                                        S.VectorColumnName( "Predictions"  ) );
 
-        if ( wq_E ) {
-            DF_rho.WriteRow( i, std::valarray<double>({ (double) E, ve.rho }));
-        }
-        else if ( wq_Tp ) {
-            DF_rho.WriteRow( i, std::valarray<double>({ (double) Tp, ve.rho }));
-        }
+        Tp_rho.WriteRow( i, std::valarray<double>({ (double) Tp, ve.rho }));
         
         if ( verbose ) {
             std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
-            std::cout << "SimplexThread() wq_E(" << wq_E << ") wq_Tp(" << wq_Tp 
-                      << ")  E " << E << "  Tp " << Tp 
+            std::cout << "PredictIntervalThread() workQ[" << workQ[i]
+                      << "]  Tp " << Tp 
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl << std::endl;
             lck.unlock();
         }
     
-        if ( wq_E ) {
-            i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
-        }
-        else if ( wq_Tp ) {
-            i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
-        }
+        i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
     }
+    
+    // Reset counter
+    std::atomic_store( &EDM_Eval::tp_count_i, std::size_t(0) );    
 }
 
 //----------------------------------------------------------------
@@ -398,12 +439,12 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
     // Container for results
     DataFrame<double> Theta_rho( ThetaValues.size(), 2, "Theta rho" );
 
-    // build work queue
-    EDM_Eval::WorkQueue wq( ThetaValues.size() );
+    // Build work queue
+    EDM_Eval::WorkQueue workQ( ThetaValues.size() );
 
     // Insert ThetaValues indexes into work queue
     for ( auto i = 0; i < ThetaValues.size(); i++ ) {
-        wq[ i ] = i;
+        workQ[ i ] = i;
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
@@ -414,7 +455,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
     std::vector< std::thread > threads;
     for ( unsigned i = 0; i < nThreads; ++i ) {
         threads.push_back( std::thread( SMapThread,
-                                        std::ref( wq ),
+                                        std::ref( workQ ),
                                         std::ref( data ),
                                         std::ref( Theta_rho ),
                                         ThetaValues,
@@ -434,9 +475,6 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
         thrd.join();
     }
 
-    // Reset counter in case other threads are spawned in the app
-    std::atomic_store( &EDM_Eval::smap_count_i, std::size_t(0) );
-    
     if ( predictFile.size() ) {
         Theta_rho.WriteData( pathOut, predictFile );
     }
@@ -447,7 +485,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > data,
 //----------------------------------------------------------------
 // Worker thread for PredictNonlinear()
 //----------------------------------------------------------------
-void SMapThread( EDM_Eval::WorkQueue   &wq,
+void SMapThread( EDM_Eval::WorkQueue   &workQ,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
                  std::valarray<double>  ThetaValues,
@@ -465,9 +503,9 @@ void SMapThread( EDM_Eval::WorkQueue   &wq,
     std::size_t i =
         std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );
 
-    while( i < wq.size() ) {
+    while( i < workQ.size() ) {
         
-        double theta = ThetaValues[ wq[ i ] ];  
+        double theta = ThetaValues[ workQ[ i ] ];  
         
         SMapValues S = SMap( data,
                              "",
@@ -505,4 +543,7 @@ void SMapThread( EDM_Eval::WorkQueue   &wq,
     
         i = std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );
     }
+    
+    // Reset counter
+    std::atomic_store( &EDM_Eval::smap_count_i, std::size_t(0) );
 }

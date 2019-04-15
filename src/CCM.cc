@@ -17,7 +17,9 @@
 #include "Neighbors.h"
 #include "AuxFunc.h"
 
-// forward declaration
+//----------------------------------------------------------------
+// forward declarations
+//----------------------------------------------------------------
 #ifdef CCM_THREADED
 void CrossMap( Parameters p, DataFrame< double > df,
                const DataFrame< double > & LibStats );
@@ -25,14 +27,15 @@ void CrossMap( Parameters p, DataFrame< double > df,
 DataFrame< double > CrossMap( Parameters p, DataFrame< double > df );
 #endif
 
-
 DataFrame< double > CCMDistances( DataFrame< double > dataBlock,
                                   Parameters param );
 
 Neighbors CCMNeighbors( DataFrame< double > Distances,
                         std::vector< size_t > lib_i, Parameters param );
 
-DataFrame<double> SimplexProjection( Parameters param, DataEmbedNN embedNN );
+DataFrame<double> SimplexProjection( Parameters  param,
+                                     DataEmbedNN embedNN,
+                                     bool        checkDataRows = true );
 
 //----------------------------------------------------------------
 // API Overload 1: Explicit data file path/name
@@ -57,13 +60,6 @@ DataFrame <double > CCM( std::string pathIn,
                          bool        verbose )
 {
 
-    if ( not columns.size() ) {
-        throw std::runtime_error("CCM() must specify the column to embed.");
-    }
-    if ( not target.size() ) {
-        throw std::runtime_error("CCM() must specify the target.");
-    }
-    
     //----------------------------------------------------------
     // Load data to dataFrameIn
     //----------------------------------------------------------
@@ -114,6 +110,9 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
     if ( not target.size() ) {
         throw std::runtime_error("CCM() must specify the target.");
     }
+    if ( not libSizes_str.size() ) {
+        throw std::runtime_error("CCM() must specify library sizes.");
+    }
 
     Parameters param = Parameters( Method::Simplex, "", "",
                                    pathOut, predictFile,
@@ -126,9 +125,9 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
         std::cout << "WARNING: CCM() Only the first column will be mapped.\n";
     }
 
-    // Create a local Parameters object that switches column[0] and
-    // target for the inverse mapping
-    Parameters inverseParam(param); // copy constructor
+    // Create an Parameters object that switches column[0] and target
+    // for the inverse mapping
+    Parameters inverseParam( param ); // copy constructor
     std::string newTarget( param.columns_str );
     inverseParam.columns_str = param.target_str;
     inverseParam.target_str  = newTarget;
@@ -415,9 +414,9 @@ DataFrame< double > CrossMap( Parameters paramCCM,
                                                targetVec,  neighbors );
 
             //----------------------------------------------------------
-            // Simplex Projection
+            // Simplex Projection: lib_str & pred_str set from N_row
             //----------------------------------------------------------
-            DataFrame<double> S = SimplexProjection( paramCCM, embedNN );
+            DataFrame<double> S = SimplexProjection( paramCCM, embedNN, false );
 
             VectorError ve = ComputeError(
                 S.VectorColumnName( "Observations" ),

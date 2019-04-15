@@ -1,7 +1,7 @@
 
 CC  = g++
 
-EXE =  SimplexTest TestCommonTest SMapTest CCMTest
+EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest
 OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
@@ -21,6 +21,9 @@ TestCommonTest: TestCommonTest.cc
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 SMapTest: SMapTest.cc
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
+
+MultiviewTest: MultiviewTest.cc
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 clean:

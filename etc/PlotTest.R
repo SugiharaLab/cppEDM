@@ -21,7 +21,8 @@ Clean = function( path = './' ) {
              "ccm.csv",
              "EmbedDimOut.csv",
              "PredictIntervalOut.csv",
-             "PredictNonlinearOut.csv" )
+             "PredictNonlinearOut.csv",
+             "MultiviewBlock3sp.csv" )
 
   file.remove( files )
 }
@@ -33,34 +34,58 @@ PlotSimplexSmap = function( path = './' ) {
   if ( is.null( dev.list() ) ) {
     dev.new()
     par( mar = c(2, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
-         cex.axis = 1.5, cex.lab = 1.5, mfrow = c(6, 1) )
+         cex.axis = 1.5, cex.lab = 1.5, mfrow = c(7, 1) )
   }
 
   f1 = "cppBlock3sp_E3.csv"
   f2 = "cppBlock3sp_Embedded.csv"
   f3 = "smap_3sp_Embed.csv"
-  f4 = "smap_3sp_coeff.csv"   
+  f4 = "smap_3sp_coeff.csv"
+  f5 = "MultiviewBlock3sp.csv"
 
   df1 = read.csv( paste( path, f1, sep = '' ) )
   df2 = read.csv( paste( path, f2, sep = '' ) )
   df3 = read.csv( paste( path, f3, sep = '' ) )
   df4 = read.csv( paste( path, f4, sep = '' ) )
+  df5 = read.csv( paste( path, f5, sep = '' ) )
 
   plot ( df1$Time, df1$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df1$Time, df1$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
+  corcoef = round( cor( df1$Observations, df1$Predictions,
+                        use = "pairwise.complete.obs" ), 2 )
+  mtext( paste( " Simplex E=3  ρ =", corcoef ),
+         side = 3, line = -1.5, adj = 0, cex = 1.3 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
   plot ( df2$Time, df2$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df2$Time, df2$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
+  corcoef = round( cor( df2$Observations, df2$Predictions,
+                        use = "pairwise.complete.obs" ), 2 )
+  mtext( paste( " Simplex embedded  ρ =", corcoef ),
+         side = 3, line = -1.5, adj = 0, cex = 1.3 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
+          fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
+
+  plot ( df5$Time, df5$Observations, type = 'l', lwd = 3, ylab = '' )
+  lines( df5$Time, df5$Predictions, col = 'red', lwd = 3 )
+  abline( h = 0 )
+  corcoef = round( cor( df5$Observations, df5$Predictions,
+                        use = "pairwise.complete.obs" ), 2 )
+  mtext( paste( " Multiview   ρ =", corcoef ),
+         side = 3, line = -1.5, adj = 0, cex = 1.3 )
+  legend( 'topright', horiz = TRUE, legend = c( "Obs", "Pred" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
   plot ( df3$Time, df3$Observations, type = 'l', lwd = 3, ylab = '' )
   lines( df3$Time, df3$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
+  corcoef = round( cor( df3$Observations, df3$Predictions,
+                        use = "pairwise.complete.obs" ), 2 )
+  mtext( paste( " SMap embedded  ρ =", corcoef ),
+         side = 3, line = -1.5, adj = 0, cex = 1.3 )
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "SMap" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 

@@ -9,7 +9,7 @@ Neighbors::~Neighbors() {}
 // It is assumed that the data frame has only columns of data for
 // which knn will be computed.  The (time) column is not present.
 //----------------------------------------------------------------
-struct Neighbors FindNeighbors(
+Neighbors FindNeighbors(
     DataFrame<double> dataFrame,
     Parameters        parameters )
 {
