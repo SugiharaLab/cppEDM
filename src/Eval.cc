@@ -208,11 +208,10 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
         E_rho.WriteRow( i, std::valarray<double>({ (double) E, ve.rho }));
         
         if ( verbose ) {
-            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
+            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
             std::cout << "EmbedThread() workQ[" << workQ[i] << "]  E " << E 
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl << std::endl;
-            lck.unlock();
         }
     
         i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
@@ -362,12 +361,11 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
         Tp_rho.WriteRow( i, std::valarray<double>({ (double) Tp, ve.rho }));
         
         if ( verbose ) {
-            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
+            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
             std::cout << "PredictIntervalThread() workQ[" << workQ[i]
                       << "]  Tp " << Tp 
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl << std::endl;
-            lck.unlock();
         }
     
         i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
@@ -534,11 +532,10 @@ void SMapThread( EDM_Eval::WorkQueue   &workQ,
         Theta_rho.WriteRow( i, std::valarray<double>({ theta, ve.rho }));
         
         if ( verbose ) {
-            std::unique_lock<std::mutex> lck( EDM_Eval::mtx );
+            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
             std::cout << "Theta " << theta
                       << "  rho " << ve.rho << "  RMSE " << ve.RMSE
                       << "  MAE " << ve.MAE << std::endl << std::endl;
-            lck.unlock();
         }
     
         i = std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );

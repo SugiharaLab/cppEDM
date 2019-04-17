@@ -383,15 +383,14 @@ void EvalComboThread( Parameters                            param,
 
 #ifdef DEBUG_ALL
         {
-        std::unique_lock<std::mutex> lck( EDM_Multiview::mtx );
-        std::cout << "EvalComboThread() Thread ["
-                  << std::this_thread::get_id() << "] ";
-        //std::cout << data;
-        std::cout << "combo: [";
-        for ( auto i = 0; i < combo.size(); i++ ) {
-            std::cout << combo[i] << ",";
-        } std::cout << "]  rho = ";
-        lck.unlock();
+            std::lock_guard<std::mutex> lck( EDM_Multiview::mtx );
+            std::cout << "EvalComboThread() Thread ["
+                      << std::this_thread::get_id() << "] ";
+            //std::cout << data;
+            std::cout << "combo: [";
+            for ( auto i = 0; i < combo.size(); i++ ) {
+                std::cout << combo[i] << ",";
+            } std::cout << "]  rho = ";
         }
 #endif
 
@@ -420,9 +419,8 @@ void EvalComboThread( Parameters                            param,
 
 #ifdef DEBUG_ALL
         {
-        std::unique_lock<std::mutex> lck( EDM_Multiview::mtx );
-        std::cout << ve.rho << std::endl;
-        lck.unlock();
+            std::lock_guard<std::mutex> lck( EDM_Multiview::mtx );
+            std::cout << ve.rho << std::endl;
         }
 #endif
 
