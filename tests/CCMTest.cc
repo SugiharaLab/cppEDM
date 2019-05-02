@@ -17,7 +17,7 @@ int main () {
     DataFrame < double > output = CCM( "../data/", "sardine_anchovy_sst.csv",
                                        "./data/", "CCM_anch_sst_cppEDM.csv",
                                        3, 0, 0, 1, "anchovy", "np_sst",
-                                       "10 75 5", 1, false, 0, false, true );
+                                       "10 75 5", 1, false, 0, true );
     
     // comparison
     MakeTest ("CCM sardine_anchovy_sst test", cppOutput, output );

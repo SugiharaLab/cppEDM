@@ -56,7 +56,6 @@ DataFrame <double > CCM( std::string pathIn,
                          int         sample,
                          bool        random,
                          unsigned    seed,
-                         bool        embedded,
                          bool        verbose )
 {
 
@@ -78,9 +77,7 @@ DataFrame <double > CCM( std::string pathIn,
                                              sample,
                                              random,
                                              seed,
-                                             embedded,
                                              verbose );
-
     return PredictLibRho;
 }
 
@@ -101,7 +98,6 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
                          int         sample,
                          bool        random,
                          unsigned    seed,
-                         bool        embedded,
                          bool        verbose )
 {
     if ( not columns.size() ) {
@@ -117,7 +113,7 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
     Parameters param = Parameters( Method::Simplex, "", "",
                                    pathOut, predictFile,
                                    "", "", E, Tp, knn, tau, 0,
-                                   columns, target, embedded, verbose,
+                                   columns, target, false, verbose,
                                    "", "", "", 0, 0, 0, 0,
                                    libSizes_str, sample, random, seed );
 

@@ -195,7 +195,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > CCMD = 
             CCM( "../data/", "sardine_anchovy_sst.csv", "./", "ccm.csv",
                  3, 0, 0, 1, "anchovy", "np_sst", "10 80 10", 100,
-                 true, 0, false, true );
+                 true, 0, true );
 
         std::cout << "CCM sardine_anchovy_sst.csv:\n";
         std::cout << CCMD;

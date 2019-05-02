@@ -150,7 +150,6 @@ DataFrame<double> CCM( std::string pathIn       = "./data/",
                        int         sample       = 0,
                        bool        random       = true,
                        unsigned    seed         = 0,     // seed=0: use RNG
-                       bool        embedded     = false,
                        bool        verbose      = true );
 
 DataFrame<double> CCM( DataFrame< double >,
@@ -166,7 +165,6 @@ DataFrame<double> CCM( DataFrame< double >,
                        int         sample       = 0,
                        bool        random       = true,
                        unsigned    seed         = 0,     // seed=0: use RNG
-                       bool        embedded     = false,
                        bool        verbose      = true );
 
 DataFrame<double> EmbedDimension( std::string pathIn      = "./data/",
