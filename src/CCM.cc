@@ -11,10 +11,8 @@
 #include <thread>
 #endif
 
-#include "Parameter.h"
-#include "DataFrame.h"
+#include "Common.h"
 #include "Embed.h"
-#include "Neighbors.h"
 #include "AuxFunc.h"
 
 //----------------------------------------------------------------

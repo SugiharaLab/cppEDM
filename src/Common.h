@@ -9,7 +9,7 @@
 #include <cctype>
 #include <cmath>
 
-#include "DataFrame.h" // #include Common.h
+#include "DataFrame.h" // has #include Common.h
 
 // Normally, macros are eschewed
 // Define the initial maximum distance for neigbor distances to avoid sort()

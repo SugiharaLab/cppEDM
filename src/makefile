@@ -5,7 +5,7 @@ OBJ = Common.o AuxFunc.o Parameter.o Embed.o Interface.o Neighbors.o\
 
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -g -DCCM_THREADED # -DDEBUG -DDEBUG_ALL
+CFLAGS = -std=c++11 -DCCM_THREADED -O3 # -g -DDEBUG -DDEBUG_ALL
 LFLAGS = -L./ -lstdc++ -lEDM -lpthread # -llapacke -llapack -lblas 
 
 all:	$(LIB)
@@ -59,9 +59,8 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-Common.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h Version.h
-Common.o: Embed.h
-AuxFunc.o: AuxFunc.h Neighbors.h Common.h DataFrame.h Parameter.h Version.h
+Common.o: Common.h DataFrame.h
+AuxFunc.o: AuxFunc.h Common.h DataFrame.h Neighbors.h Parameter.h Version.h
 AuxFunc.o: Embed.h
 Parameter.o: Parameter.h Common.h DataFrame.h Version.h
 Embed.o: Embed.h Common.h DataFrame.h Parameter.h Version.h
@@ -70,6 +69,7 @@ Neighbors.o: Neighbors.h Common.h DataFrame.h Parameter.h Version.h
 Simplex.o: Common.h DataFrame.h Parameter.h Version.h Neighbors.h Embed.h
 Simplex.o: AuxFunc.h
 Eval.o: Common.h DataFrame.h
-CCM.o: Parameter.h Common.h DataFrame.h Version.h Embed.h Neighbors.h
-CCM.o: AuxFunc.h
-Multiview.o: Common.h DataFrame.h
+CCM.o: Common.h DataFrame.h Embed.h Parameter.h Version.h AuxFunc.h
+CCM.o: Neighbors.h
+Multiview.o: Common.h DataFrame.h AuxFunc.h Neighbors.h Parameter.h Version.h
+Multiview.o: Embed.h

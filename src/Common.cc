@@ -2,7 +2,6 @@
 #include <algorithm>
 
 #include "Common.h"
-#include "AuxFunc.h"
 
 //----------------------------------------------------------------
 // 

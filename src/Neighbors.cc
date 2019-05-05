@@ -180,11 +180,17 @@ double Distance( const std::valarray<double> &v1,
     // For efficiency sake, we forego the usual validation of v1 & v2.
 
     if ( metric == DistanceMetric::Euclidean ) {
-        double sum = 0;
+        double sum   = 0;
+        double delta = 0;
         for ( size_t i = 0; i < v1.size(); i++ ) {
-            sum += pow( v2[i] - v1[i], 2 );
+            delta = v2[i] - v1[i];
+            sum  += delta * delta; // avoid call to pow()
         }
         distance = sqrt( sum );
+
+        // Note: this implicit implementation is slower
+        // std::valarray<double> delta = v2 - v1;
+        // distance = sqrt( (delta * delta).sum() );
     }
     else if ( metric == DistanceMetric::Manhattan ) {
         double sum = 0;
@@ -203,6 +209,7 @@ double Distance( const std::valarray<double> &v1,
     return distance;
 }
 
+#ifdef DEBUG_ALL
 //----------------------------------------------------------------
 // 
 //----------------------------------------------------------------
@@ -244,3 +251,4 @@ void PrintNeighborsOut( const Neighbors &neighbors )
         } std::cout << std::endl;
     }
 }
+#endif

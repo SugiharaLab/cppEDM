@@ -1,6 +1,8 @@
 #ifndef AUXFUNC
 #define AUXFUNC
 
+#include "Common.h"
+
 #include "Neighbors.h"
 #include "Embed.h"
 
