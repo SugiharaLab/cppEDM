@@ -3,14 +3,16 @@ General notes
 
 1) The OSX XCode compiler/linker seems to be incompatible with the C++11
    standard implementation allowing template classes to be distributed into
-   declarations (.h) and implementation (.cc).  To support OSX, DataFrame.h
-   contains both declarations and implemenations. See: libstdc++_Notes.txt.
+   declarations (.h) and implementation (.cc).  However, this does entail
+   explicit declaration of specialised template types in the .cc file.
+   To support OSX, DataFrame.h contains both declarations and implemenations.
+   See: libstdc++_Notes.txt.
 
 2) The code relies heavily on class and data containers without explicit
-   heap allocation.  This facilitates garbage collection.  However, using
-   copy-on-return for large data objects is likely a performance issue.
-   If the code encounters massive data objects/large problems, this may pose
-   a significant limitation.
+   heap allocation.  This facilitates garbage collection.  It may be that
+   copy-on-return for large data objects creates a performance issue.
+   If the code encounters massive data objects/large problems, this may
+   pose a limitation.
 
 3) Eigen template library. The recommended SVD solver is the BDCSVD that
    scales to large problems. The Eigen documentation states:
@@ -22,12 +24,16 @@ General notes
      accuracy.
    See: https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
 
-   However, when running the SMap circle.csv test, this solver (with
-   default parameters) produces occasional divergence.  We have therefore
+   Note that when running the SMap circle.csv test, the BDCSVD solver with
+   default parameters produces occasional divergence.  We have therefore
    defaulted to the JacobiSVD solver. 
 
 4) Eigen template library. Eigen allows replacement of it's internal
    template library routines with direct calls to BLAS/LAPACK libraries.
    See: https://eigen.tuxfamily.org/dox/TopicUsingBlasLapack.html
    This may offer performance and stability advantages.
+
+5) SVD for S-map.  To completely excise Eigen or other 3rd party libraries
+   for S-map SVD, one can call the BLAS/LAPACK dgesdd_() directly.
+   An example of such a C++ implementation is in lapack_dgesdd.cc.
    
