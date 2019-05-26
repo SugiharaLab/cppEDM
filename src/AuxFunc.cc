@@ -65,9 +65,11 @@ DataEmbedNN EmbedNN( DataFrame<double> dataIn,
         size_t shift = std::max(0, param.tau * (param.E - 1) );
         
         std::valarray<double> target_vec_embed( dataIn.NRows() - shift );
-        target_vec_embed = target_vec[ std::slice( shift,
-                                                   target_vec.size() - shift,
-                                                   1 ) ];
+        // Bogus cast to ( std::valarray<double> ) for MSVC
+        // as it doesn't export its own slice_array applied to []
+        target_vec_embed = ( std::valarray<double> )
+            target_vec[ std::slice( shift, target_vec.size() - shift, 1 ) ];
+        
         target_vec = target_vec_embed;
 
         DataFrame<double> dataInEmbed( dataIn.NRows() - shift,
@@ -112,7 +114,8 @@ DataFrame<double> FormatOutput( Parameters            param,
     std::valarray<double> time( N_row + param.Tp );
     
     // Insert times from prediction. Time is the 1st column
-    time[ std::slice( 0, N_row, 1 ) ] = dataFrameIn.Column( 0 )[ pred_i ];
+    time[ std::slice( 0, N_row, 1 ) ] =
+        ( std::valarray<double> ) dataFrameIn.Column( 0 )[ pred_i ];
 
 #ifdef DEBUG_ALL
     std::cout << "FormatOutput() >>>> " << time.size() << " >>> ";
@@ -129,7 +132,9 @@ DataFrame<double> FormatOutput( Parameters            param,
     // Observations: add Tp nan at end
     //----------------------------------------------------
     std::valarray<double> observations( N_row + param.Tp );
-    observations[ std::slice( 0, N_row, 1 ) ] = target_vec[ pred_i ];
+    observations[ std::slice( 0, N_row, 1 ) ] =
+        ( std::valarray<double> ) target_vec[ pred_i ];
+    
     for ( size_t i = N_row; i < N_row + param.Tp; i++ ) {
         observations[ i ] = NAN;
     }

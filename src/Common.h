@@ -9,6 +9,10 @@
 #include <cctype>
 #include <cmath>
 
+#ifdef _MSC_VER
+#include <ciso646> // macro constants for C++ operators not in ISO646
+#endif
+
 #include "DataFrame.h" // has #include Common.h
 
 // Normally, macros are eschewed
@@ -43,12 +47,18 @@ struct MultiviewValues {
     DataFrame< double > Combo_rho;
     DataFrame< double > Predictions;
 
+#ifdef MULTIVIEW_VALUES_OVERLOAD
+    // The MSVC compiler with pybind11 does not handle overloads easily...
+    // https://pybind11.readthedocs.io/en/stable/classes.html
+    // Don't define constructurs for the setuptools module build on Windows
+    
     // Constructors
     MultiviewValues();
 
     MultiviewValues( DataFrame< double > combo_rho,
                      DataFrame< double > predictions ):
         Combo_rho( combo_rho ), Predictions( predictions ) {}
+#endif
 };
 
 //-------------------------------------------------------------
