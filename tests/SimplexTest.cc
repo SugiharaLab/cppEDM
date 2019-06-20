@@ -19,8 +19,8 @@ int main () {
     // Generate cpp output
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_embd_block_3sp_cppEDM.csv",
-                          "1 99","100 198", 3, 1, 0, 1,
-                          "x_t y_t z_t", "x_t", true, true );
+                          "1 99","100 198", 3, 1, 0, 1, 0,
+                          "x_t y_t z_t", "x_t", true, false, true );
     // Comparison
     MakeTest ( "block_3sp.csv embedded data test", pyOutput, cppOutput );
 
@@ -35,8 +35,8 @@ int main () {
     // Generate cpp output
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_E3_block_3sp_cppEDM.csv",
-                          "1 100", "101 195", 3, 1, 0, 1,
-                          "x_t", "x_t", false, true );
+                          "1 100", "101 195", 3, 1, 0, 1, 0,
+                          "x_t", "x_t", false, false, true );
     // Comparison
     MakeTest ( "block_3sp.csv dynamic embedding test", pyOutput, cppOutput );
 }

@@ -72,8 +72,8 @@ int main( int argc, char *argv[] ) {
         DataFrame<double> dataFrame = 
             Simplex( "../data/", "block_3sp.csv", "./",
                      "cppBlock3sp_Embedded.csv",
-                     "1 100", "101 195", 3, 1, 0, 1,
-                     "x_t x_t-1 x_t-2", "x_t", true, true );
+                     "1 100", "101 195", 3, 1, 0, 1, 0,
+                     "x_t x_t-1 x_t-2", "x_t", true, false, true );
         std::cout << dataFrame;
 
         VectorError ve = ComputeError(
@@ -95,8 +95,8 @@ int main( int argc, char *argv[] ) {
         DataFrame<double> dataFrameEmbed = 
             Simplex( "../data/", "block_3sp.csv", "./",
                      "cppBlock3sp_E3.csv",
-                     "1 100", "101 195", 3, 1, 0, 1,
-                     "x_t y_t z_t", "x_t", false, true );
+                     "1 100", "101 195", 3, 1, 0, 1, 0,
+                     "x_t y_t z_t", "x_t", false, false, true );
         
         dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
         std::cout << dataFrameEmbed;
@@ -145,9 +145,9 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         SMapValues SMV = 
             SMap( "../data/", "block_3sp.csv", "./", "smap_3sp_Embed.csv",
-                  "1 100", "101 195", 3, 1, 0, 1, 3.,
+                  "1 100", "101 195", 3, 1, 0, 1, 3., 0, 
                   "x_t", "x_t", "smap_3sp_coeff.csv", "",
-                  false, true );
+                  false, false, true );
 
         DataFrame< double > predictions  = SMV.predictions;
         DataFrame< double > coefficients = SMV.coefficients;
@@ -169,9 +169,9 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         SMapValues SMV2 = 
             SMap( "../data/", "circle.csv", "./", "smap_circle.csv",
-                  "1 100", "101 198", 2, 1, 0, 1, 4.,
+                  "1 100", "101 198", 2, 1, 0, 1, 4., 0,
                   "x y", "x", "smap_circ_coeff.csv", "",
-                  true, true );
+                  true, false, true );
 
         DataFrame< double > predictions2  = SMV2.predictions;
         DataFrame< double > coefficients2 = SMV2.coefficients;
