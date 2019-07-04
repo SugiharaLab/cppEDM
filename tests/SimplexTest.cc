@@ -39,4 +39,28 @@ int main () {
                           "x_t", "x_t", false, false, true );
     // Comparison
     MakeTest ( "block_3sp.csv dynamic embedding test", pyOutput, cppOutput );
+
+    
+    //-------------------------------------------------------------------
+    // Simplex prediction with dynamically embedded data and ISO Datetime
+    // Load pyEDM output from (Datetime converted to day since 0000-12-30)
+    //   Predict.py -pa ../data/ -i "S12CD-S333-SumFlow_1980-2005.csv"
+    //              -l 1 800 -p 801 1375 -c "S12.C.D.S333" -r "S12.C.D.S333"
+    //              -E 3 -T 1 -P -v -o Smplx_S12CD_E3_pyEDM.csv
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","Smplx_S12CD_E3_pyEDM.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "../data/", "S12CD-S333-SumFlow_1980-2005.csv",
+                          "./data/", "Smplx_S12CD_E3_cppEDM.csv",
+                          "1 800", "801 1375", 3, 1, 0, 1, 0,
+                          "S12.C.D.S333", "S12.C.D.S333", false, false, true );
+
+    cppOutput.MaxRowPrint() = 5; // Set number of rows to print
+
+    std::cout << cppOutput; // ISO datetime in Time column
+    
+    // Comparison
+    MakeTest ( "S12CD-S333 ISO datetime", pyOutput, cppOutput );
+
 }
