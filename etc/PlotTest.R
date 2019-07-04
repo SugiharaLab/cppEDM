@@ -41,16 +41,17 @@ PlotSimplexSmap = function( path = './' ) {
   f2 = "cppBlock3sp_Embedded.csv"
   f3 = "smap_3sp_Embed.csv"
   f4 = "smap_3sp_coeff.csv"
-  f5 = "MultiviewBlock3sp.csv"
+  f5 = "MultiviewBlock3sp.csv" # as.is = T since last times can be string
 
-  df1 = read.csv( paste( path, f1, sep = '' ) )
-  df2 = read.csv( paste( path, f2, sep = '' ) )
-  df3 = read.csv( paste( path, f3, sep = '' ) )
-  df4 = read.csv( paste( path, f4, sep = '' ) )
-  df5 = read.csv( paste( path, f5, sep = '' ) )
+  df1 = read.csv( paste( path, f1, sep = '' ), na.string = 'nan' )
+  df2 = read.csv( paste( path, f2, sep = '' ), na.string = 'nan' )
+  df3 = read.csv( paste( path, f3, sep = '' ), na.string = 'nan' )
+  df4 = read.csv( paste( path, f4, sep = '' ), na.string = 'nan' )
+  df5 = read.csv( paste( path, f5, sep = '' ), na.string = 'nan', as.is = TRUE )
 
-  plot ( df1$Time, df1$Observations, type = 'l', lwd = 3, ylab = '' )
-  lines( df1$Time, df1$Predictions, col = 'red', lwd = 3 )
+  # Simplex: cppBlock3sp_E3.csv
+  plot ( df1$time, df1$Observations, type = 'l', lwd = 3, ylab = '' )
+  lines( df1$time, df1$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
   corcoef = round( cor( df1$Observations, df1$Predictions,
                         use = "pairwise.complete.obs" ), 2 )
@@ -59,8 +60,9 @@ PlotSimplexSmap = function( path = './' ) {
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
-  plot ( df2$Time, df2$Observations, type = 'l', lwd = 3, ylab = '' )
-  lines( df2$Time, df2$Predictions, col = 'red', lwd = 3 )
+  # Simplex: cppBlock3sp_Embedded.csv
+  plot ( df2$time, df2$Observations, type = 'l', lwd = 3, ylab = '' )
+  lines( df2$time, df2$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
   corcoef = round( cor( df2$Observations, df2$Predictions,
                         use = "pairwise.complete.obs" ), 2 )
@@ -69,8 +71,9 @@ PlotSimplexSmap = function( path = './' ) {
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Simplex" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
-  plot ( df5$Time, df5$Observations, type = 'l', lwd = 3, ylab = '' )
-  lines( df5$Time, df5$Predictions, col = 'red', lwd = 3 )
+  # Multiview: MultiviewBlock3sp.csv
+  plot ( df5$time, df5$Observations, type = 'l', lwd = 3, ylab = '' )
+  lines( df5$time, df5$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
   corcoef = round( cor( df5$Observations, df5$Predictions,
                         use = "pairwise.complete.obs" ), 2 )
@@ -79,8 +82,9 @@ PlotSimplexSmap = function( path = './' ) {
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "Pred" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
-  plot ( df3$Time, df3$Observations, type = 'l', lwd = 3, ylab = '' )
-  lines( df3$Time, df3$Predictions, col = 'red', lwd = 3 )
+  # SMap: smap_3sp_Embed.csv
+  plot ( df3$time, df3$Observations, type = 'l', lwd = 3, ylab = '' )
+  lines( df3$time, df3$Predictions, col = 'red', lwd = 3 )
   abline( h = 0 )
   corcoef = round( cor( df3$Observations, df3$Predictions,
                         use = "pairwise.complete.obs" ), 2 )
@@ -89,11 +93,12 @@ PlotSimplexSmap = function( path = './' ) {
   legend( 'topright', horiz = TRUE, legend = c( "Obs", "SMap" ),
           fill = c( 'black', 'red' ), cex = 1.5, bg = 'white' )
 
-  plot ( df4$Time, df4$C0, type = 'l', lwd = 3, ylab = 'SMap C0' )
+  # SMap: smap_3sp_coeff.csv
+  plot ( df4$time, df4$C0, type = 'l', lwd = 3, ylab = 'SMap C0' )
   abline( h = 0 )
-  plot ( df4$Time, df4$C1, type = 'l', lwd = 3, ylab = 'SMap C2' )
+  plot ( df4$time, df4$C1, type = 'l', lwd = 3, ylab = 'SMap C1' )
   abline( h = 0 )
-  plot ( df4$Time, df4$C2, type = 'l', lwd = 3, ylab = 'SMap C2' )
+  plot ( df4$time, df4$C2, type = 'l', lwd = 3, ylab = 'SMap C2' )
   abline( h = 0 )  
 } 
 

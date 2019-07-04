@@ -11,7 +11,8 @@ int main () {
     // Load cppEdm output
     //---------------------------------------------------------
     cppOutput = DataFrame < double > ( "./data/",
-                                       "CCM_anch_sst_cppEDM_valid.csv" );
+                                       "CCM_anch_sst_cppEDM_valid.csv",
+                                       true );  // noTime = true
     
     //generate new cpp output
     DataFrame < double > output = CCM( "../data/", "sardine_anchovy_sst.csv",

@@ -11,7 +11,8 @@ int main( int argc, char *argv[] ) {
                                           "Multiview_pred_valid.csv" );
     
     DataFrame < double > validCppCombos( "./data/",
-                                         "Multiview_combos_valid.csv" );
+                                         "Multiview_combos_valid.csv",
+                                         true ); // noTime = true
     
     // Generate new cppEDM output
     MultiviewValues MV = Multiview( "../data/",
