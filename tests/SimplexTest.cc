@@ -56,13 +56,15 @@ int main () {
                           "1 800", "801 1375", 3, 6, 0, 1, 0,
                           "S12.C.D.S333", "S12.C.D.S333", false, false, true );
 
-    cppOutput.MaxRowPrint() = 100000000; // Set number of rows to print
+    cppOutput.MaxRowPrint() = 5; // Set number of rows to print
 
     std::cout << cppOutput; // ISO datetime in Time column
-    std::cout << "printed out the dataframe to show that the time col can be extended"
-    <<" generically past the given time col data for supported iso formats"<<std::endl
-    <<"delete the line above and uncomment line below to restore simplex"
-    <<" tests output"<<std::endl;    
+    std::cout << "printed out the dataframe to show that the time col can "
+        <<"be extended"
+        <<" generically past the given time col data for supported iso formats"
+        <<std::endl
+        <<"delete the line above and uncomment line below to restore simplex"
+        <<" tests output"<<std::endl;    
     // Comparison - not running for now cus just testing time format parsing
     //MakeTest ( "S12CD-S333 ISO datetime", pyOutput, cppOutput );
 

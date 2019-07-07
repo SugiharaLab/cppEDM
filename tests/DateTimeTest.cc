@@ -1,11 +1,8 @@
-//file to test the parsing and incrementing of some datetime strings
+//file to test the parsing and incrementing of some datetime std::strings
 
 #include <iostream>
 #include <string>
-//ugly but don't want to expose this file's methods in cppEDM common
-#include "../src/DateTimeUtil.cc" 
-
-using namespace std;
+#include "TestCommon.h" 
 
 /*
    TIME FORMATS NEED TO TEST ON:
@@ -15,23 +12,23 @@ using namespace std;
    hh:mm:ss.sss
 */
 
-void check_increment_correct( string date_str_1, string date_str_2, 
-        string correct_incremented, int tp ) {
-    string output = increment_datetime_str( date_str_1, date_str_2, tp ); 
+void check_increment_correct( std::string date_str_1, std::string date_str_2, 
+        std::string correct_incremented, int tp ) {
+    std::string output = increment_datetime_str( date_str_1, date_str_2, tp ); 
     if ( output == correct_incremented ) 
-        cout <<"Correct."<<endl;
+        std::cout <<"Correct."<<std::endl;
     else 
-        cout << "BAD:"<<endl
+        std::cout << "BAD:"<<std::endl
         <<"datetimes are :"<<date_str_1<<" and "<<date_str_2
-        <<", increment of tp "<<tp<<" is "<<endl
-        <<output <<"vs"<<correct_incremented<<"end"<<endl
-        <<"_______________"<<endl;
+        <<", increment of tp "<<tp<<" is "<<std::endl
+        <<output <<"vs"<<correct_incremented<<"end"<<std::endl
+        <<"_______________"<<std::endl;
 }
 
 int main() {
 
-    string date_str_1;
-    string date_str_2;
+    std::string date_str_1;
+    std::string date_str_2;
 
     //////////////////testing YYYY-MM-DD//////////////////
     //difference in a month's unit. note won't be clean in months w date on 

@@ -2,15 +2,11 @@
 //  to add some tp increment to a datetime std::string past the given
 //  range the time column
 #include <iostream>//for testing
-#include <stdio.h> //time formatting
-#include <time.h> 
+#include <cstdio> //time formatting
+#include <ctime> 
 #include <string> 
 #include <bits/stdc++.h> 
 #include <regex> 
-
-//remove these 
-using std::cout; 
-using std::endl;
 
 const int iso_start_year = 1900;
 const int iso_start_month = 1;
@@ -23,7 +19,7 @@ YYYY-MM-DDTHH:MM:SS   (2019-06-30T10:26:10)
 hh:mm:ss.sss
 */
 
-//the regex's used in parsing and their time formats. in pair for easier checking
+//regex's used in parsing and their time formats. in pair for easier checking
 std::regex  regEx_yyyymmdd        ("\\d{4}-\\d{2}-\\d{2}"); 
 std::string fmt_yyyymmdd          ("%Y-%m-%d");
 std::regex  regEx_hhmmss          ("\\d{2}:\\d{2}:\\d{2}");
@@ -115,8 +111,9 @@ std::string increment_datetime_str ( std::string datetime1,
     datetime_info dtinfo2   = parse_datetime( datetime2 );
     if ( dtinfo1.unrecognized_fmt ) return std::string();
     //get the delta unit between two datetimes in the time col
-    size_t seconds_diff     = difftime(mktime(&dtinfo2.time),mktime(&dtinfo1.time));
-    if ( seconds_diff == 0 ) seconds_diff = 1; //case milliseconds want some update
+    size_t seconds_diff     = difftime(mktime(&dtinfo2.time),
+                                        mktime(&dtinfo1.time));
+    if ( seconds_diff == 0 ) seconds_diff = 1; //if millisec, want some update
     //increment the time and format
     dtinfo2.time.tm_sec     += tp * seconds_diff;
     mktime( &dtinfo2.time );

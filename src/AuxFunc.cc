@@ -300,6 +300,8 @@ void FillTimes( Parameters                param,
         }
     }
     else {
+		//to keep track of whether warning of time format already printed
+		bool time_format_warning_printed = false;
         // Tp introduces time values beyond the range of time
         for ( auto i = N_row; i < N_row + param.Tp; i++ ) {
             std::stringstream tss;
@@ -311,15 +313,23 @@ void FillTimes( Parameters                param,
             else {
                 int time_delta = i - N_row + 1;
                 //get last two datetimes to compute time diff to add time delta 
-                std::string time_new(time[ max_pred_i ]),
-                    time_old(time[ max_pred_i-1 ]);
+                std::string time_new(time[ max_pred_i ]);
+                std::string time_old(time[ max_pred_i-1 ]);
                 std::string new_time = increment_datetime_str( time_old, 
-                        time_new, time_delta ); 
+                                                        time_new, time_delta ); 
                 //add +ti if not a recognized format (datetime util returns "")
                 if ( new_time.size() )
                     tss << new_time; 
-                else 
+                else {
                     tss << time[ max_pred_i ] << " +" << i - N_row + 1;
+					if ( ! time_format_warning_printed ) {
+						std::cout << "FillTimes(): Note that the input "
+							<<"time column is an unrecognized time format."
+							<<std::endl<<"\tManually adding + tp to the last"
+							<< " time column available."<<std::endl;
+						time_format_warning_printed = true;
+					}
+				}
             }
             
             timeOut[ i ] = tss.str();
