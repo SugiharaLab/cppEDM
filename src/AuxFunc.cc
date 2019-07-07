@@ -1,5 +1,6 @@
 
 #include "AuxFunc.h"
+#include "DateTimeUtil.cc"
 
 //---------------------------------------------------------------
 // Common code for Simplex and Smap that embeds, extracts
@@ -310,7 +311,14 @@ void FillTimes( Parameters                param,
             else {
                 // JP: Use chrono to get new time value
                 // This " + Ti" is bogus...
-                tss << time[ max_pred_i ] << " +" << i - N_row + 1;
+                //tss << time[ max_pred_i ] << " +" << i - N_row + 1;
+                int time_delta = i - N_row + 1;
+                //get last two datetimes to compute time diff to add time delta 
+                std::string time_new(time[ max_pred_i ]),
+                    time_old(time[ max_pred_i-1 ]);
+                std::string new_time = increment_datetime_str( time_old, 
+                        time_new, time_delta ); 
+                tss << new_time; 
             }
             
             timeOut[ i ] = tss.str();
