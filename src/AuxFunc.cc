@@ -309,16 +309,17 @@ void FillTimes( Parameters                param,
                 tss << std::stod( time[ max_pred_i ] ) + i - N_row + 1;
             }
             else {
-                // JP: Use chrono to get new time value
-                // This " + Ti" is bogus...
-                //tss << time[ max_pred_i ] << " +" << i - N_row + 1;
                 int time_delta = i - N_row + 1;
                 //get last two datetimes to compute time diff to add time delta 
                 std::string time_new(time[ max_pred_i ]),
                     time_old(time[ max_pred_i-1 ]);
                 std::string new_time = increment_datetime_str( time_old, 
                         time_new, time_delta ); 
-                tss << new_time; 
+                //add +ti if not a recognized format (datetime util returns "")
+                if ( new_time.size() )
+                    tss << new_time; 
+                else 
+                    tss << time[ max_pred_i ] << " +" << i - N_row + 1;
             }
             
             timeOut[ i ] = tss.str();

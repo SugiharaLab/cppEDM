@@ -60,8 +60,8 @@ int main () {
 
     std::cout << cppOutput; // ISO datetime in Time column
     std::cout << "printed out the dataframe to show that the time col can be extended"
-    <<"generically past the given time col data for supported iso formats"<<
-    "delete the line above and uncommend line below to restore simplex"
+    <<" generically past the given time col data for supported iso formats"<<std::endl
+    <<"delete the line above and uncomment line below to restore simplex"
     <<" tests output"<<std::endl;    
     // Comparison - not running for now cus just testing time format parsing
     //MakeTest ( "S12CD-S333 ISO datetime", pyOutput, cppOutput );

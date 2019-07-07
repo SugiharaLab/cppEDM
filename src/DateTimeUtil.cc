@@ -113,6 +113,7 @@ std::string increment_datetime_str ( std::string datetime1,
     //parse datetimes
     datetime_info dtinfo1   = parse_datetime( datetime1 );
     datetime_info dtinfo2   = parse_datetime( datetime2 );
+    if ( dtinfo1.unrecognized_fmt ) return std::string();
     //get the delta unit between two datetimes in the time col
     size_t seconds_diff     = difftime(mktime(&dtinfo2.time),mktime(&dtinfo1.time));
     if ( seconds_diff == 0 ) seconds_diff = 1; //case milliseconds want some update
