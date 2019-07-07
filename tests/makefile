@@ -1,7 +1,7 @@
 
 CC  = g++
 
-EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest
+EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest
 OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
@@ -12,6 +12,10 @@ all:	$(EXE)
 # Need to figure out how to build TestCommon.o automatically
 SimplexTest: SimplexTest.cc
 	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
+
+DateTimeTest: DateTimeTest.cc ../src/DateTimeUtil.cc
+	$(CC) DateTimeTest.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 CCMTest: CCMTest.cc
