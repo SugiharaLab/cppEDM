@@ -1,6 +1,6 @@
 
 #include "AuxFunc.h"
-#include "DateTimeUtil.cc"
+#include "DateTime.h"
 
 //---------------------------------------------------------------
 // Common code for Simplex and Smap that embeds, extracts
@@ -120,7 +120,7 @@ DataEmbedNN EmbedNN( DataFrame<double>  dataIn,
 
             // erase elements of row indices that were deleted
             for ( auto element =  deleted_elements.begin();
-                       element != deleted_elements.end(); element++ ) {
+                  element != deleted_elements.end(); element++ ) {
 
                 std::vector< size_t >::iterator it;
                 it = std::find( param.library.begin(),
@@ -142,11 +142,11 @@ DataEmbedNN EmbedNN( DataFrame<double>  dataIn,
             // in library and prediction refer to the same data rows
             // before the deletion/shift.
             for ( auto li =  param.library.begin();
-                       li != param.library.end(); li++ ) {
+                  li != param.library.end(); li++ ) {
                 *li = *li - shift;
             }
             for ( auto pi =  param.prediction.begin();
-                       pi != param.prediction.end(); pi++ ) {
+                  pi != param.prediction.end(); pi++ ) {
                 *pi = *pi - shift;
             }
         } // if ( shift > 0 )
@@ -300,8 +300,8 @@ void FillTimes( Parameters                param,
         }
     }
     else {
-		//to keep track of whether warning of time format already printed
-		bool time_format_warning_printed = false;
+        //to keep track of whether warning of time format already printed
+        bool time_format_warning_printed = false;
         // Tp introduces time values beyond the range of time
         for ( auto i = N_row; i < N_row + param.Tp; i++ ) {
             std::stringstream tss;
@@ -316,20 +316,20 @@ void FillTimes( Parameters                param,
                 std::string time_new(time[ max_pred_i ]);
                 std::string time_old(time[ max_pred_i-1 ]);
                 std::string new_time = increment_datetime_str( time_old, 
-                                                        time_new, time_delta ); 
+                                                               time_new, time_delta ); 
                 //add +ti if not a recognized format (datetime util returns "")
                 if ( new_time.size() )
                     tss << new_time; 
                 else {
                     tss << time[ max_pred_i ] << " +" << i - N_row + 1;
-					if ( ! time_format_warning_printed ) {
-						std::cout << "FillTimes(): Note that the input "
-							<<"time column is an unrecognized time format."
-							<<std::endl<<"\tManually adding + tp to the last"
-							<< " time column available."<<std::endl;
-						time_format_warning_printed = true;
-					}
-				}
+                    if ( ! time_format_warning_printed ) {
+                        std::cout << "FillTimes(): Note that the input "
+                                  <<"time column is an unrecognized time format."
+                                  <<std::endl<<"\tManually adding + tp to the last"
+                                  << " time column available."<<std::endl;
+                        time_format_warning_printed = true;
+                    }
+                }
             }
             
             timeOut[ i ] = tss.str();

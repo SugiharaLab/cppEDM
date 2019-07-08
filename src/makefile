@@ -1,7 +1,7 @@
 
 CC  = g++
-OBJ = Common.o AuxFunc.o Parameter.o Embed.o Interface.o Neighbors.o\
-	Simplex.o Eval.o CCM.o Multiview.o SMap.o 
+OBJ = Common.o AuxFunc.o DateTimeUtil.o Parameter.o Embed.o Interface.o\
+	Neighbors.o Simplex.o Eval.o CCM.o Multiview.o SMap.o 
 
 LIB = libEDM.a
 
@@ -22,6 +22,9 @@ $(LIB): $(OBJ)
 
 AuxFunc.o: AuxFunc.cc
 	$(CC) -c AuxFunc.cc $(CFLAGS)
+
+DateTimeUtil.o: DateTimeUtil.cc
+	$(CC) -c DateTimeUtil.cc $(CFLAGS)
 
 Common.o: Common.cc
 	$(CC) -c Common.cc $(CFLAGS)
@@ -61,7 +64,8 @@ depend:
 
 Common.o: Common.h DataFrame.h
 AuxFunc.o: AuxFunc.h Common.h DataFrame.h Neighbors.h Parameter.h Version.h
-AuxFunc.o: Embed.h
+AuxFunc.o: Embed.h DateTime.h
+DateTimeUtil.o: DateTime.h
 Parameter.o: Parameter.h Common.h DataFrame.h Version.h
 Embed.o: Embed.h Common.h DataFrame.h Parameter.h Version.h
 Interface.o: Common.h DataFrame.h

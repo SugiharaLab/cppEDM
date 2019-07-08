@@ -41,3 +41,10 @@ depend:
 	@echo ${SRCS}
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
+
+SimplexTest.o: TestCommon.h
+TestCommonTest.o: TestCommon.h
+SMapTest.o: TestCommon.h
+CCMTest.o: TestCommon.h
+MultiviewTest.o: TestCommon.h
+DateTimeTest.o: TestCommon.h
