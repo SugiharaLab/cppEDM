@@ -5,7 +5,6 @@
 #include <cstdio> //time formatting
 #include <ctime> 
 #include <string> 
-#include <bits/stdc++.h> 
 #include <regex> 
 
 const int iso_start_year    = 1900;
@@ -25,6 +24,5 @@ datetime_info parse_datetime ( std::string datetime );
 std::string increment_datetime_str ( std::string datetime1, 
                                      std::string datetime2,
                                      int         tp );
-
 
 #endif
