@@ -18,11 +18,11 @@ void check_increment_correct( std::string date_str_1, std::string date_str_2,
     if ( output == correct_incremented ) 
         std::cout <<"Correct."<<std::endl;
     else 
-        std::cout << "BAD:"<<std::endl;
-    std::cout<<"datetimes are : \n\t"<<date_str_1<<" and "<<date_str_2
-    <<", \nincrement of tp "<<tp<<" is "<<std::endl
-    <<"\t"<<output <<" vs "<<correct_incremented<<std::endl
-    <<"_______________"<<std::endl;
+        std::cout << "BAD:"<<std::endl
+        <<"datetimes are :"<<date_str_1<<" and "<<date_str_2
+        <<", increment of tp "<<tp<<" is "<<std::endl
+        <<output <<"vs"<<correct_incremented<<"end"<<std::endl
+        <<"_______________"<<std::endl;
 }
 
 int main() {
