@@ -1,5 +1,6 @@
 
-// g++ Test.cc -o Test -std=c++11 -g -DDEBUG -DCCM_THREADED -I../src -L../lib -lstdc++ -lEDM -lpthread -O3
+// g++ Test.cc -o Test -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -O3
+// -g -DDEBUG
 
 #include "Common.h"
 #include "Neighbors.h"
@@ -47,7 +48,7 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         Parameters param = Parameters( Method::Simplex,
                                        "../data/", "block_3sp.csv", "", "",
-                                       "1 100", "190 198", 2, 1, 4, 1, 0,
+                                       "1 100", "190 198", 2, 1, 4, 1, 0, 0,
                                        "x_t y_t z_t" );
         std::cout << param;
         

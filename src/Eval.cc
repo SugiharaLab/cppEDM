@@ -86,9 +86,10 @@ DataFrame<double> EmbedDimension( std::string pathIn,
                                   unsigned    nThreads ) {
 
     // Create DataFrame (constructor loads data)
-    DataFrame< double > dataFrameIn( pathIn, dataFile );
+    DataFrame< double > *dataFrameIn =
+        new DataFrame< double > ( pathIn, dataFile );
     
-    DataFrame<double> E_rho = EmbedDimension( dataFrameIn,
+    DataFrame<double> E_rho = EmbedDimension( std::ref( *dataFrameIn ),
                                               pathOut,
                                               predictFile,
                                               lib,
@@ -100,6 +101,9 @@ DataFrame<double> EmbedDimension( std::string pathIn,
                                               embedded,
                                               verbose,
                                               nThreads );
+
+    delete dataFrameIn;
+    
     return E_rho;
 }
 
@@ -107,19 +111,19 @@ DataFrame<double> EmbedDimension( std::string pathIn,
 // EmbedDimension() : Evaluate Simplex rho vs. dimension E
 // API Overload 2: DataFrame provided
 //----------------------------------------------------------------
-DataFrame<double> EmbedDimension( DataFrame< double > data,
-                                  std::string         pathOut,
-                                  std::string         predictFile,
-                                  std::string         lib,
-                                  std::string         pred,
-                                  int                 Tp,
-                                  int                 tau,
-                                  std::string         colNames,
-                                  std::string         targetName,
-                                  bool                embedded,
-                                  bool                verbose,
-                                  unsigned            nThreads ) {
-
+DataFrame<double> EmbedDimension( DataFrame< double > &data,
+                                  std::string          pathOut,
+                                  std::string          predictFile,
+                                  std::string          lib,
+                                  std::string          pred,
+                                  int                  Tp,
+                                  int                  tau,
+                                  std::string          colNames,
+                                  std::string          targetName,
+                                  bool                 embedded,
+                                  bool                 verbose,
+                                  unsigned             nThreads ) {
+    
     // Container for results
     DataFrame<double> E_rho( 10, 2, "E rho" );
 
@@ -138,6 +142,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > data,
     // thread container
     std::vector< std::thread > threads;
     for ( unsigned i = 0; i < nThreads; i++ ) {
+    
         threads.push_back( std::thread( EmbedThread,
                                         std::ref( workQ ),
                                         std::ref( data ),
@@ -187,8 +192,14 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
         
         // WorkQueue stores E
         int E = workQ[ i ];
-      
-        DataFrame<double> S = Simplex( data,
+
+        // Simplex() -> EmbedNN() -> Embed() -> DeletePartialDataRows()
+        // In a multthreaded application we need to pass a unique copy of
+        // the data so that DeletePartialDataRows() is not recursively
+        // applied to the same data frame.
+        DataFrame< double > localData( data );
+        
+        DataFrame<double> S = Simplex( std::ref( localData ),
                                        "",          // pathOut,
                                        "",          // predictFile,
                                        lib,
@@ -203,7 +214,7 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
                                        embedded,
                                        false,       // const_predict
                                        verbose );
-        
+         
         VectorError ve = ComputeError( S.VectorColumnName( "Observations" ),
                                        S.VectorColumnName( "Predictions"  ) );
 
@@ -243,9 +254,10 @@ DataFrame<double> PredictInterval( std::string pathIn,
                                    unsigned    nThreads ) {
     
     // Create DataFrame (constructor loads data)
-    DataFrame< double > dataFrameIn( pathIn, dataFile );
+    DataFrame< double > *dataFrameIn =
+        new DataFrame< double > ( pathIn, dataFile );
     
-    DataFrame<double> Tp_rho = PredictInterval( dataFrameIn,
+    DataFrame<double> Tp_rho = PredictInterval( std::ref( *dataFrameIn ),
                                                 pathOut,
                                                 predictFile,
                                                 lib,
@@ -256,6 +268,8 @@ DataFrame<double> PredictInterval( std::string pathIn,
                                                 targetName,
                                                 embedded,
                                                 verbose );
+    delete dataFrameIn;
+    
     return Tp_rho;
 }
 
@@ -263,18 +277,18 @@ DataFrame<double> PredictInterval( std::string pathIn,
 // PredictInterval() : Evaluate Simplex rho vs. predict interval Tp
 // API Overload 2: DataFrame provided
 //-----------------------------------------------------------------
-DataFrame<double> PredictInterval( DataFrame< double > data,
-                                   std::string         pathOut,
-                                   std::string         predictFile,
-                                   std::string         lib,
-                                   std::string         pred,
-                                   int                 E,
-                                   int                 tau,
-                                   std::string         colNames,
-                                   std::string         targetName,
-                                   bool                embedded,
-                                   bool                verbose,
-                                   unsigned            nThreads ) {
+DataFrame<double> PredictInterval( DataFrame< double > &data,
+                                   std::string          pathOut,
+                                   std::string          predictFile,
+                                   std::string          lib,
+                                   std::string          pred,
+                                   int                  E,
+                                   int                  tau,
+                                   std::string          colNames,
+                                   std::string          targetName,
+                                   bool                 embedded,
+                                   bool                 verbose,
+                                   unsigned             nThreads ) {
     
     // Container for results
     DataFrame<double> Tp_rho( 10, 2, "Tp rho" );
@@ -342,8 +356,13 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
         
         // WorkQueue stores Tp
         int Tp = workQ[ i ];
+        
+        // In a multthreaded application we need to pass a unique copy of
+        // the data so that DeletePartialDataRows() is not recursively
+        // applied to the same data frame.
+        DataFrame< double > localData( data );
                   
-        DataFrame<double> S = Simplex( data,
+        DataFrame<double> S = Simplex( std::ref( localData ),
                                        "",          // pathOut,
                                        "",          // predictFile,
                                        lib,
@@ -400,9 +419,10 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
                                     unsigned    nThreads ) {
     
     // Create DataFrame (constructor loads data)
-    DataFrame< double > dataFrameIn( pathIn, dataFile );
+    DataFrame< double > *dataFrameIn =
+        new DataFrame< double > ( pathIn, dataFile );
     
-    DataFrame< double > Theta_rho = PredictNonlinear( dataFrameIn,
+    DataFrame< double > Theta_rho = PredictNonlinear( std::ref( *dataFrameIn ),
                                                       pathOut,
                                                       predictFile,
                                                       lib,
@@ -414,6 +434,8 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
                                                       targetName,
                                                       embedded,
                                                       verbose );
+    delete dataFrameIn;
+    
     return Theta_rho;
 }
 
@@ -421,19 +443,19 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
 // PredictNonlinear() : Smap rho vs. localisation parameter theta
 // API Overload 2: DataFrame provided
 //----------------------------------------------------------------
-DataFrame<double> PredictNonlinear( DataFrame< double > data,
-                                    std::string         pathOut,
-                                    std::string         predictFile,
-                                    std::string         lib,
-                                    std::string         pred,
-                                    int                 E,
-                                    int                 Tp,
-                                    int                 tau,
-                                    std::string         colNames,
-                                    std::string         targetName,
-                                    bool                embedded,
-                                    bool                verbose,
-                                    unsigned            nThreads ) {
+DataFrame<double> PredictNonlinear( DataFrame< double > &data,
+                                    std::string          pathOut,
+                                    std::string          predictFile,
+                                    std::string          lib,
+                                    std::string          pred,
+                                    int                  E,
+                                    int                  Tp,
+                                    int                  tau,
+                                    std::string          colNames,
+                                    std::string          targetName,
+                                    bool                 embedded,
+                                    bool                 verbose,
+                                    unsigned             nThreads ) {
 
     std::valarray<double> ThetaValues( { 0.01, 0.1, 0.3, 0.5, 0.75, 1,
                                           1.5, 2, 3, 4, 5, 6, 7, 8, 9 } );
@@ -509,7 +531,12 @@ void SMapThread( EDM_Eval::WorkQueue   &workQ,
         
         double theta = ThetaValues[ workQ[ i ] ];  
         
-        SMapValues S = SMap( data,
+        // In a multthreaded application we need to pass a unique copy of
+        // the data so that DeletePartialDataRows() is not recursively
+        // applied to the same data frame.
+        DataFrame< double > localData( data );
+                  
+        SMapValues S = SMap( std::ref( localData ),
                              "",
                              "",        // predictFile
                              lib,
