@@ -55,7 +55,7 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
 void SMapThread( EDM_Eval::WorkQueue   &workQ,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
-                 std::valarray<double>  ThetaValues,
+                 std::vector<double>    ThetaValues,
                  std::string            lib,
                  std::string            pred,
                  int                    E,
@@ -77,6 +77,7 @@ DataFrame<double> EmbedDimension( std::string pathIn,
                                   std::string predictFile,
                                   std::string lib,
                                   std::string pred,
+                                  int         maxE,
                                   int         Tp,
                                   int         tau,
                                   std::string colNames,
@@ -94,6 +95,7 @@ DataFrame<double> EmbedDimension( std::string pathIn,
                                               predictFile,
                                               lib,
                                               pred,
+                                              maxE,
                                               Tp,
                                               tau,
                                               colNames,
@@ -116,6 +118,7 @@ DataFrame<double> EmbedDimension( DataFrame< double > &data,
                                   std::string          predictFile,
                                   std::string          lib,
                                   std::string          pred,
+                                  int                  maxE,
                                   int                  Tp,
                                   int                  tau,
                                   std::string          colNames,
@@ -125,19 +128,19 @@ DataFrame<double> EmbedDimension( DataFrame< double > &data,
                                   unsigned             nThreads ) {
     
     // Container for results
-    DataFrame<double> E_rho( 10, 2, "E rho" );
+    DataFrame<double> E_rho( maxE, 2, "E rho" );
 
     // Build work queue
-    EDM_Eval::WorkQueue workQ( 10 );
+    EDM_Eval::WorkQueue workQ( maxE );
 
     // Insert dimension values into work queue
-    for ( auto i = 0; i < 10; i++ ) {
+    for ( auto i = 0; i < maxE; i++ ) {
         workQ[ i ] = i + 1;
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
     if ( maxThreads < nThreads ) { nThreads = maxThreads; }
-    if ( nThreads > 10 )         { nThreads = 10;         }
+    if ( nThreads > maxE       ) { nThreads = maxE;       }
     
     // thread container
     std::vector< std::thread > threads;
@@ -245,6 +248,7 @@ DataFrame<double> PredictInterval( std::string pathIn,
                                    std::string predictFile,
                                    std::string lib,
                                    std::string pred,
+                                   int         maxTp,
                                    int         E,
                                    int         tau,
                                    std::string colNames,
@@ -262,6 +266,7 @@ DataFrame<double> PredictInterval( std::string pathIn,
                                                 predictFile,
                                                 lib,
                                                 pred,
+                                                maxTp,
                                                 E,
                                                 tau,
                                                 colNames,
@@ -282,6 +287,7 @@ DataFrame<double> PredictInterval( DataFrame< double > &data,
                                    std::string          predictFile,
                                    std::string          lib,
                                    std::string          pred,
+                                   int                  maxTp,
                                    int                  E,
                                    int                  tau,
                                    std::string          colNames,
@@ -291,19 +297,19 @@ DataFrame<double> PredictInterval( DataFrame< double > &data,
                                    unsigned             nThreads ) {
     
     // Container for results
-    DataFrame<double> Tp_rho( 10, 2, "Tp rho" );
+    DataFrame<double> Tp_rho( maxTp, 2, "Tp rho" );
 
     // Build work queue
-    EDM_Eval::WorkQueue workQ( 10 );
+    EDM_Eval::WorkQueue workQ( maxTp );
 
     // Insert Tp values into work queue
-    for ( auto i = 0; i < 10; i++ ) {
+    for ( auto i = 0; i < maxTp; i++ ) {
         workQ[ i ] = i + 1;
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
     if ( maxThreads < nThreads ) { nThreads = maxThreads; }
-    if ( nThreads > 10 )         { nThreads = 10;         }
+    if ( nThreads   > maxTp    ) { nThreads = maxTp;      }
     
     // thread container
     std::vector< std::thread > threads;
@@ -409,6 +415,7 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
                                     std::string predictFile,
                                     std::string lib,
                                     std::string pred,
+                                    std::string theta,
                                     int         E,
                                     int         Tp,
                                     int         tau,
@@ -427,6 +434,7 @@ DataFrame<double> PredictNonlinear( std::string pathIn,
                                                       predictFile,
                                                       lib,
                                                       pred,
+                                                      theta,
                                                       E,
                                                       Tp,
                                                       tau,
@@ -448,6 +456,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
                                     std::string          predictFile,
                                     std::string          lib,
                                     std::string          pred,
+                                    std::string          theta,
                                     int                  E,
                                     int                  Tp,
                                     int                  tau,
@@ -457,9 +466,28 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
                                     bool                 verbose,
                                     unsigned             nThreads ) {
 
-    std::valarray<double> ThetaValues( { 0.01, 0.1, 0.3, 0.5, 0.75, 1,
-                                          1.5, 2, 3, 4, 5, 6, 7, 8, 9 } );
+    std::vector<double> ThetaValues( { 0.01, 0.1, 0.3, 0.5, 0.75, 1,
+                                       1.5, 2, 3, 4, 5, 6, 7, 8, 9 } );
 
+   if ( theta.size() ) {
+       // Use theta values passed in as parameter string
+       ThetaValues.clear();
+        
+       std::vector<std::string> theta_vec = SplitString( theta, " \t,\n" );
+       
+       try {
+           for ( auto ci =  theta_vec.begin(); ci != theta_vec.end(); ++ci ) {
+               ThetaValues.push_back( std::stod( *ci ) );
+           }
+       }
+       catch ( const std::invalid_argument &ia ) {
+           std::stringstream errMsg;
+           errMsg << "PredictNonlinear(): Unable to convert theta ["
+                  << ia.what() << "] to numeric.";
+           throw std::runtime_error( errMsg.str() );
+       }
+   }
+   
     // Container for results
     DataFrame<double> Theta_rho( ThetaValues.size(), 2, "Theta rho" );
 
@@ -472,8 +500,8 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
     }
 
     unsigned maxThreads = std::thread::hardware_concurrency();
-    if ( maxThreads < nThreads ) { nThreads = maxThreads; }
-    if ( nThreads > 15 )         { nThreads = 15;         }
+    if ( maxThreads < nThreads           ) { nThreads = maxThreads;         }
+    if ( nThreads   > ThetaValues.size() ) { nThreads = ThetaValues.size(); }
     
     // thread container
     std::vector< std::thread > threads;
@@ -512,7 +540,7 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
 void SMapThread( EDM_Eval::WorkQueue   &workQ,
                  DataFrame< double >   &data,
                  DataFrame< double >   &Theta_rho,
-                 std::valarray<double>  ThetaValues,
+                 std::vector<double>    ThetaValues,
                  std::string            lib,
                  std::string            pred,
                  int                    E,

@@ -210,7 +210,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > EMBD = 
             EmbedDimension( "../data/", "TentMap_rEDM.csv",
                             "./", "EmbedDimOut.csv",
-                            "1 100", "201 500", 1, 1,
+                            "1 100", "201 500", 10, 1, 1,
                             "TentMap", "", false, false, 4 );
                 
         std::cout << "EmbedDimension TentMap_rEDM.csv:\n";
@@ -225,7 +225,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > PD = 
             PredictInterval( "../data/", "TentMap_rEDM.csv",
                              "./", "PredictIntervalOut.csv",
-                             "1 100", "201 500", 2, 1,
+                             "1 100", "201 500", 10, 2, 1,
                              "TentMap", "", false, false, 4 );
                 
         std::cout << "PredictInterval TentMap_rEDM.csv:\n";
@@ -240,7 +240,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > NL = 
             PredictNonlinear( "../data/", "TentMapNoise_rEDM.csv",
                               "./", "PredictNonlinearOut.csv",
-                              "1 100", "201 500", 2, 1, 1,
+                              "1 100", "201 500", "", 2, 1, 1,
                               "TentMap", "", false, false, 4 );
 
         NL.MaxRowPrint() = 15;
