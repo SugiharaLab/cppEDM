@@ -191,12 +191,12 @@ int main( int argc, char *argv[] ) {
 #ifdef CCM_TEST
         //----------------------------------------------------------
         // ./CCM.py -i sardine_anchovy_sst.csv -c anchovy -r np_sst
-        // -E 3 -s 100 -L 10 80 10 -R
+        // -E 3 -s 100 -L 10 70 10 -R -rp
         //----------------------------------------------------------
         DataFrame< double > CCMD = 
             CCM( "../data/", "sardine_anchovy_sst.csv", "./", "ccm.csv",
-                 3, 0, 0, 1, "anchovy", "np_sst", "10 80 10", 100,
-                 true, 0, true );
+                 3, 0, 0, 1, "anchovy", "np_sst", "10 70 10", 100,
+                 true, false, 0, true );
 
         std::cout << "CCM sardine_anchovy_sst.csv:\n";
         std::cout << CCMD;
