@@ -115,19 +115,19 @@ PlotSMapCircle = function( path = './' ) {
   c = read.csv( paste( path, 'smap_circ_coeff.csv', sep = '' ))
   p = read.csv( paste( path, 'smap_circle.csv',     sep = '' ))
   
-  plot( p$Time, p$Observations, type='l', lwd=3, xlab='Time', ylab='x')
-  lines( p$Time, p$Predictions, lwd=3, col = 'red' )
-  legend('topright',legend=c('Observed','Predicted'),
-          cex = 1.7, fill=c('black','red'))
+  plot ( p $ Time, p $ Observations, type='l', lwd=3, xlab='Time', ylab='x')
+  lines( p $ Time, p $ Predictions, lwd = 3, col = 'red' )
+  legend( 'topright', legend = c( 'Observed', 'Predicted' ),
+           cex = 1.7, fill = c( 'black', 'red' ) )
   
-  plot(c$Time,c$C0,type='l',lwd=3, xlab='Time', ylab='S Map C0')
-  mtext(line=-2,"C0",cex=1.6)
+  plot( c $ Time, c $ C0, type = 'l', lwd = 3, xlab = 'Time', ylab = 'S Map C0')
+  mtext( line = -2, "C0", cex = 1.6 )
   
-  plot(c$Time,c$C1,type='l',lwd=3,ylim=range(c$C1,c$C2),
-       col='red',xlab='Time',ylab='S Map Coef')
-  lines( c$Time, c$C2, lwd=3, col='blue')
-  legend('top',legend=c('C1','C2'),fill=c('red','blue'),cex=1.7)
-
+  plot( c $ Time, c $ C1, type = 'l', lwd = 3,
+        ylim = range( c $ C1, c $ C2, na.rm = TRUE ),
+        col = 'red', xlab = 'Time' , ylab = 'S Map Coef' )
+  lines( c $ Time, c $ C2, lwd = 3, col = 'blue' )
+  legend( 'top', legend = c( 'C1', 'C2' ), fill = c('red', 'blue'), cex = 1.7 )
 }
 
 #---------------------------------------------------------------------
