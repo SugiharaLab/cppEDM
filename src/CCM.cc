@@ -164,7 +164,12 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
 
     CrossMapColTarget.join();
     CrossMapTargetCol.join();
-#else    
+    
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
+#else
     DataFrame< double > col_to_target = CrossMap( param, dataFrameIn );
 
     DataFrame< double > target_to_col = CrossMap( inverseParam, dataFrameIn );
@@ -224,7 +229,8 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
         } msg << std::endl << std::endl;
         std::cout << msg.str();
     }
-    
+
+    try {
     //----------------------------------------------------------
     // Generate embedding on data to be cross mapped (-c column)
     // JP: Should this be allocated on the heap?
@@ -506,6 +512,12 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
         LibStats.WriteRow( lib_size_i, statVec );
     } // for ( lib_size : param.librarySizes ) 
 
+    } // try 
+    catch(...) {
+        // Set global exception pointer for main thread catch
+        globalExceptionPtr = std::current_exception();
+    }
+    
 #ifndef CCM_THREADED
     return LibStats;
 #endif

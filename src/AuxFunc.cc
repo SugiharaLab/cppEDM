@@ -362,7 +362,8 @@ void CheckDataRows( Parameters         param,
 
     if ( dataFrameIn.NRows() <= prediction_max_i + shift ) {
         std::stringstream errMsg;
-        errMsg << "CheckDataRows(): The prediction index + tau(E-1) "
+        errMsg << "CheckDataRows(): " << call
+               << ": The prediction index + tau(E-1) "
                << prediction_max_i + shift
                << " equals or exceeds the number of data rows "
                << dataFrameIn.NRows();
@@ -371,7 +372,8 @@ void CheckDataRows( Parameters         param,
     
     if ( dataFrameIn.NRows() <= library_max_i + shift ) {
         std::stringstream errMsg;
-        errMsg << "CheckDataRows(): The library index + tau(E-1) "
+        errMsg << "CheckDataRows(): " << call
+               << ": The library index + tau(E-1) "
                << library_max_i + shift
                << " equals or exceeds the number of data rows "
                << dataFrameIn.NRows();

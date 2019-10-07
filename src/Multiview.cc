@@ -97,7 +97,7 @@ MultiviewValues  Multiview( DataFrame< double > data,
                                    lib, pred, E, Tp, knn, tau, 0, 0,
                                    columns, target, true, false, verbose,
                                    "", "", "", 0, 0, 0, multiview );
-    
+
     if ( not param.columnNames.size() ) {
         throw std::runtime_error( "Multiview() requires column names." );
     }
@@ -112,6 +112,35 @@ MultiviewValues  Multiview( DataFrame< double > data,
         throw std::runtime_error( "Multiview() params not validated." );        
     }
 
+    // Validate that columns & target are in data
+    for ( auto colName : param.columnNames ) {
+        auto ci = find( data.ColumnNames().begin(),
+                        data.ColumnNames().end(), colName );
+        
+        if ( ci == data.ColumnNames().end() ) {
+            std::stringstream errMsg;
+            errMsg << "Multiview(): Failed to find column "
+                   << colName << " in dataFrame with columns: [ ";
+            for ( auto col : data.ColumnNames() ) {
+                errMsg << col << " ";
+            } errMsg << " ]\n";
+            throw std::runtime_error( errMsg.str() );
+        }
+    }
+    auto ti = find( data.ColumnNames().begin(),
+                    data.ColumnNames().end(), param.targetName );
+    if ( ti == data.ColumnNames().end() ) {
+        std::stringstream errMsg;
+        errMsg << "Multiview(): Failed to find target "
+               << param.targetName << " in dataFrame with columns: [ ";
+        for ( auto col : data.ColumnNames() ) {
+            errMsg << col << " ";
+        } errMsg << " ]\n";
+        throw std::runtime_error( errMsg.str() );
+    }
+
+    CheckDataRows( param, std::ref( data ), "Multiview()" );
+    
     // Save param.predictOutputFile and reset so Simplex() does not write 
     std::string outputFile = param.predictOutputFile;
     param.predictOutputFile = "";
@@ -198,6 +227,10 @@ MultiviewValues  Multiview( DataFrame< double > data,
         thrd.join();
     }
 
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
     //-----------------------------------------------------------------
     // Rank in-sample (library) forecasts
     //-----------------------------------------------------------------
@@ -293,6 +326,10 @@ MultiviewValues  Multiview( DataFrame< double > data,
         thrd.join();
     }
     
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
 #ifdef DEBUG_ALL
     for ( auto cpi =  combos_rho_prediction.begin();
                cpi != combos_rho_prediction.end(); ++cpi ) {
@@ -386,6 +423,8 @@ void EvalComboThread( Parameters                            param,
         // Get the combo for this thread
         std::vector< size_t > combo = combos[ combo_i ];
 
+        try {
+        
         // Local copy with combo column indices (zero-offset)
         std::vector< size_t > combo_cols( combo );
 
@@ -448,7 +487,13 @@ void EvalComboThread( Parameters                            param,
         combo_row[ combo.size() + 2 ] = ve.RMSE;
         
         combos_rho.WriteRow( eval_i, combo_row );
-        
+
+        } // try
+        catch(...) {
+            // Set global exception pointer for main thread catch
+            globalExceptionPtr = std::current_exception();
+        }
+    
         eval_i = std::atomic_fetch_add(&EDM_Multiview::eval_i, std::size_t(1));
     }
     

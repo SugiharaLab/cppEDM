@@ -165,6 +165,10 @@ DataFrame<double> EmbedDimension( DataFrame< double > &data,
         thrd.join();
     }
     
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
     if ( predictFile.size() ) {
         E_rho.WriteData( pathOut, predictFile );
     }
@@ -201,35 +205,41 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
         // the data so that DeletePartialDataRows() is not recursively
         // applied to the same data frame.
         DataFrame< double > localData( data );
-        
-        DataFrame<double> S = Simplex( std::ref( localData ),
-                                       "",          // pathOut,
-                                       "",          // predictFile,
-                                       lib,
-                                       pred,
-                                       E,
-                                       Tp,
-                                       0,           // knn
-                                       tau,
-                                       0,           // exclusionRadius
-                                       colNames,
-                                       targetName,
-                                       embedded,
-                                       false,       // const_predict
-                                       verbose );
-         
-        VectorError ve = ComputeError( S.VectorColumnName( "Observations" ),
-                                       S.VectorColumnName( "Predictions"  ) );
 
-        E_rho.WriteRow( i, std::valarray<double>({ (double) E, ve.rho }));
+        try {
+            DataFrame<double> S = Simplex( std::ref( localData ),
+                                           "",          // pathOut,
+                                           "",          // predictFile,
+                                           lib,
+                                           pred,
+                                           E,
+                                           Tp,
+                                           0,           // knn
+                                           tau,
+                                           0,           // exclusionRadius
+                                           colNames,
+                                           targetName,
+                                           embedded,
+                                           false,       // const_predict
+                                           verbose );
+            
+            VectorError ve = ComputeError( S.VectorColumnName("Observations"),
+                                           S.VectorColumnName("Predictions"));
+
+            E_rho.WriteRow( i, std::valarray<double>({ (double) E, ve.rho }));
         
-        if ( verbose ) {
-            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
-            std::cout << "EmbedThread() workQ[" << workQ[i] << "]  E " << E 
-                      << "  rho " << ve.rho << "  RMSE " << ve.RMSE
-                      << "  MAE " << ve.MAE << std::endl << std::endl;
+            if ( verbose ) {
+                std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
+                std::cout << "EmbedThread() workQ[" << workQ[i] << "]  E " << E 
+                          << "  rho " << ve.rho << "  RMSE " << ve.RMSE
+                          << "  MAE " << ve.MAE << std::endl << std::endl;
+            }
         }
-    
+        catch(...) {
+            // Set global exception pointer for main thread catch
+            globalExceptionPtr = std::current_exception();
+        }
+        
         i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
     }
     
@@ -333,6 +343,10 @@ DataFrame<double> PredictInterval( DataFrame< double > &data,
         thrd.join();
     }
     
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
     if ( predictFile.size() ) {
         Tp_rho.WriteData( pathOut, predictFile );
     }
@@ -367,36 +381,42 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
         // the data so that DeletePartialDataRows() is not recursively
         // applied to the same data frame.
         DataFrame< double > localData( data );
-                  
-        DataFrame<double> S = Simplex( std::ref( localData ),
-                                       "",          // pathOut,
-                                       "",          // predictFile,
-                                       lib,
-                                       pred,
-                                       E,
-                                       Tp,
-                                       0,           // knn
-                                       tau,
-                                       0,           // exclusionRadius
-                                       colNames,
-                                       targetName,
-                                       embedded,
-                                       false,       // const_pred
-                                       verbose );
-        
-        VectorError ve = ComputeError( S.VectorColumnName( "Observations" ),
-                                       S.VectorColumnName( "Predictions"  ) );
 
-        Tp_rho.WriteRow( i, std::valarray<double>({ (double) Tp, ve.rho }));
+        try {
+            DataFrame<double> S = Simplex( std::ref( localData ),
+                                           "",          // pathOut,
+                                           "",          // predictFile,
+                                           lib,
+                                           pred,
+                                           E,
+                                           Tp,
+                                           0,           // knn
+                                           tau,
+                                           0,           // exclusionRadius
+                                           colNames,
+                                           targetName,
+                                           embedded,
+                                           false,       // const_pred
+                                           verbose );
+            
+            VectorError ve = ComputeError( S.VectorColumnName("Observations"),
+                                           S.VectorColumnName("Predictions"));
+
+            Tp_rho.WriteRow( i, std::valarray<double>({ (double) Tp, ve.rho }));
         
-        if ( verbose ) {
-            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
-            std::cout << "PredictIntervalThread() workQ[" << workQ[i]
-                      << "]  Tp " << Tp 
-                      << "  rho " << ve.rho << "  RMSE " << ve.RMSE
-                      << "  MAE " << ve.MAE << std::endl << std::endl;
+            if ( verbose ) {
+                std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
+                std::cout << "PredictIntervalThread() workQ[" << workQ[i]
+                          << "]  Tp " << Tp 
+                          << "  rho " << ve.rho << "  RMSE " << ve.RMSE
+                          << "  MAE " << ve.MAE << std::endl << std::endl;
+            }
         }
-    
+        catch(...) {
+            // Set global exception pointer for main thread catch
+            globalExceptionPtr = std::current_exception();
+        }
+        
         i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
     }
     
@@ -527,6 +547,10 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
         thrd.join();
     }
 
+    if ( globalExceptionPtr ) {
+        std::rethrow_exception( globalExceptionPtr );
+    }
+    
     if ( predictFile.size() ) {
         Theta_rho.WriteData( pathOut, predictFile );
     }
@@ -563,42 +587,48 @@ void SMapThread( EDM_Eval::WorkQueue   &workQ,
         // the data so that DeletePartialDataRows() is not recursively
         // applied to the same data frame.
         DataFrame< double > localData( data );
-                  
-        SMapValues S = SMap( std::ref( localData ),
-                             "",
-                             "",        // predictFile
-                             lib,
-                             pred,
-                             E,
-                             Tp,
-                             0,         // knn
-                             tau,
-                             theta,
-                             0,         // exclusionRadius
-                             colNames,
-                             targetName,
-                             "",        // smapFile
-                             "",        // derivatives
-                             embedded,
-                             false,     // const_predict
-                             verbose );
-        
-        DataFrame< double > predictions  = S.predictions;
-        DataFrame< double > coefficients = S.coefficients;
-        
-        VectorError ve = ComputeError(
-            predictions.VectorColumnName( "Observations" ),
-            predictions.VectorColumnName( "Predictions"  ) );
 
-        Theta_rho.WriteRow( i, std::valarray<double>({ theta, ve.rho }));
-        
-        if ( verbose ) {
-            std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
-            std::cout << "Theta " << theta
-                      << "  rho " << ve.rho << "  RMSE " << ve.RMSE
-                      << "  MAE " << ve.MAE << std::endl << std::endl;
+        try {
+            SMapValues S = SMap( std::ref( localData ),
+                                 "",
+                                 "",        // predictFile
+                                 lib,
+                                 pred,
+                                 E,
+                                 Tp,
+                                 0,         // knn
+                                 tau,
+                                 theta,
+                                 0,         // exclusionRadius
+                                 colNames,
+                                 targetName,
+                                 "",        // smapFile
+                                 "",        // derivatives
+                                 embedded,
+                                 false,     // const_predict
+                                 verbose );
+            
+            DataFrame< double > predictions  = S.predictions;
+            DataFrame< double > coefficients = S.coefficients;
+            
+            VectorError ve = ComputeError(
+                predictions.VectorColumnName( "Observations" ),
+                predictions.VectorColumnName( "Predictions"  ) );
+            
+            Theta_rho.WriteRow( i, std::valarray<double>({ theta, ve.rho }));
+            
+            if ( verbose ) {
+                std::lock_guard<std::mutex> lck( EDM_Eval::mtx );
+                std::cout << "Theta " << theta
+                          << "  rho " << ve.rho << "  RMSE " << ve.RMSE
+                          << "  MAE " << ve.MAE << std::endl << std::endl;
+            }
         }
-    
+        catch(...) {
+            // Set global exception pointer for main thread catch
+            globalExceptionPtr = std::current_exception();
+        }
+        
         i = std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );
     }
     
