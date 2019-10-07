@@ -121,7 +121,7 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
         throw std::runtime_error("CCM() must specify library sizes.");
     }
 
-    Parameters param = Parameters( Method::Simplex, "", "",
+    Parameters param = Parameters( Method::CCM, "", "",
                                    pathOut, predictFile,
                                    "", "", E, Tp, knn, tau, 0, 0,
                                    columns, target, false, false, verbose,

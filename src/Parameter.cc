@@ -133,9 +133,6 @@ void Parameters::Validate() {
         library = std::vector<size_t>( lib_end - lib_start + 1 );
         std::iota ( library.begin(), library.end(), lib_start - 1 );
     }
-    else {
-        library = std::vector<size_t>( 1, 0 );
-    }
 
     //--------------------------------------------------------------
     // Generate prediction indices: Apply zero-offset
@@ -153,9 +150,6 @@ void Parameters::Validate() {
         prediction = std::vector<size_t>( pred_end - pred_start + 1 );
         std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
     }
-    else {
-        prediction = std::vector<size_t>( 1, 0 );
-    }
     
     if ( method == Method::Simplex or method == Method::SMap ) {
         if ( not library.size() ) {
@@ -167,6 +161,15 @@ void Parameters::Validate() {
             std::string errMsg( "Parameters::Validate(): "
                                 "prediction indices not found.\n" );
             throw std::runtime_error( errMsg );
+        }
+    }
+    else {
+        // Defaults if Method is None, Embed or CCM
+        if ( not library.size() ) {
+            library = std::vector<size_t>( 1, 0 );
+        }
+        if ( not prediction.size() ) {
+            prediction = std::vector<size_t>( 1, 0 );
         }
     }
     
@@ -255,7 +258,7 @@ void Parameters::Validate() {
     //--------------------------------------------------------------------
     // If Simplex and knn not specified, knn set to E+1
     // If S-Map require knn > E + 1, default is all neighbors.
-    if ( method == Method::Simplex ) {
+    if ( method == Method::Simplex or method == Method::CCM ) {
         if ( knn < 1 ) {
             knn = E + 1;
             if ( verbose ) {
@@ -353,7 +356,14 @@ std::ostream& operator<< ( std::ostream &os, Parameters &p ) {
     // print info about the dataframe
     os << "Parameters: -------------------------------------------\n";
 
-    os << "Method: " << ( p.method == Method::Simplex ? "Simplex" : "SMap" )
+    std::string method("Unknown");
+    if      ( p.method == Method::Simplex ) { method = "Simplex"; }
+    else if ( p.method == Method::SMap    ) { method = "SMap";    }
+    else if ( p.method == Method::CCM     ) { method = "CCM";     }
+    else if ( p.method == Method::None    ) { method = "None";    }
+    else if ( p.method == Method::Embed   ) { method = "Embed";   }
+    
+    os << "Method: " << method
        << " E=" << p.E << " Tp=" << p.Tp
        << " knn=" << p.knn << " tau=" << p.tau << " theta=" << p.theta
        << std::endl;

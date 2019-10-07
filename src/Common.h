@@ -28,7 +28,7 @@ static std::exception_ptr globalExceptionPtr = nullptr;
 #define DISTANCE_LIMIT 1E299  // Must be less than DISTANCE_MAX, but large
 
 // Enumerations
-enum class Method         { None, Embed, Simplex, SMap };
+enum class Method         { None, Embed, Simplex, SMap, CCM };
 enum class DistanceMetric { Euclidean, Manhattan };
 
 //---------------------------------------------------------
