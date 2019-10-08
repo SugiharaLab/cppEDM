@@ -20,7 +20,7 @@ int main () {
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_embd_block_3sp_cppEDM.csv",
                           "1 99","100 198", 3, 1, 0, 1, 0,
-                          "x_t y_t z_t", "x_t", true, false, true );
+                          "x_t y_t z_t", "x_t", true, false, false );
     // Comparison
     MakeTest ( "block_3sp.csv embedded data test", pyOutput, cppOutput );
 
@@ -36,7 +36,7 @@ int main () {
     cppOutput = Simplex ( "../data/", "block_3sp.csv",
                           "./data/", "Smplx_E3_block_3sp_cppEDM.csv",
                           "1 100", "101 195", 3, 1, 0, 1, 0,
-                          "x_t", "x_t", false, false, true );
+                          "x_t", "x_t", false, false, false );
     // Comparison
     MakeTest ( "block_3sp.csv dynamic embedding test", pyOutput, cppOutput );
 
@@ -54,11 +54,11 @@ int main () {
     cppOutput = Simplex ( "../data/", "S12CD-S333-SumFlow_1980-2005.csv",
                           "./data/", "Smplx_S12CD_E3_cppEDM.csv",
                           "1 800", "801 1375", 3, 1, 0, 1, 0,
-                          "S12.C.D.S333", "S12.C.D.S333", false, false, true );
+                          "S12.C.D.S333", "S12.C.D.S333", false, false, false );
 
     cppOutput.MaxRowPrint() = 5; // Set number of rows to print
 
-    std::cout << cppOutput; // ISO datetime in Time column
+    // std::cout << cppOutput; // ISO datetime in Time column
     
     MakeTest ( "S12CD-S333 ISO datetime", pyOutput, cppOutput );
 

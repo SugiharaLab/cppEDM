@@ -20,7 +20,7 @@ int main () {
     SMapValues smapVals = SMap ( circleData,
                                  "./data/", "Smap_circle_cppEDM.csv",
                                  " 1 100 ", "101 198", 2, 1, 0, 1, 4, 0,
-                                 "x y", "x", "", "", true, false, true );
+                                 "x y", "x", "", "", true, false, false );
     
     DataFrame < double > cppOutput = smapVals.predictions;
     
@@ -38,7 +38,7 @@ int main () {
     smapVals = SMap ( "../data/", "block_3sp.csv",
                       "./data/", "Smap_embd_block_3sp_cppEDM.csv",
                       " 1 99 ", "100 198", 3, 1, 0, 1, 2, 0,
-                      "x_t y_t z_t", "x_t", "", "", true, false, true );
+                      "x_t y_t z_t", "x_t", "", "", true, false, false );
 
     cppOutput = smapVals.predictions;
     

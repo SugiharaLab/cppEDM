@@ -2,6 +2,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <queue>
 
 #include "Common.h"
 
@@ -9,11 +10,18 @@ namespace EDM_Eval {
     // Thread Work Queue : Vector of int
     typedef std::vector< int > WorkQueue;
     
+    // Thread exception_ptr queue
+    std::queue< std::exception_ptr > embedDimExceptQ;
+    std::queue< std::exception_ptr > predictIntExceptQ;
+    std::queue< std::exception_ptr > predictNLExceptQ;
+    
     // atomic counters for all threads
     std::atomic<std::size_t> tp_count_i   (0); // initialize to 0
     std::atomic<std::size_t> embed_count_i(0); // initialize to 0
     std::atomic<std::size_t> smap_count_i (0); // initialize to 0
+
     std::mutex mtx;
+    std::mutex q_mtx;
 }
 
 //----------------------------------------------------------------
@@ -165,8 +173,13 @@ DataFrame<double> EmbedDimension( DataFrame< double > &data,
         thrd.join();
     }
     
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_Eval::embedDimExceptQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_Eval::embedDimExceptQ.front();
+        EDM_Eval::embedDimExceptQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
     if ( predictFile.size() ) {
@@ -236,8 +249,9 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
             }
         }
         catch(...) {
-            // Set global exception pointer for main thread catch
-            globalExceptionPtr = std::current_exception();
+            // push exception pointer onto queue for main thread to catch
+            std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+            EDM_Eval::embedDimExceptQ.push( std::current_exception() );
         }
         
         i = std::atomic_fetch_add(&EDM_Eval::embed_count_i, std::size_t(1));
@@ -343,8 +357,13 @@ DataFrame<double> PredictInterval( DataFrame< double > &data,
         thrd.join();
     }
     
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_Eval::predictIntExceptQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_Eval::predictIntExceptQ.front();
+        EDM_Eval::predictIntExceptQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
     if ( predictFile.size() ) {
@@ -413,8 +432,9 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
             }
         }
         catch(...) {
-            // Set global exception pointer for main thread catch
-            globalExceptionPtr = std::current_exception();
+            // push exception pointer onto queue for main thread to catch
+            std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+            EDM_Eval::predictIntExceptQ.push( std::current_exception() );
         }
         
         i = std::atomic_fetch_add( &EDM_Eval::tp_count_i, std::size_t(1) );
@@ -547,8 +567,13 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
         thrd.join();
     }
 
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_Eval::predictNLExceptQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_Eval::predictNLExceptQ.front();
+        EDM_Eval::predictNLExceptQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
     if ( predictFile.size() ) {
@@ -625,8 +650,9 @@ void SMapThread( EDM_Eval::WorkQueue   &workQ,
             }
         }
         catch(...) {
-            // Set global exception pointer for main thread catch
-            globalExceptionPtr = std::current_exception();
+            // push exception pointer onto queue for main thread to catch
+            std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
+            EDM_Eval::predictNLExceptQ.push( std::current_exception() );
         }
         
         i = std::atomic_fetch_add( &EDM_Eval::smap_count_i, std::size_t(1) );

@@ -13,9 +13,6 @@
 #include <ciso646> // macro constants for MSVC C++ operators not in ISO646
 #endif
 
-// Global exception pointer
-static std::exception_ptr globalExceptionPtr = nullptr;
-
 #include "DataFrame.h" // has #include Common.h
 
 // Normally, macros are eschewed

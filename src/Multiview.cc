@@ -2,6 +2,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <queue>
 
 #include "Common.h"
 #include "AuxFunc.h"
@@ -10,9 +11,14 @@ namespace EDM_Multiview {
     // Thread Work Queue : Vector of combos indices
     typedef std::vector< int > WorkQueue;
     
+    // Thread exception_ptr queue
+    std::queue< std::exception_ptr > exceptionQ;
+    
     // atomic counter for all threads
     std::atomic<std::size_t> eval_i(0); // initialize to 0
+    
     std::mutex mtx;
+    std::mutex q_mtx;
 }
 
 //----------------------------------------------------------------
@@ -227,8 +233,13 @@ MultiviewValues  Multiview( DataFrame< double > data,
         thrd.join();
     }
 
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_Multiview::exceptionQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_Multiview::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_Multiview::exceptionQ.front();
+        EDM_Multiview::exceptionQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
     //-----------------------------------------------------------------
@@ -326,8 +337,13 @@ MultiviewValues  Multiview( DataFrame< double > data,
         thrd.join();
     }
     
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_Multiview::exceptionQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_Multiview::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_Multiview::exceptionQ.front();
+        EDM_Multiview::exceptionQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
 #ifdef DEBUG_ALL
@@ -490,8 +506,9 @@ void EvalComboThread( Parameters                            param,
 
         } // try
         catch(...) {
-            // Set global exception pointer for main thread catch
-            globalExceptionPtr = std::current_exception();
+            // push exception pointer onto queue for main thread to catch
+            std::lock_guard<std::mutex> lck( EDM_Multiview::q_mtx );
+            EDM_Multiview::exceptionQ.push( std::current_exception() );
         }
     
         eval_i = std::atomic_fetch_add(&EDM_Multiview::eval_i, std::size_t(1));

@@ -3,6 +3,7 @@
 #include <random>
 #include <unordered_set>
 #include <chrono>
+#include <queue>
 
 #ifdef CCM_THREADED // Defined in makefile
 // Two explicit CrossMap() threads are invoked. One for forward mapping, 
@@ -18,6 +19,8 @@
 
 namespace EDM_CCM {
     std::mutex mtx;
+    std::mutex q_mtx;
+    std::queue< std::exception_ptr > exceptionQ;
 }
 
 //----------------------------------------------------------------
@@ -164,9 +167,14 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
 
     CrossMapColTarget.join();
     CrossMapTargetCol.join();
-    
-    if ( globalExceptionPtr ) {
-        std::rethrow_exception( globalExceptionPtr );
+
+    // If thread threw exception, get from queue and rethrow
+    if ( not EDM_CCM::exceptionQ.empty() ) {
+        std::lock_guard<std::mutex> lck( EDM_CCM::q_mtx );
+
+        std::exception_ptr exceptionPtr = EDM_CCM::exceptionQ.front();
+        EDM_CCM::exceptionQ.pop();
+        std::rethrow_exception( exceptionPtr );
     }
     
 #else
@@ -514,8 +522,9 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
 
     } // try 
     catch(...) {
-        // Set global exception pointer for main thread catch
-        globalExceptionPtr = std::current_exception();
+        // push exception pointer onto queue for main thread to catch
+        std::lock_guard<std::mutex> lck( EDM_CCM::q_mtx );
+        EDM_CCM::exceptionQ.push( std::current_exception() );
     }
     
 #ifndef CCM_THREADED
