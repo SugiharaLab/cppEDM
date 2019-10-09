@@ -177,8 +177,14 @@ DataFrame<double> EmbedDimension( DataFrame< double > &data,
     if ( not EDM_Eval::embedDimExceptQ.empty() ) {
         std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
 
+        // Take the first exception in the queue
         std::exception_ptr exceptionPtr = EDM_Eval::embedDimExceptQ.front();
-        EDM_Eval::embedDimExceptQ.pop();
+
+        // Unroll all other exception from the thread/loops
+        while( not EDM_Eval::embedDimExceptQ.empty() ) {
+            // JP When do these exception_ptr get deleted? Is it a leak?
+            EDM_Eval::embedDimExceptQ.pop();
+        }
         std::rethrow_exception( exceptionPtr );
     }
     
@@ -361,8 +367,14 @@ DataFrame<double> PredictInterval( DataFrame< double > &data,
     if ( not EDM_Eval::predictIntExceptQ.empty() ) {
         std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
 
+        // Take the first exception in the queue
         std::exception_ptr exceptionPtr = EDM_Eval::predictIntExceptQ.front();
-        EDM_Eval::predictIntExceptQ.pop();
+
+        // Unroll all other exception from the thread/loops
+        while( not EDM_Eval::predictIntExceptQ.empty() ) {
+            // JP When do these exception_ptr get deleted? Is it a leak?
+            EDM_Eval::predictIntExceptQ.pop();
+        }
         std::rethrow_exception( exceptionPtr );
     }
     
@@ -571,8 +583,14 @@ DataFrame<double> PredictNonlinear( DataFrame< double > &data,
     if ( not EDM_Eval::predictNLExceptQ.empty() ) {
         std::lock_guard<std::mutex> lck( EDM_Eval::q_mtx );
 
+        // Take the first exception in the queue
         std::exception_ptr exceptionPtr = EDM_Eval::predictNLExceptQ.front();
-        EDM_Eval::predictNLExceptQ.pop();
+
+        // Unroll all other exception from the thread/loops
+        while( not EDM_Eval::predictNLExceptQ.empty() ) {
+            // JP When do these exception_ptr get deleted? Is it a leak?
+            EDM_Eval::predictNLExceptQ.pop();
+        }
         std::rethrow_exception( exceptionPtr );
     }
     

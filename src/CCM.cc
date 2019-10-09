@@ -172,8 +172,14 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
     if ( not EDM_CCM::exceptionQ.empty() ) {
         std::lock_guard<std::mutex> lck( EDM_CCM::q_mtx );
 
+        // Take the first exception in the queue
         std::exception_ptr exceptionPtr = EDM_CCM::exceptionQ.front();
-        EDM_CCM::exceptionQ.pop();
+
+        // Unroll all other exception from the thread/loops
+        while( not EDM_CCM::exceptionQ.empty() ) {
+            // JP When do these exception_ptr get deleted? Is it a leak?
+            EDM_CCM::exceptionQ.pop();
+        }
         std::rethrow_exception( exceptionPtr );
     }
     
