@@ -86,21 +86,17 @@ DataFrame< double > Embed( DataFrame< double > dataFrameIn,
     DataFrame< double > dataFrame;
     
     if ( param.columnNames.size() ) {
-        // Get a vector of column indices 
-        std::vector< size_t > col_i;
-        for ( auto colName : param.columnNames ) {
-            col_i.push_back( dataFrameIn.ColumnNameToIndex()[ colName ] );
-        }
-        
-        dataFrame = dataFrameIn.DataFrameFromColumnIndex( col_i );
+        dataFrame = dataFrameIn.DataFrameFromColumnNames( param.columnNames );
     }
     else if ( param.columnIndex.size() ) {
         // already have column indices
+        // Note there will be no column names transferred
         dataFrame = dataFrameIn.DataFrameFromColumnIndex( param.columnIndex );
     }
         
     DataFrame< double > embedding = MakeBlock( dataFrame, E, tau,
                                                colNames, verbose );
+        
     return embedding;
 }
 

@@ -27,11 +27,12 @@ namespace EDM_CCM {
 // forward declarations
 //----------------------------------------------------------------
 #ifdef CCM_THREADED
-void CrossMap(       Parameters           p,
-               const DataFrame< double > &df,
+void CrossMap(       Parameters           param,
+                     DataFrame< double > &dataFrameIn,
                const DataFrame< double > &LibStats );
 #else
-DataFrame< double > CrossMap( Parameters p, const DataFrame< double > &df );
+DataFrame< double > CrossMap( Parameters param,
+                              DataFrame< double > &dataFrameIn );
 #endif
 
 DataFrame< double > CCMDistances( const DataFrame< double > &dataBlock,
@@ -124,13 +125,36 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
         throw std::runtime_error("CCM() must specify library sizes.");
     }
 
-    Parameters param = Parameters( Method::CCM, "", "",
-                                   pathOut, predictFile,
-                                   "", "", E, Tp, knn, tau, 0, 0,
-                                   columns, target, false, false, verbose,
-                                   "", "", "", 0, 0, 0, 0,
-                                   libSizes_str, sample, random,
-                                   replacement, seed );
+    Parameters param = Parameters( Method::CCM,
+                                   "",           // pathIn
+                                   "",           // dataFile
+                                   pathOut,      // 
+                                   predictFile,  // 
+                                   "",           // lib_str
+                                   "",           // pred_str
+                                   E,            // 
+                                   Tp,           // 
+                                   knn,          // 
+                                   tau,          // 
+                                   0,            // theta
+                                   0,            // exclusionRadius
+                                   columns,      // 
+                                   target,       // 
+                                   false,        // embedded
+                                   false,        // const_predict
+                                   verbose,      // 
+                                   "",           // SmapFile
+                                   "",           // blockFile
+                                   "",           // derivatives_str
+                                   0,            // svdSig
+                                   0,            // tikhonov
+                                   0,            // elasticNet
+                                   0,            // multi
+                                   libSizes_str, // 
+                                   sample,       // 
+                                   random,       // 
+                                   replacement,  // 
+                                   seed );       // 
 
     if ( param.columnNames.size() > 1 ) {
         std::cout << "WARNING: CCM() Only the first column will be mapped.\n";
@@ -153,16 +177,35 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
     std::cout << inverseParam;
 #endif
 
+    //--------------------------------------------------------------
+    // Remove dataFrameIn rows to match embedded dataBlock with
+    // partial data rows ignored: CrossMap() -> Embed() -> MakeBlock()
+    // This removal of partial data rows is also done in EmbedNN()
+    //--------------------------------------------------------------
+    // If we support negative tau, this will change
+    // For now, assume only positive tau is allowed
+    size_t shift = std::max( 0, param.tau * (param.E - 1) );
+    {
+        std::lock_guard<std::mutex> lck( EDM_CCM::mtx );
+        if ( not dataFrameIn.PartialDataRowsDeleted() ) {
+            // Not thread safe.
+            dataFrameIn.DeletePartialDataRows( shift );
+        }
+    }
+
 #ifdef CCM_THREADED
     DataFrame<double> col_to_target( param.librarySizes.size(), 4,
                                      "LibSize rho RMSE MAE" );
+    
     DataFrame<double> target_to_col( param.librarySizes.size(), 4,
                                      "LibSize rho RMSE MAE" );
 
-    std::thread CrossMapColTarget( CrossMap, param, dataFrameIn,
+    std::thread CrossMapColTarget( CrossMap, param,
+                                   std::ref( dataFrameIn ),
                                    std::ref( col_to_target ) );
     
-    std::thread CrossMapTargetCol( CrossMap, inverseParam, dataFrameIn,
+    std::thread CrossMapTargetCol( CrossMap, inverseParam,
+                                   std::ref( dataFrameIn ),
                                    std::ref( target_to_col ) );
 
     CrossMapColTarget.join();
@@ -221,14 +264,14 @@ DataFrame <double > CCM( DataFrame< double > &dataFrameIn,
 //----------------------------------------------------------------
 #ifdef CCM_THREADED
 void CrossMap(       Parameters           paramCCM,
-               const DataFrame< double > &dataFrameIn,
+                     DataFrame< double > &dataFrameIn,
                const DataFrame< double > &LibStatsIn ) {
     
     DataFrame< double > &LibStats =
         const_cast< DataFrame< double > & >( LibStatsIn );
 #else
 DataFrame< double > CrossMap( Parameters           paramCCM,
-                              DataFrame< double > &dataFrameInRef ) {
+                              DataFrame< double > &dataFrameIn ) {
 #endif
     
     if ( paramCCM.verbose ) {
@@ -245,10 +288,11 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
     }
 
     try {
-    //----------------------------------------------------------
+    //------------------------------------------------------------
     // Generate embedding on data to be cross mapped (-c column)
+    // dataBlock will have tau * (E-1) fewer rows than dataFrameIn
     // JP: Should this be allocated on the heap?
-    //----------------------------------------------------------
+    //------------------------------------------------------------
     DataFrame<double> dataBlock = Embed( dataFrameIn,
                                          paramCCM.E,
                                          paramCCM.tau,
@@ -257,35 +301,14 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
     
     size_t N_row = dataBlock.NRows();
 
-    //----------------------------------------------------------
-    // Remove dataFrameIn rows to match dataBlock which had
-    // partial data rows ignored in Embed() -> MakeBlock()
-    //----------------------------------------------------------
-    // If we support negative tau, this will change
-    // For now, assume only positive tau is allowed
-    size_t shift = std::max( 0, paramCCM.tau * (paramCCM.E - 1) );
-    
-    // This removal of partial data rows is also done in EmbedNN()
-    // using: DataFrame.DeletePartialDataRows().
-    
-    // Can't do that here on dataFrameIn or the second CrossMap() thread
-    // will delete valid data.  Make a local copy.
-    // DataFrame<double> dataInEmbed( dataFrameIn );
-    // JP: Or is it OK to just craete a new reference?
-    DataFrame<double> &dataInEmbed =
-        const_cast< DataFrame< double > &>( dataFrameIn );
-    
-    if ( not dataInEmbed.PartialDataRowsDeleted() ) {
-        // Not thread safe.
-        std::lock_guard<std::mutex> lck( EDM_CCM::mtx );
-        // NOTE: Only operates on the first call.
-        dataInEmbed.DeletePartialDataRows( shift );
-    }
+    // NOTE: No need to adjust param.library and param.prediction indices
+    //       [param.DeleteLibPred( shift );] since pred will be created
+    //       below based on N_row of dataBlock.
     
 #ifdef DEBUG_ALL
-    std::cout << ">>>> CrossMap() dataInEmbed-----------------------\n";
-    std::cout << dataInEmbed;
-    std::cout << "<<<< dataInEmbed----------------------------------\n";
+    std::cout << ">>>> CrossMap() dataFrameIn-----------------------\n";
+    std::cout << dataFrameIn;
+    std::cout << "<<<< dataFrameIn----------------------------------\n";
     std::cout << ">>>> dataBlock------------------------------------\n";
     std::cout << dataBlock;
     std::cout << "<<<< dataBlock------------------------------------\n";
@@ -470,14 +493,14 @@ DataFrame< double > CrossMap( Parameters           paramCCM,
             Neighbors neighbors = CCMNeighbors( Distances, lib_i, paramCCM );
 
             //----------------------------------------------------------
-            // Subset dataInEmbed to lib_i
+            // Subset dataFrameIn to lib_i
             //----------------------------------------------------------
             DataFrame< double > dataFrameLib_i( lib_i.size(),
-                                                dataInEmbed.NColumns(),
-                                                dataInEmbed.ColumnNames() );
+                                                dataFrameIn.NColumns(),
+                                                dataFrameIn.ColumnNames() );
             
             for ( size_t i = 0; i < lib_i.size(); i++ ) {
-                dataFrameLib_i.WriteRow( i, dataInEmbed.Row( lib_i[ i ] ) ) ;
+                dataFrameLib_i.WriteRow( i, dataFrameIn.Row( lib_i[ i ] ) ) ;
             }
 
             std::valarray<double> targetVec =

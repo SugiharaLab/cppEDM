@@ -348,6 +348,55 @@ void Parameters::Validate() {
     }
 }
 
+//------------------------------------------------------------
+// Adjust lib/pred concordant with Embed() removal of tau(E-1)
+// rows, and DeletePartialDataRow()
+// If we support negative tau, this will change
+// For now, assume only positive tau is allowed
+//------------------------------------------------------------
+void Parameters::DeleteLibPred( size_t shift ) {
+    
+    size_t library_len    = library.size();
+    size_t prediction_len = prediction.size();
+
+    // If 0, 1, ... shift are in library or prediction
+    // those rows were deleted, delete these elements.
+    // First, create a vector of indices to delete
+    std::vector< size_t > deleted_elements( shift, 0 );
+    std::iota( deleted_elements.begin(), deleted_elements.end(), 0 );
+
+    // erase elements of row indices that were deleted
+    for ( auto element =  deleted_elements.begin();
+          element != deleted_elements.end(); element++ ) {
+
+        std::vector< size_t >::iterator it;
+        it = std::find( library.begin(), library.end(), *element );
+
+        if ( it != library.end() ) {
+            library.erase( it );
+        }
+                
+        it = std::find( prediction.begin(),
+                        prediction.end(), *element );
+
+        if ( it != prediction.end() ) {
+            prediction.erase( it );
+        }
+    }
+            
+    // Now offset all values by shift so that vectors indices
+    // in library and prediction refer to the same data rows
+    // before the deletion/shift.
+    for ( auto li =  library.begin();
+          li != library.end(); li++ ) {
+        *li = *li - shift;
+    }
+    for ( auto pi =  prediction.begin();
+          pi != prediction.end(); pi++ ) {
+        *pi = *pi - shift;
+    }
+}
+
 //------------------------------------------------------------------
 // Overload << to output to ostream
 //------------------------------------------------------------------

@@ -34,7 +34,8 @@ int main( int argc, char *argv[] ) {
     DataFrame< double > combos = MV.Combo_rho;
     DataFrame< double > output = MV.Predictions;
 
-    combos.WriteData( "./", "Multiview_combos_valid.csv" );
+    combos.WriteData( "./", "Multiview_combos.csv" );
+    output.WriteData( "./", "Multiview_pred.csv"   );
     
     //VectorError ve = ComputeError( output.VectorColumnName("Observations"),
     //                               output.VectorColumnName("Predictions"));
