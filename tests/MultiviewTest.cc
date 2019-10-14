@@ -28,6 +28,7 @@ int main( int argc, char *argv[] ) {
                                     "x_t y_t z_t", // columns
                                     "x_t",         // target,
                                     0,             // multiview
+                                    0,             // exclusionRadius
                                     false,         // verbose,
                                     1 );           // nThreads
 

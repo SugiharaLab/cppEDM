@@ -78,6 +78,7 @@ MultiviewValues Multiview( std::string pathIn,
                            std::string columns,
                            std::string target,
                            int         multiview,
+                           int         exclusionRadius,
                            bool        verbose,
                            unsigned    nThreads ) {
 
@@ -96,6 +97,7 @@ MultiviewValues Multiview( std::string pathIn,
                                         columns,
                                         target,
                                         multiview,
+                                        exclusionRadius,
                                         verbose,
                                         nThreads );
     return result;
@@ -117,14 +119,16 @@ MultiviewValues  Multiview( DataFrame< double > data,
                             std::string         columns,
                             std::string         target,
                             int                 multiview,
+                            int                 exclusionRadius,
                             bool                verbose,
                             unsigned            nThreads ) {
 
     // Create local Parameters struct. Note embedded = true
     Parameters param = Parameters( Method::Simplex, "", "",
                                    pathOut, predictFile,
-                                   lib, pred, E, Tp, knn, tau, 0, 0,
-                                   columns, target, true, false, verbose,
+                                   lib, pred, E, Tp, knn, tau, 0,
+                                   exclusionRadius, columns, target,
+                                   true, false, verbose,
                                    "", "", "", 0, 0, 0, multiview );
 
     if ( not param.columnNames.size() ) {
