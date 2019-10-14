@@ -60,6 +60,9 @@ void EvalComboThread( Parameters                            param,
                       DataFrame< double >                  &combos_rho,
                       std::vector< DataFrame< double > >   &prediction );
 
+std::vector< std::string > ComboRhoTable( DataFrame<double>          combosRho,
+                                          std::vector< std::string > colNames );
+
 //----------------------------------------------------------------
 // Multiview() : Evaluate Simplex rho vs. dimension E
 // API Overload 1: Explicit data file path/name
@@ -476,13 +479,20 @@ MultiviewValues  Multiview( DataFrame< double > data,
         Prediction.WriteData( param.pathOut, outputFile );
     }
 
+    // Create combos_rho table with column names
+    std::vector< std::string > comboTable =
+        ComboRhoTable( combos_rho_pred, embedding.ColumnNames() );
+
     if ( param.verbose ) {
         std::cout << "Multiview(): rho " << ve.rho
                   << "  MAE " << ve.MAE << "  RMSE " << ve.RMSE << std::endl;
-        std::cout << combos_rho_pred;
+        std::cout << std::endl << "Multiview Combinations:" << std::endl;
+        for ( auto tableRow : comboTable ) {
+            std::cout << tableRow << std::endl;
+        } std::cout << std::endl; 
    }
 
-    struct MultiviewValues MV( combos_rho_pred, Prediction );
+    struct MultiviewValues MV( combos_rho_pred, Prediction, comboTable );
     
     return MV;
 }
@@ -620,4 +630,62 @@ std::vector< std::vector< size_t > > Combination( int n, int k ) {
     } while ( std::next_permutation( v.begin(), v.end() ) );
 
     return combos;
+}
+
+//----------------------------------------------------------------
+// Return combos_rho_pred DataFrame as a vector of strings
+// with column names. 
+//----------------------------------------------------------------
+std::vector< std::string > ComboRhoTable(
+    DataFrame<double>          combos_rho_pred,
+    std::vector< std::string > columnNames )
+{
+
+    // combos_rho_pred has E + 3 columns: Col_1, ... Col_E, rho, MAE, RMSE
+    size_t nCol = combos_rho_pred.NColumns() - 3; // JP Hardcoded silliness!
+
+    if ( nCol > columnNames.size() ) {
+        std::stringstream errMsg;
+        errMsg << "ComboRhoTable(): Combos_rho has " << nCol
+               << " columns, but the data embedding has "
+               << columnNames.size() << " elements.";
+        throw std::runtime_error( errMsg.str() );
+    }
+
+    std::vector< std::string > table;
+    
+    // Header
+    std::stringstream header;
+    for ( size_t col = 0; col < nCol; col++ ) {  // column indices
+        header << "col_" << col + 1 << ", ";
+    }
+    for ( size_t col = 0; col < nCol; col++ ) {  // column names
+        header << "name_" << col + 1 << ", ";
+    }
+    header << "rho, MAE, RMSE";
+    table.push_back( header.str() );
+
+    // Process each row of combos_rho_pred
+    for ( size_t row = 0; row < combos_rho_pred.NRows(); row++ ) {
+        std::stringstream rowsstring;
+        rowsstring.precision( 4 );
+        
+        std::valarray< double > rowValues = combos_rho_pred.Row( row );
+        
+        for ( size_t col = 0; col < nCol; col++ ) {
+            rowsstring << std::setw(4) << rowValues[ col ] <<  ", ";
+        }
+        for ( size_t col = 0; col < nCol; col++ ) {
+            size_t col_i = (size_t) rowValues[ col ];
+            rowsstring << columnNames[ col_i - 1 ] <<  ", ";
+        }
+
+        rowsstring << std::setw(6) << rowValues[ nCol     ] <<  ", "; // rho
+        rowsstring << std::setw(6) << rowValues[ nCol + 1 ] <<  ", "; // MAE
+        rowsstring << std::setw(6) << rowValues[ nCol + 2 ];          // RMSE
+        
+        table.push_back( rowsstring.str() );
+    }
+    
+    return table;
 }

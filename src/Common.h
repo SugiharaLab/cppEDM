@@ -43,8 +43,9 @@ struct SMapValues {
 };
 
 struct MultiviewValues {
-    DataFrame< double > Combo_rho;
+    DataFrame< double > Combo_rho;              // col_i..., rho, MAE, RMSE
     DataFrame< double > Predictions;
+    std::vector< std::string > Combo_rho_table; // includes column names
 
 #ifdef MULTIVIEW_VALUES_OVERLOAD
     // Don't define constructors for the setuptools module build on Windows
@@ -54,9 +55,11 @@ struct MultiviewValues {
     // Constructors
     MultiviewValues();
 
-    MultiviewValues( DataFrame< double > combo_rho,
-                     DataFrame< double > predictions ):
-        Combo_rho( combo_rho ), Predictions( predictions ) {}
+    MultiviewValues( DataFrame< double >        combo_rho,
+                     DataFrame< double >        predictions,
+                     std::vector< std::string > combo_rho_table ):
+        Combo_rho( combo_rho ), Predictions( predictions ),
+        Combo_rho_table( combo_rho_table ) {}
 #endif
 };
 
