@@ -5,7 +5,7 @@ EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest
 OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
-LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread
+LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread -llapack
 
 all:	$(EXE)
 
