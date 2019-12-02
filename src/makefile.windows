@@ -1,6 +1,6 @@
 
 CC  = cl
-OBJ = Common.obj AuxFunc.obj DateTimeUtil.o Parameter.obj Embed.obj\
+OBJ = Common.obj AuxFunc.obj DateTimeUtil.obj Parameter.obj Embed.obj\
 	Interface.obj Neighbors.obj Simplex.obj Eval.obj CCM.obj\
 	Multiview.obj SMap.obj 
 
