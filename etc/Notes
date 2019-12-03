@@ -12,28 +12,50 @@ General notes
    heap allocation.  This facilitates garbage collection.  It may be that
    copy-on-return for large data objects creates a performance issue.
    If the code encounters massive data objects/large problems, this may
-   pose a limitation.
+   pose a limitation.  The use of object references may alleviate this.
 
-3) Eigen template library. The recommended SVD solver is the BDCSVD that
-   scales to large problems. The Eigen documentation states:
-     This algorithm is unlikely to provide accurate results when
-     compiled with unsafe math optimizations. For instance, this concerns
-     Intel's compiler (ICC), which performs such optimization by default
-     unless you compile with the -fp-model precise option. Likewise,
-     the -ffast-math option of GCC or clang will significantly degrade
-     accuracy.
-   See: https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
+3) The LAPACK library is used for the S-map solver. It calls the dgelss_()
+   FORTRAN function.  On nix systems, OS-installed libraries are used.
+   On Windows, the Windows for LAPACK libraries are needed.  These are
+   built with mingw, so mingw libraries must be available.  It further
+   seems that the mingw 32-bit libraries have to be used. See below. 
 
-   Note that when running the SMap circle.csv test, the BDCSVD solver with
-   default parameters produces occasional divergence.  We have therefore
-   defaulted to the JacobiSVD solver. 
+4) pyEDM implements a wrapper for cppEDM using PyBind11. This requires
+   a MSVC build since Python extensions must be compiled with the same
+   compiler as the Python interpreter. 
 
-4) Eigen template library. Eigen allows replacement of it's internal
-   template library routines with direct calls to BLAS/LAPACK libraries.
-   See: https://eigen.tuxfamily.org/dox/TopicUsingBlasLapack.html
-   This may offer performance and stability advantages.
+5) rEDM implements a wrapper for cppEDM using Rcpp. R includes the
+   RTools package for building Windows binaries, and, it's own
+   LAPACK libraries. 
 
-5) SVD for S-map.  To completely excise Eigen or other 3rd party libraries
-   for S-map SVD, one can call the BLAS/LAPACK dgesdd_() directly.
-   An example of such a C++ implementation is in lapack_dgesdd.cc.
-   
+--------------------------------------------------------------------
+Building etc/Test.cc on Windows
+
+This has been found to work on Windows 10 with MSVC 2019 build tools
+and mingw. 
+
+   Build cppEDM/src:
+   nmake /f makefile.windows
+
+   Compile cppEDM/etc/Test.cc into Test.obj:
+   cl /c Test.cc /EHsc /MD /I../src
+
+   Download .lib and .dll from Windows for LAPACKE:
+   https://icl.cs.utk.edu/lapack-for-windows/lapack/#lapacke
+   Copy .dll and .lib from LAPACKE_examples.zip into ../../lapacke
+
+   Link Test.obj into Test.exe:
+   link /OUT:Test.exe /LIBPATH:../lib /LIBPATH:../../lapacke EDM.lib
+   liblapack.lib Test.obj
+
+   Get missing libraries for LAPACK legacy:
+   Downloaded libgfortran-3.dll into ../../lapacke
+   https://www.opendll.com/index.php?file-download=libgfortran-3.dll&arch=32bit
+
+   Downloaded libwinpthread-1.dll into ../../lapacke
+   https://wikidll.com/mingw-w64/libwinpthread-1-dll
+
+   Set PATH to find the lapacke and mingw dll's:
+   PATH=../../lapacke;C:\MINGW\BIN;%PATH%
+
+   Run Test.exe
