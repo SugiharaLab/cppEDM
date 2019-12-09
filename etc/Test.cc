@@ -241,7 +241,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > NL = 
             PredictNonlinear( "../data/", "TentMapNoise_rEDM.csv",
                               "./", "PredictNonlinearOut.csv",
-                              "1 100", "201 500", "", 2, 1, 1,
+                              "1 100", "201 500", "", 2, 1, 0, 1,
                               "TentMap", "", false, false, 4 );
 
         NL.MaxRowPrint() = 15;
