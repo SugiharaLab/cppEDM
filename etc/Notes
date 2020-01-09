@@ -5,7 +5,7 @@ General notes
    standard implementation allowing template classes to be distributed into
    declarations (.h) and implementation (.cc).  However, this does entail
    explicit declaration of specialised template types in the .cc file.
-   To support OSX, DataFrame.h contains both declarations and implemenations.
+   To support OSX, DataFrame.h contains both declarations and implementations.
    See: libstdc++_Notes.txt.
 
 2) The code relies heavily on class and data containers without explicit
@@ -28,8 +28,80 @@ General notes
    RTools package for building Windows binaries, and, it's own
    LAPACK libraries. 
 
+
+
+--------------------------------------------------------------------
+CCM vs Simplex : lib, pred and libSize compatibility
+--------------------------------------------------------------------
+
+Time delay embedding removes the first tau(E-1) rows of data to exclude
+partial data vectors. Accordingly, the maximum index of lib or pred
+rows allowed is the number of data observation rows minus tau(E-1). 
+
+If Tp > 0, then Tp additional rows are forecast beyond pred.
+
+Simplex() is a wrapper for SimplexProjection(). With default embedded = false
+it embeds the data and performs cross mapping from lib NN at each pred
+observation with a call to SimplexProjection(). The lib and pred indices are
+adjusted to account for the removal of partial data vectors so that output
+data align with the observations.  
+
+Simplex with E = 3, Tp = 0, lib = pred = "1 10" on a dataset with 12
+observation rows will have a NN library of size 8 = 10 - 2 from embedding
+of the first 10 observation rows.  Predictions will be output at rows
+3 - 10 since the max pred is 10 and the first two observations were deleted
+as partial data E-dimensional vectors where no neighbors can be computed. 
+
+CCM() embeds the entire data, then uses the embedding size (rows) as both
+lib and pred to perform cross mapping with a call to SimplexProjection()
+using embedded = true (no embedding performed on data). If random = false
+then lib is assigned sequentially up to the current library size. There
+is no external notion of lib & pred.
+
+CCM with E = 3 and libSizes = "10 10 1", random = false, will read the 12
+observation rows, perform embedding discarding the first two rows, then
+predict 10 points at a library size of 10 using sequential lib indices.
+
+CCM was not intended to be used for non-convergent cross mapping and has
+no notion of pred, only library size.  As a result, it does not have the
+same alignment of lib & pred as in Simplex(), and, forms the embedding
+based on all available observations (not just lib). 
+
+Continuing with the 12 observation data, 10 analysis row example, the
+following parameter combinations give congruent rho results:
+
+******** Tp = 0 **********
+Simplex: data.csv lib = "1 10" pred = "3 12" columns = x target = y
+E = 3 Tp = 0
+rho   0.911001  RMSE   0.259461  MAE   0.198365
+
+CCM: data.csv columns = x target = y E = 3 Tp = 0 libSizes = "10 10 1"
+----------------------------------------------
+      10.0000       0.9110       0.5470
+----------------------------------------------
+
+******** Tp = 1 **********
+Simplex: data.csv lib = "1 10" pred = "3 11" columns = x target = y
+E = 3 Tp = 1
+rho   0.868089  RMSE   0.198611  MAE   0.15669
+
+CCM: data.csv columns = x target = y E = 3 Tp = 1 libSizes = "9 9 1"
+----------------------------------------------
+       9.0000       0.8681       0.7016
+----------------------------------------------
+
+******** Tp = 2 **********
+Simplex: data.csv lib = "1 10" pred = "3 10" columns = x target = y
+E = 3 Tp = 2
+rho   0.831373  RMSE   0.170693  MAE   0.132672
+
+CCM: data.csv columns = x target = y E = 3 Tp = 2 libSizes = "8 8 1"
+
+
+
 --------------------------------------------------------------------
 Building etc/Test.cc on Windows
+--------------------------------------------------------------------
 
 This has been found to work on Windows 10 with MSVC 2019 build tools
 and mingw. 
