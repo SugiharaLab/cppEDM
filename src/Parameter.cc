@@ -20,6 +20,8 @@ Parameters::Parameters(
     float       theta,
     int         exclusionRadius,
 
+    std::vector< std::vector<bool> > * exclusionMatrix,
+
     std::string columns_str,
     std::string target_str,
     
@@ -58,6 +60,8 @@ Parameters::Parameters(
     tau              ( tau ),
     theta            ( theta ),
     exclusionRadius  ( exclusionRadius ),
+
+    exclusionMatrix  ( exclusionMatrix ),
     
     columns_str      ( columns_str ),
     target_str       ( target_str ),
