@@ -5,7 +5,7 @@
 #include <chrono>
 #include <queue>
 
-#ifdef CCM_THREADED // Defined in makefile
+#ifdef CCM_THREADED
 // Two explicit CrossMap() threads are invoked. One for forward mapping, 
 // one for inverse mapping.  The call signature of CrossMap() is
 // dependent on which path is used.  This should probably be unified 
@@ -134,7 +134,7 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
                                    tau,          // 
                                    0,            // theta
                                    0,            // exclusionRadius
-                                   0,            // exclusionMatrix
+                                   DataFrame<double>(),// exclusionMatrix
                                    columns,      // 
                                    target,       // 
                                    false,        // embedded

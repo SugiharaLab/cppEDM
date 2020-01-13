@@ -82,7 +82,7 @@ MultiviewValues Multiview( std::string pathIn,
                            std::string target,
                            int         multiview,
                            int         exclusionRadius,
-                           std::vector< std::vector<bool> > *exclusionMatrix,
+                           const DataFrame<double> & exclusionMatrix,
                            bool        verbose,
                            unsigned    nThreads ) {
 
@@ -125,7 +125,7 @@ MultiviewValues  Multiview( DataFrame< double > data,
                             std::string         target,
                             int                 multiview,
                             int                 exclusionRadius,
-                            std::vector< std::vector<bool> > *exclusionMatrix,
+                            const DataFrame<double> & exclusionMatrix,
                             bool                verbose,
                             unsigned            nThreads ) {
 

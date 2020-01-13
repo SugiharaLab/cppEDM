@@ -237,7 +237,7 @@ void EmbedThread( EDM_Eval::WorkQueue &workQ,
                                            0,           // knn
                                            tau,
                                            0,           // exclusionRadius
-                                           0,           // exclusionMatrix
+                                           DataFrame<double>(),// exclusionMatrix
                                            colNames,
                                            targetName,
                                            embedded,
@@ -426,7 +426,7 @@ void PredictIntervalThread( EDM_Eval::WorkQueue &workQ,
                                            0,           // knn
                                            tau,
                                            0,           // exclusionRadius
-                                           0,           // exclusionMatrix
+                                           DataFrame<double>(),// exclusionMatrix
                                            colNames,
                                            targetName,
                                            embedded,
@@ -651,7 +651,7 @@ void SMapThread( EDM_Eval::WorkQueue   &workQ,
                                  tau,
                                  theta,
                                  0,         // exclusionRadius
-                                 0,         // exclusionMatrix
+                                 DataFrame<double>(),// exclusionMatrix
                                  colNames,
                                  targetName,
                                  "",        // smapFile

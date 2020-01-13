@@ -20,7 +20,7 @@ Parameters::Parameters(
     float       theta,
     int         exclusionRadius,
 
-    std::vector< std::vector<bool> > * exclusionMatrix,
+    const DataFrame<double> &exclusionMatrix,
 
     std::string columns_str,
     std::string target_str,
@@ -177,12 +177,13 @@ void Parameters::Validate() {
     
         //also check exclusion matrix size while we have pred string parsed
 
-        if ( exclusionMatrix and ( exclusionMatrix->size() < pred_end or 
-                    exclusionMatrix->begin()->size() < pred_end) ) { 
-
+        if ( exclusionMatrix.NRows() and method != Method::CCM and (
+                        exclusionMatrix.NRows() < pred_end or 
+                        exclusionMatrix.NColumns() < pred_end ) ){
+            
             std::string errMsg( "Parameters::Validate(): "
-                    "Exclusion Matrix contains less rows or "
-                    "columns than the range predicting on.\n" );
+                    "The range of rows in the Exclusion Matrix "
+                    "is smaller than range predicting on.\n" );
             throw std::runtime_error( errMsg );
         }
     

@@ -29,6 +29,7 @@ int main( int argc, char *argv[] ) {
                                     "x_t",         // target,
                                     0,             // multiview
                                     0,             // exclusionRadius
+                                    DataFrame<double>(),
                                     false,         // verbose,
                                     1 );           // nThreads
 

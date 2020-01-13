@@ -22,7 +22,7 @@ public:  // Not protected with accessors.
     int         tau;                // block embedding delay
     int         exclusionRadius;    // temporal rows to ignore in predict
 
-    std::vector< std::vector<bool> > *exclusionMatrix; //opt. exclusion matrix
+    const DataFrame<double> &exclusionMatrix;
     
     float       theta;              // S Map localization
     float       SVDSignificance;    // SVD singular value cutoff
@@ -87,7 +87,7 @@ public:  // Not protected with accessors.
         float       theta       = 0,
         int         exclusionRadius = 0,
 
-        std::vector< std::vector<bool> > * exclusionMatrix = 0,
+        const DataFrame<double> &exclusionMatrix = DataFrame<double>(),
 
         std::string columns_str = "",
         std::string target_str  = "",
