@@ -104,22 +104,20 @@ Neighbors FindNeighbors(
             }
 
             //skip excluded neighbors in exclusion matrix if provided
-            if ( parameters.exclusionMatrix ) {
+            if ( parameters.exclusionMatrix.NRows() and 
+                                           parameters.method != Method::CCM) {
                  
-                std::vector<bool>& exclusion_row=parameters.exclusionMatrix->at(
-                                    pred_row + parameters.tau*(parameters.E-1));
-               
                 bool exclude_row = false;
 
                 //if neighb idx OR any idx's in its lag are excluded, skip
 
-                int top_row = (parameters.E-1)*parameters.tau + lib_row;
+                int lead_time_idx = (parameters.E-1)*parameters.tau + lib_row;
+                int pred_time_row = pred_row + parameters.tau*(parameters.E-1);
 
-                for ( int curr_row = lib_row; curr_row <= top_row; 
+                for ( int curr_row = lib_row; curr_row <= lead_time_idx; 
                                                   curr_row += parameters.tau ) {
-                    if ( exclusion_row.at( curr_row ) ) {
+                    if( parameters.exclusionMatrix( pred_time_row , curr_row ) ){
                         exclude_row = true; 
-                        break;
                     }
                 }
 
