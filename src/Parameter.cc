@@ -146,6 +146,7 @@ void Parameters::Validate() {
         
         library = std::vector<size_t>( lib_end - lib_start + 1 );
         std::iota ( library.begin(), library.end(), lib_start - 1 );
+
     }
 
     //--------------------------------------------------------------
@@ -173,6 +174,18 @@ void Parameters::Validate() {
         
         prediction = std::vector<size_t>( pred_end - pred_start + 1 );
         std::iota ( prediction.begin(), prediction.end(), pred_start - 1 );
+    
+        //also check exclusion matrix size while we have pred string parsed
+
+        if ( exclusionMatrix and ( exclusionMatrix->size() < pred_end or 
+                    exclusionMatrix->begin()->size() < pred_end) ) { 
+
+            std::string errMsg( "Parameters::Validate(): "
+                    "Exclusion Matrix contains less rows or "
+                    "columns than the range predicting on.\n" );
+            throw std::runtime_error( errMsg );
+        }
+    
     }
     
     if ( method == Method::Simplex or method == Method::SMap ) {
@@ -196,6 +209,7 @@ void Parameters::Validate() {
             prediction = std::vector<size_t>( 1, 0 );
         }
     }
+    
     
 #ifdef DEBUG_ALL
     PrintIndices( library, prediction );
@@ -256,6 +270,7 @@ void Parameters::Validate() {
             derivatives.push_back( std::stoi( der_vec[i] ) );
         }
     }
+
 
     // CCM librarySizes
     if ( libSizes_str.size() > 0 ) {

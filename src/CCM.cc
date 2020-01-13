@@ -134,6 +134,7 @@ DataFrame <double > CCM( DataFrame< double > dataFrameIn,
                                    tau,          // 
                                    0,            // theta
                                    0,            // exclusionRadius
+                                   0,            // exclusionMatrix
                                    columns,      // 
                                    target,       // 
                                    false,        // embedded
