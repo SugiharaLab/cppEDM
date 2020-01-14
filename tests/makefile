@@ -1,17 +1,22 @@
 
 CC  = g++
 
-EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest
+EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest \
+		CustomExclusionTest
 OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
 LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread -llapack
 
-all:	$(EXE)
+all:	 $(EXE)
 
 # Need to figure out how to build TestCommon.o automatically
 SimplexTest: SimplexTest.cc
 	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
+	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
+
+CustomExclusionTest: CustomExclusionTest.cc 
+	$(CC) CustomExclusionTest.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 DateTimeTest: DateTimeTest.cc ../src/DateTimeUtil.cc
