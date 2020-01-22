@@ -23,7 +23,7 @@ int main () {
                                        3,          // E
                                        0,          // Tp
                                        0,          // knn
-                                       1,          // tau
+                                       -1,         // tau
                                        "anchovy",  // columns
                                        "np_sst",   // target
                                        "10 75 5",  // libSizes_str

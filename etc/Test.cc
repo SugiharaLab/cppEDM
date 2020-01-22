@@ -37,7 +37,7 @@ int main( int argc, char *argv[] ) {
         // Embedding of data file
         //----------------------------------------------------------
         DataFrame< double > EmbedFrame = Embed( "../data/", "block_3sp.csv",
-                                                2, 1, "x_t y_t z_t", true );
+                                                2, -1, "x_t y_t z_t", true );
         std::cout << EmbedFrame;
         
         //----------------------------------------------------------
@@ -59,7 +59,7 @@ int main( int argc, char *argv[] ) {
         std::cout << "block_3sp.csv Embed():\n";
         std::cout << D;
 
-        DataFrame< double > EmbedFrame2 = Embed( D, 2, 1, "x_t y_t z_t", true );
+        DataFrame< double > EmbedFrame2 = Embed(D, 2, -1, "x_t y_t z_t", true);
         std::cout << "block_3sp.csv DataFrame Embed():\n";
         std::cout << EmbedFrame2;
 #endif
@@ -67,14 +67,24 @@ int main( int argc, char *argv[] ) {
 #ifdef SIMPLEX_TEST1
         //----------------------------------------------------------
         // embedded = true : data file is multivariable embedding
-        // ./Predict.py -i block_3sp.csv -r x_t -c x_t x_t-1 x_t-2
-        //   -l 1 100 -p 101 130 -T 1 -P -e -o block3sp_Embedded.csv
         //----------------------------------------------------------
         DataFrame<double> dataFrame = 
-            Simplex( "../data/", "block_3sp.csv", "./",
-                     "cppBlock3sp_Embedded.csv",
-                     "1 100", "101 195", 3, 1, 0, 1, 0,
-                     "x_t x_t-1 x_t-2", "x_t", true, false, true );
+            Simplex( "../data/",           // pathIn
+                     "block_3sp.csv",      // dataFile
+                     "./",                 // pathOut
+                     "cppBlock3sp_Embedded.csv", // predictFile
+                     "1 100",              // lib
+                     "101 195",            // pred
+                     3,                    // E
+                     1,                    // Tp
+                     0,                    // knn
+                     -1,                   // tau
+                     0,                    // exclusionRadius
+                     "x_t x_t-1 x_t-2",    // columns
+                     "x_t",                // target
+                     true,                 // embedded
+                     false,                // const_predict
+                     true );               // verbose 
         std::cout << dataFrame;
 
         VectorError ve = ComputeError(
@@ -90,14 +100,24 @@ int main( int argc, char *argv[] ) {
 #ifdef SIMPLEX_TEST2
         //----------------------------------------------------------
         // embedded = false : Simplex embeds data file columns to E
-        // ./Predict.py -i block_3sp.csv -r x_t -c x_t
-        // -l 1 100 -p 101 130 -T 1 -P -E 3 -o block3sp_E3.csv -P
         //----------------------------------------------------------
         DataFrame<double> dataFrameEmbed = 
-            Simplex( "../data/", "block_3sp.csv", "./",
-                     "cppBlock3sp_E3.csv",
-                     "1 100", "101 195", 3, 1, 0, 1, 0,
-                     "x_t y_t z_t", "x_t", false, false, true );
+            Simplex( "../data/",           // pathIn
+                     "block_3sp.csv",      // dataFile
+                     "./",                 // pathOut
+                     "cppBlock3sp_E3.csv", // predictFile
+                     "1 100",              // lib
+                     "101 195",            // pred
+                     3,                    // E
+                     1,                    // Tp
+                     0,                    // knn
+                     -1,                   // tau
+                     0,                    // exclusionRadius
+                     "x_t y_t z_t",        // columns
+                     "x_t",                // target
+                     false,                // embedded
+                     false,                // const_predict
+                     true );               // verbose 
         
         dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
         std::cout << dataFrameEmbed;
@@ -113,17 +133,17 @@ int main( int argc, char *argv[] ) {
 
 #ifdef MULTIVIEW_TEST
         //----------------------------------------------------------
-        // ./Multiview.py -i block_3sp.csv -E 3 -r x_t -c x_t y_t z_t
-        // -l 1 100 -p 101 198 -T 1 -P
         //----------------------------------------------------------
         MultiviewValues MV =
-            Multiview( "../data/", "block_3sp.csv",
+            Multiview( "../data/",
+                       "block_3sp.csv",
                        "./", "MultiviewBlock3sp.csv",
-                       "1 100", "101 198",
+                       "1 100",       // lib
+                       "101 198",     // pred
                        3,             // E
                        1,             // Tp
                        0,             // knn
-                       1,             // tau
+                       -1,            // tau
                        "x_t y_t z_t", // columns
                        "x_t",         // target,
                        0,             // multiview
@@ -146,10 +166,25 @@ int main( int argc, char *argv[] ) {
         // embedded = false : SMap embeds data file columns to E
         //----------------------------------------------------------
         SMapValues SMV = 
-            SMap( "../data/", "block_3sp.csv", "./", "smap_3sp_Embed.csv",
-                  "1 100", "101 195", 3, 1, 0, 1, 3., 0, 
-                  "x_t", "x_t", "smap_3sp_coeff.csv", "",
-                  false, false, true );
+            SMap( "../data/",           // pathIn
+                  "block_3sp.csv",      // dataFile
+                  "./",                 // pathOut
+                  "smap_3sp_Embed.csv", // predictFile
+                  "1 100",              // lib
+                  "101 195",            // pred
+                  3,                    // E
+                  1,                    // Tp
+                  0,                    // knn
+                  -1,                   // tau
+                  3.,                   // theta
+                  0,                    // exclusionRadius
+                  "x_t",                // columns
+                  "x_t",                // target
+                  "smap_3sp_coeff.csv", // smapFile
+                  "",                   // derivatives
+                  false,                // embedded
+                  false,                // const_predict
+                  true );               // verbose
 
         DataFrame< double > predictions  = SMV.predictions;
         DataFrame< double > coefficients = SMV.coefficients;
@@ -170,10 +205,25 @@ int main( int argc, char *argv[] ) {
         // embedded = true : Circle 
         //----------------------------------------------------------
         SMapValues SMV2 = 
-            SMap( "../data/", "circle.csv", "./", "smap_circle.csv",
-                  "1 100", "101 198", 2, 1, 0, 1, 4., 0,
-                  "x y", "x", "smap_circ_coeff.csv", "",
-                  true, false, true );
+            SMap( "../data/",        // pathIn
+                  "circle.csv",      // dataFile,
+                  "./",              // pathOut
+                  "smap_circle.csv", // predictFile
+                  "1 100",           // lib
+                  "101 198",         // pred
+                  2,                 // E
+                  1,                 // Tp
+                  0,                 // knn
+                  -1,                // tau
+                  4.,                // theta
+                  0,                 // exclusionRadius
+                  "x y",             // columns
+                  "x",               // target
+                  "smap_circ_coeff.csv", // smapFile
+                  "",                    // derivatives
+                  true,                  // embedded 
+                  false,                 // const_predict
+                  true );                // verbose 
 
         DataFrame< double > predictions2  = SMV2.predictions;
         DataFrame< double > coefficients2 = SMV2.coefficients;
@@ -191,13 +241,24 @@ int main( int argc, char *argv[] ) {
 
 #ifdef CCM_TEST
         //----------------------------------------------------------
-        // ./CCM.py -i sardine_anchovy_sst.csv -c anchovy -r np_sst
-        // -E 3 -s 100 -L 10 70 10 -R -rp
         //----------------------------------------------------------
         DataFrame< double > CCMD = 
-            CCM( "../data/", "sardine_anchovy_sst.csv", "./", "ccm.csv",
-                 3, 0, 0, 1, "anchovy", "np_sst", "10 70 10", 100,
-                 true, false, 0, true );
+            CCM( "../data/",                // pathIn
+                 "sardine_anchovy_sst.csv", // dataFile
+                 "./",                      // pathOut
+                 "ccm.csv",                 // predictFile
+                 3,                         // E
+                 0,                         // Tp
+                 0,                         // knn
+                 -1,                        // tau
+                 "anchovy",                 // columns
+                 "np_sst",                  // target
+                 "10 70 10",                // libSizes_str
+                 100,                       // sample
+                 true,                      // random
+                 false,                     // replacement
+                 0,                         // seed
+                 true );                    // verbose
 
         std::cout << "CCM sardine_anchovy_sst.csv:\n";
         std::cout << CCMD;
@@ -205,14 +266,22 @@ int main( int argc, char *argv[] ) {
 
 #ifdef EMBED_DIMENSION
         //----------------------------------------------------------
-        // ./EmbedDimension.py -i TentMap_rEDM.csv -c TentMap
-        // -l 1 100 -p 201 500 -T 1
         //----------------------------------------------------------
         DataFrame< double > EMBD = 
-            EmbedDimension( "../data/", "TentMap_rEDM.csv",
-                            "./", "EmbedDimOut.csv",
-                            "1 100", "201 500", 10, 1, 1,
-                            "TentMap", "", false, false, 4 );
+            EmbedDimension( "../data/",         // pathIn
+                            "TentMap_rEDM.csv", // dataFile
+                            "./",               // pathOut
+                            "EmbedDimOut.csv",  // predictFile
+                            "1 100",            // lib
+                            "201 500",          // pred
+                            10,                 // maxE
+                            1,                  // Tp
+                            -1,                 // tau
+                            "TentMap",          // colNames
+                            "",                 // targetName
+                            false,              // embedded
+                            false,              // verbose
+                            4 );                // nThreads 
                 
         std::cout << "EmbedDimension TentMap_rEDM.csv:\n";
         std::cout << EMBD;
@@ -220,14 +289,22 @@ int main( int argc, char *argv[] ) {
 
 #ifdef PREDICT_INTERVAL
         //----------------------------------------------------------
-        // ./PredictDecay.py -i TentMap_rEDM.csv -c TentMap
-        // -l 1 100 -p 201 500 -E 2
         //----------------------------------------------------------
         DataFrame< double > PD = 
-            PredictInterval( "../data/", "TentMap_rEDM.csv",
-                             "./", "PredictIntervalOut.csv",
-                             "1 100", "201 500", 10, 2, 1,
-                             "TentMap", "", false, false, 4 );
+            PredictInterval( "../data/",             // pathIn
+                             "TentMap_rEDM.csv",     // dataFile
+                             "./",                   // pathOut
+                             "PredictIntervalOut.csv",// predictFile
+                             "1 100",                // lib
+                             "201 500",              // pred
+                             10,                     // maxTp
+                             2,                      // E
+                             -1,                     // tau
+                             "TentMap",              // colNames
+                             "",                     // targetName,
+                             false,                  // embedded
+                             false,                  // verbose
+                             4 );                    // nThreads
                 
         std::cout << "PredictInterval TentMap_rEDM.csv:\n";
         std::cout << PD;
@@ -235,14 +312,24 @@ int main( int argc, char *argv[] ) {
 
 #ifdef PREDICT_NONLINEAR
         //----------------------------------------------------------
-        // ./SMapNL.py -i TentMapErr_rEDM.csv -c TentMap
-        // -l 1 100 -p 201 500 -T 1 -E 2 
         //----------------------------------------------------------
-        DataFrame< double > NL = 
-            PredictNonlinear( "../data/", "TentMapNoise_rEDM.csv",
-                              "./", "PredictNonlinearOut.csv",
-                              "1 100", "201 500", "", 2, 1, 0, 1,
-                              "TentMap", "", false, false, 4 );
+        DataFrame< double > NL =
+            PredictNonlinear( "../data/",  // pathIn,
+                              "TentMapNoise_rEDM.csv",   // dataFile,
+                              "./",        // pathOut,
+                              "PredictNonlinearOut.csv", // predictFile,
+                              "1 100",     // lib,
+                              "201 500",   // pred,
+                              "",          // theta,
+                              2,           // E,
+                              1,           // Tp,
+                              0,           // knn,
+                              -1,          // tau,
+                              "TentMap",   // colNames,
+                              "",          // targetName,
+                              false,       // embedded,
+                              false,       // verbose,
+                              4 );         // nThreads
 
         NL.MaxRowPrint() = 15;
         std::cout << "PredictNonlinear TentMapNoise_rEDM.csv:\n";

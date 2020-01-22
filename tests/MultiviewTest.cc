@@ -24,7 +24,7 @@ int main( int argc, char *argv[] ) {
                                     3,             // E
                                     1,             // Tp
                                     0,             // knn
-                                    1,             // tau
+                                    -1,            // tau
                                     "x_t y_t z_t", // columns
                                     "x_t",         // target,
                                     0,             // multiview
