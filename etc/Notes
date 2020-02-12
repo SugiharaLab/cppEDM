@@ -100,6 +100,31 @@ CCM: data.csv columns = x target = y E = 3 Tp = 2 libSizes = "8 8 1"
 
 
 --------------------------------------------------------------------
+C++ std::sort() for finding nearest neighbors
+--------------------------------------------------------------------
+Investigation was made into using std::sort instead of the heuristic
+used in FindNeighbors() and CCMNeighbors().  Since we seek to sort
+coupled <distance, library index> pairs, this was done using a vector
+of distance, index pairs: std::vector< std::pair<double, size_t> >.
+
+This is then sorted with std::sort(). Any elements that were not inserted
+into the vector, e.g. pred = lib degenerate rows, will have 0 distance
+and get sorted to the front.  These are removed by tracking how many
+elements were not inserted into the vector.
+
+Ties in distances are sorted as one would expect, following the strict
+weak odering rules.  This works fine for FindNeighbors() used for
+Simplex() & SMap().
+
+In CCMNeighbors() used for CCM(), it seems that subtle differences in
+handling ties (which neighbor out of a set of equal distances) creates
+substantial problems in CCM results.  This could be resolved with the
+use of a std::sort() comparison function invoking: x.first <= y.first,
+however, this <= does not follow the strict weak odering mandated by
+std::sort(), which can cause faults if used with std::sort().
+
+
+--------------------------------------------------------------------
 Building etc/Test.cc on Windows
 --------------------------------------------------------------------
 
