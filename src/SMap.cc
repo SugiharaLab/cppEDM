@@ -124,9 +124,12 @@ SMapValues SMap( DataFrame< double > &data,
     // Init coefficients to NAN ?
     DataFrame< double > coefficients = DataFrame< double >( N_row,
                                                             param.E + 1 );
+
+#ifdef EDM_FUTURE
     DataFrame< double > derivative;
     DataFrame< double > tangents;
-
+#endif
+    
     //------------------------------------------------------------
     // Process each prediction row
     //------------------------------------------------------------

@@ -122,37 +122,3 @@ substantial problems in CCM results.  This could be resolved with the
 use of a std::sort() comparison function invoking: x.first <= y.first,
 however, this <= does not follow the strict weak odering mandated by
 std::sort(), which can cause faults if used with std::sort().
-
-
---------------------------------------------------------------------
-Building etc/Test.cc on Windows
---------------------------------------------------------------------
-
-This has been found to work on Windows 10 with MSVC 2019 build tools
-and mingw. 
-
-   Build cppEDM/src:
-   nmake /f makefile.windows
-
-   Compile cppEDM/etc/Test.cc into Test.obj:
-   cl /c Test.cc /EHsc /MD /I../src
-
-   Download .lib and .dll from Windows for LAPACKE:
-   https://icl.cs.utk.edu/lapack-for-windows/lapack/#lapacke
-   Copy .dll and .lib from LAPACKE_examples.zip into ../../lapacke
-
-   Link Test.obj into Test.exe:
-   link /OUT:Test.exe /LIBPATH:../lib /LIBPATH:../../lapacke EDM.lib
-   liblapack.lib Test.obj
-
-   Get missing libraries for LAPACK legacy:
-   Downloaded libgfortran-3.dll into ../../lapacke
-   https://www.opendll.com/index.php?file-download=libgfortran-3.dll&arch=32bit
-
-   Downloaded libwinpthread-1.dll into ../../lapacke
-   https://wikidll.com/mingw-w64/libwinpthread-1-dll
-
-   Set PATH to find the lapacke and mingw dll's:
-   PATH=../../lapacke;C:\MINGW\BIN;%PATH%
-
-   Run Test.exe
