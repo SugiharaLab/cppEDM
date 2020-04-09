@@ -188,10 +188,10 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
         maxSamples = param.librarySizes.size();
     }
     
-    DataFrame<double> PredictionStats1( maxSamples, 8,
-                                        "N E nn lib target rho RMSE MAE" );
-    DataFrame<double> PredictionStats2( maxSamples, 8,
-                                        "N E nn lib target rho RMSE MAE" );
+    DataFrame<double> PredictionStats1( maxSamples, 10,
+                                 "N E nn tau lib target LibSize rho RMSE MAE" );
+    DataFrame<double> PredictionStats2( maxSamples, 10,
+                                 "N E nn tau lib target LibSize rho RMSE MAE" );
 
     // Instantiate CrossMapValues output structs and insert DataFrames
     CrossMapValues col_to_target = CrossMapValues();
@@ -201,7 +201,7 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
     col_to_target.PredictStats = PredictionStats1;
     target_to_col.LibStats     = LibStats2;
     target_to_col.PredictStats = PredictionStats2;
- 
+
 #ifdef CCM_THREADED
     std::thread CrossMapColTarget( CrossMap, param, dataFrameIn,
                                    std::ref( col_to_target ) );
@@ -406,6 +406,12 @@ void CrossMap(       Parameters           paramCCM,
               << " x " << Distances.NColumns() << std::endl;
     }
 #endif
+
+    // For Rcpp rEDM output
+    size_t libColumnIndex =
+        dataFrameIn.ColumnNameToIndex()[ paramCCM.columnNames[0] ];
+    size_t targetColumnIndex =
+        dataFrameIn.ColumnNameToIndex()[ paramCCM.targetName ];
     
     //----------------------------------------------------------
     // Predictions
@@ -590,15 +596,17 @@ void CrossMap(       Parameters           paramCCM,
             MAE [ n ] = ve.MAE;
 
             // Save stats for this prediction
-            std::valarray< double > predOutVec( 8 );
+            std::valarray< double > predOutVec( 10 );
             predOutVec[ 0 ] = predictionCount + 1; // N
             predOutVec[ 1 ] = paramCCM.E;          // E
             predOutVec[ 2 ] = paramCCM.knn;        // nn
-            predOutVec[ 3 ] = 0;                   // lib
-            predOutVec[ 4 ] = 0;                   // target
-            predOutVec[ 5 ] = ve.rho;              // rho
-            predOutVec[ 6 ] = ve.RMSE;             // RMSE
-            predOutVec[ 7 ] = ve.MAE;              // MAE
+            predOutVec[ 3 ] = paramCCM.tau;        // tau
+            predOutVec[ 4 ] = libColumnIndex;      // lib
+            predOutVec[ 5 ] = targetColumnIndex;   // target
+            predOutVec[ 6 ] = lib_size;            // LibSize
+            predOutVec[ 7 ] = ve.rho;              // rho
+            predOutVec[ 8 ] = ve.RMSE;             // RMSE
+            predOutVec[ 9 ] = ve.MAE;              // MAE
 
             crossMapValues.PredictStats.WriteRow( predictionCount, predOutVec );
 
