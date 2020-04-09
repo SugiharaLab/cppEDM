@@ -16,22 +16,22 @@ int main () {
                                        true );  // noTime = true
     
     // Generate new cpp output: sequential sampling for reproduceability
-    DataFrame < double > ccmOut = CCM( "../data/",                // pathIn
-                                       "sardine_anchovy_sst.csv", // dataFile
-                                       "./data/",                 // pathOut
-                                       "CCM_anch_sst_cppEDM.csv", //predictFile
-                                       3,          // E
-                                       0,          // Tp
-                                       0,          // knn
-                                       -1,         // tau
-                                       "anchovy",  // columns
-                                       "np_sst",   // target
-                                       "10 75 5",  // libSizes_str
-                                       1,          // sample
-                                       false,      // random
-                                       false,      // replacement
-                                       0,          // seed
-                                       false );    // verbose
+    CCMValues ccmOut = CCM( "../data/",                // pathIn
+                            "sardine_anchovy_sst.csv", // dataFile
+                            "./data/",                 // pathOut
+                            "CCM_anch_sst_cppEDM.csv", //predictFile
+                            3,          // E
+                            0,          // Tp
+                            0,          // knn
+                            -1,         // tau
+                            "anchovy",  // columns
+                            "np_sst",   // target
+                            "10 75 5",  // libSizes_str
+                            1,          // sample
+                            false,      // random
+                            false,      // replacement
+                            0,          // seed
+                            false );    // verbose
     
     // Load cppEDM output
     output = DataFrame < double > ( "./data/",

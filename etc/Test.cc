@@ -242,7 +242,7 @@ int main( int argc, char *argv[] ) {
 #ifdef CCM_TEST
         //----------------------------------------------------------
         //----------------------------------------------------------
-        DataFrame< double > CCMD = 
+        CCMValues CCMVals = 
             CCM( "../data/",                // pathIn
                  "sardine_anchovy_sst.csv", // dataFile
                  "./",                      // pathOut
@@ -261,7 +261,7 @@ int main( int argc, char *argv[] ) {
                  true );                    // verbose
 
         std::cout << "CCM sardine_anchovy_sst.csv:\n";
-        std::cout << CCMD;
+        std::cout << CCMVals.AllLibStats;
 #endif
 
 #ifdef EMBED_DIMENSION
