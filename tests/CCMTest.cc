@@ -31,6 +31,7 @@ int main () {
                             false,      // random
                             false,      // replacement
                             0,          // seed
+                            false,      // includeData
                             false );    // verbose
     
     // Load cppEDM output

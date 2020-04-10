@@ -31,6 +31,7 @@ namespace EDM_CCM {
 //----------------------------------------------------------------
 void CrossMap(       Parameters           param,
                      DataFrame< double >  dataFrameIn,
+                     bool                 includeData,
                const CrossMapValues      &crossMapValues );
 
 DataFrame< double > CCMDistances( const DataFrame< double > &dataBlock,
@@ -64,6 +65,7 @@ CCMValues CCM( std::string pathIn,
                bool        random,
                bool        replacement,
                unsigned    seed,
+               bool        includeData,
                bool        verbose )
 {
     //----------------------------------------------------------
@@ -85,6 +87,7 @@ CCMValues CCM( std::string pathIn,
                                random,
                                replacement,
                                seed,
+                               includeData,
                                verbose );
     return ccmValues;
 }
@@ -107,6 +110,7 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
                bool                random,
                bool                replacement,
                unsigned            seed,
+               bool                includeData,
                bool                verbose )
 {
     if ( not columns.size() ) {
@@ -188,26 +192,29 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
         maxSamples = param.librarySizes.size();
     }
     
-    DataFrame<double> PredictionStats1( maxSamples, 10,
-                                 "N E nn tau lib target LibSize rho RMSE MAE" );
-    DataFrame<double> PredictionStats2( maxSamples, 10,
-                                 "N E nn tau lib target LibSize rho RMSE MAE" );
+    DataFrame<double> PredictionStats1( maxSamples, 8,
+                                        "N E nn tau LibSize rho RMSE MAE" );
+    DataFrame<double> PredictionStats2( maxSamples, 8,
+                                        "N E nn tau LibSize rho RMSE MAE" );
 
     // Instantiate CrossMapValues output structs and insert DataFrames
     CrossMapValues col_to_target = CrossMapValues();
     CrossMapValues target_to_col = CrossMapValues();
 
     col_to_target.LibStats     = LibStats1;
-    col_to_target.PredictStats = PredictionStats1;
     target_to_col.LibStats     = LibStats2;
-    target_to_col.PredictStats = PredictionStats2;
+
+    if ( includeData ) {
+        col_to_target.PredictStats = PredictionStats1;
+        target_to_col.PredictStats = PredictionStats2;
+    }
 
 #ifdef CCM_THREADED
-    std::thread CrossMapColTarget( CrossMap, param, dataFrameIn,
+    std::thread CrossMapColTarget( CrossMap, param, dataFrameIn, includeData,
                                    std::ref( col_to_target ) );
     
     std::thread CrossMapTargetCol( CrossMap, inverseParam, dataFrameIn,
-                                   std::ref( target_to_col ) );
+                                   includeData, std::ref( target_to_col ) );
     CrossMapColTarget.join();
     CrossMapTargetCol.join();
 
@@ -226,8 +233,8 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
         std::rethrow_exception( exceptionPtr );
     }
 #else
-    CrossMap( param,        dataFrameIn, std::ref( col_to_target ) );
-    CrossMap( inverseParam, dataFrameIn, std::ref( target_to_col ) );
+    CrossMap( param,        dataFrameIn, includeData, std::ref( col_to_target));
+    CrossMap( inverseParam, dataFrameIn, includeData, std::ref( target_to_col));
 #endif
     
     //-----------------------------------------------------------------
@@ -255,12 +262,14 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
     // Output struct
     CCMValues ccmValues;
     ccmValues.AllLibStats = PredictLibRho;
-    
-    // Now handle data for each prediction instance
-    ccmValues.CrossMap1.PredictStats = col_to_target.PredictStats;
-    ccmValues.CrossMap2.PredictStats = target_to_col.PredictStats;
-    ccmValues.CrossMap1.Predictions  = col_to_target.Predictions;
-    ccmValues.CrossMap2.Predictions  = target_to_col.Predictions;
+
+    if ( includeData ) {
+        // Now handle data for each prediction instance
+        ccmValues.CrossMap1.PredictStats = col_to_target.PredictStats;
+        ccmValues.CrossMap2.PredictStats = target_to_col.PredictStats;
+        ccmValues.CrossMap1.Predictions  = col_to_target.Predictions;
+        ccmValues.CrossMap2.Predictions  = target_to_col.Predictions;
+    }
     
     return ccmValues;
 }
@@ -283,6 +292,7 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
 //----------------------------------------------------------------
 void CrossMap(       Parameters           paramCCM,
                      DataFrame< double >  dataFrameIn,
+                     bool                 includeData,
                const CrossMapValues      &crossMapValuesIn ) {
 
     // Get a local reference for CrossMapValues
@@ -407,12 +417,6 @@ void CrossMap(       Parameters           paramCCM,
     }
 #endif
 
-    // For Rcpp rEDM output
-    size_t libColumnIndex =
-        dataFrameIn.ColumnNameToIndex()[ paramCCM.columnNames[0] ];
-    size_t targetColumnIndex =
-        dataFrameIn.ColumnNameToIndex()[ paramCCM.targetName ];
-    
     //----------------------------------------------------------
     // Predictions
     //----------------------------------------------------------
@@ -595,23 +599,23 @@ void CrossMap(       Parameters           paramCCM,
             RMSE[ n ] = ve.RMSE;
             MAE [ n ] = ve.MAE;
 
-            // Save stats for this prediction
-            std::valarray< double > predOutVec( 10 );
-            predOutVec[ 0 ] = predictionCount + 1; // N
-            predOutVec[ 1 ] = paramCCM.E;          // E
-            predOutVec[ 2 ] = paramCCM.knn;        // nn
-            predOutVec[ 3 ] = paramCCM.tau;        // tau
-            predOutVec[ 4 ] = libColumnIndex;      // lib
-            predOutVec[ 5 ] = targetColumnIndex;   // target
-            predOutVec[ 6 ] = lib_size;            // LibSize
-            predOutVec[ 7 ] = ve.rho;              // rho
-            predOutVec[ 8 ] = ve.RMSE;             // RMSE
-            predOutVec[ 9 ] = ve.MAE;              // MAE
-
-            crossMapValues.PredictStats.WriteRow( predictionCount, predOutVec );
-
-            // Save predictions
-            crossMapValues.Predictions.push_front( S );
+            if ( includeData ) {
+                // Save stats for this prediction
+                std::valarray< double > predOutVec( 8 );
+                predOutVec[ 0 ] = predictionCount + 1; // N
+                predOutVec[ 1 ] = paramCCM.E;          // E
+                predOutVec[ 2 ] = paramCCM.knn;        // nn
+                predOutVec[ 3 ] = paramCCM.tau;        // tau
+                predOutVec[ 4 ] = lib_size;            // LibSize
+                predOutVec[ 5 ] = ve.rho;              // rho
+                predOutVec[ 6 ] = ve.RMSE;             // RMSE
+                predOutVec[ 7 ] = ve.MAE;              // MAE
+                
+                crossMapValues.PredictStats.WriteRow(predictionCount,predOutVec);
+                
+                // Save predictions
+                crossMapValues.Predictions.push_front( S );
+            }
             
             predictionCount++; 
         } // for ( n = 0; n < maxSamples; n++ )

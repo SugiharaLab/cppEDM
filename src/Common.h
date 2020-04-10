@@ -235,6 +235,7 @@ CCMValues CCM( std::string pathIn       = "./data/",
                bool        random       = true,
                bool        replacement  = false,
                unsigned    seed         = 0,     // seed=0: use RNG
+               bool        includeData  = false,
                bool        verbose      = true );
 
 CCMValues CCM( DataFrame< double > dataFrameIn,
@@ -251,6 +252,7 @@ CCMValues CCM( DataFrame< double > dataFrameIn,
                bool                random       = true,
                bool                replacement  = false,
                unsigned            seed         = 0, // seed=0: use RNG
+               bool                includeData  = false,
                bool                verbose      = true );
 
 MultiviewValues Multiview( std::string pathIn          = "./",
