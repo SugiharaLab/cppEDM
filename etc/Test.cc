@@ -140,6 +140,7 @@ int main( int argc, char *argv[] ) {
                        "./", "MultiviewBlock3sp.csv",
                        "1 100",       // lib
                        "101 198",     // pred
+                       0,             // D
                        3,             // E
                        1,             // Tp
                        0,             // knn
