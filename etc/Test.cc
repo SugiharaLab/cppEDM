@@ -149,6 +149,7 @@ int main( int argc, char *argv[] ) {
                        "x_t",         // target,
                        0,             // multiview
                        0,             // exclusionRadius
+                       true,          // trainLib
                        false,         // verbose,
                        1 );           // nThreads
         
