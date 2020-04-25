@@ -1,6 +1,6 @@
 
 CC  = g++
-OBJ = EDM.o EDM_Functions.o Simplex.o
+OBJ = Common.o Embed.o EDM.o Simplex.o EDM_Functions.o Parameter.o
 
 LIB = libEDM.a
 
@@ -28,4 +28,9 @@ depend:
 	makedepend -Y $(SRCS)
 # DO NOT DELETE
 
-EDM.o: EDM.h Common.h DataFrame.h
+Common.o: Common.h DataFrame.h
+Parameter.o: Common.o
+Embed.o: Parameter.o
+EDM.o: Embed.o
+Simplex.o: EDM.o
+EDM_Functions.o: Simplex.o

@@ -6,6 +6,7 @@
 #define EDM_H
 
 #include "Common.h"
+#include "Embed.h"
 
 //----------------------------------------------------------------
 // EDM Class
@@ -17,18 +18,45 @@
 //----------------------------------------------------------------
 class EDM {
 
-    // The input time series (potentially not embedded)
+    // The input time series and its embedding
     DataFrame<double> & data;
+    DataFrame<double> embedding;
 
-    // The target column this class should model for
+    // The dimension to be project onto
     std::string targetName;
+
+    // Flag on whether to have no neighbor limit in neighbor search
+    bool noNeighborLimit = false;
+
+    // Return structure of FindNeighbors()
+    struct Neighbors {
+        DataFrame<size_t> neighbors;
+        DataFrame<double> distances;
+        Neighbors();
+        ~Neighbors();
+    };
 
     public:
 
-        //----------------------------------------------------------------
-        // EDM() : Constructor
-        //----------------------------------------------------------------
-        EDM ( DataFrame<double> & data, bool embedded, int E, int tau );
+    //----------------------------------------------------------------
+    // EDM() : Constructor
+    //----------------------------------------------------------------
+    EDM ( DataFrame<double> & data, int E, int tau, 
+            std::string columns, std::string targetName, 
+            bool embedded, bool verbose  );
+
+    //----------------------------------------------------------------
+    // EDM() : ComputeNeighbors
+    //----------------------------------------------------------------
+    Neighbors ComputeNeighbors (  
+            std::string lib, std::string pred, int Tp, int knn, 
+            int exclusionRadius, bool verbose  );
+
+    //----------------------------------------------------------------
+    // EDM() : Project
+    //----------------------------------------------------------------
+    std::list< DataFrame<double> > Project ( std::string lib, std::string pred,
+             int Tp, int knn, int exclusionRadius, bool verbose );
 
 };
 

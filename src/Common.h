@@ -8,7 +8,7 @@
 #include <vector>
 #include <valarray>
 #include <map>
-#include <forward_list>
+#include <list>
 #include <cctype>
 #include <cmath>
 
@@ -18,9 +18,29 @@
 
 #include "DataFrame.h" // Has #include Common.h
 
-// Define EDM function and class signatures in its own namespace
+// Data structs
 
+struct VectorError {
+    double rho;
+    double RMSE;
+    double MAE;
+};
+
+// Enumerations
+enum class Method  { None, Embed, Simplex, SMap, CCM };
+enum class DistanceMetric { Euclidean, Manhattan };
+
+// Namespace with all functions user should have
 namespace cppEDM {
+
+    // Forward declarations of EDM Functions
+
+    DataFrame<double> Simplex( DataFrame<double> & data,
+                            std::string pathOut, std::string predictFile,
+                            std::string lib, std::string pred,
+                            int E, int Tp, int knn, int tau, int exclusionRadius,
+                            std::string columns, std::string target,
+                            bool embedded, bool const_predict, bool verbose ) ;
 
 } 
 
