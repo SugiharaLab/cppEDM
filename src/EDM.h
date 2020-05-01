@@ -22,21 +22,24 @@ class EDM {
     DataFrame<double> & data;
     DataFrame<double> embedding;
 
+    // The current embedding dimension (meaning may change when implementing
+    // EmbedDimension) and tau
+    int E, tau;
+    bool embedded;
+
     // The dimension to be project onto
     std::string targetName;
 
     // Flag on whether to have no neighbor limit in neighbor search
     bool noNeighborLimit = false;
 
+    public:
+
     // Return structure of FindNeighbors()
     struct Neighbors {
         DataFrame<size_t> neighbors;
         DataFrame<double> distances;
-        Neighbors();
-        ~Neighbors();
     };
-
-    public:
 
     //----------------------------------------------------------------
     // EDM() : Constructor
@@ -49,14 +52,16 @@ class EDM {
     // EDM() : ComputeNeighbors
     //----------------------------------------------------------------
     Neighbors ComputeNeighbors (  
-            std::string lib, std::string pred, int Tp, int knn, 
-            int exclusionRadius, bool verbose  );
+            std::vector<size_t> libraryIndices, std::vector<size_t> predIndices,
+            int Tp, int knn, int exclusionRadius, bool verbose  );
+
 
     //----------------------------------------------------------------
     // EDM() : Project
     //----------------------------------------------------------------
-    std::list< DataFrame<double> > Project ( std::string lib, std::string pred,
-             int Tp, int knn, int exclusionRadius, bool verbose );
+    std::list< DataFrame<double> > Project (std::string lib,std::string pred, 
+                                          std::string target, int Tp, int knn, 
+                                          int exclusionRadius, bool verbose );
 
 };
 

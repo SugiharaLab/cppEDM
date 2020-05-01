@@ -14,7 +14,7 @@ SimplexMachine::SimplexMachine ( DataFrame<double> & data,
                   bool embedded, bool const_predict, bool verbose  ):
                   EDM{data, E, tau, columns, target, embedded, verbose } {
 
-        Project(lib,pred,Tp,knn,exclusionRadius,verbose);
+        Project(lib,pred,target,Tp,knn,exclusionRadius,verbose);
 
 
 }

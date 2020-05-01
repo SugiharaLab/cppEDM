@@ -4,6 +4,7 @@
 #define COMMON_H
 
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <vector>
 #include <valarray>
@@ -41,6 +42,14 @@ namespace cppEDM {
                             int E, int Tp, int knn, int tau, int exclusionRadius,
                             std::string columns, std::string target,
                             bool embedded, bool const_predict, bool verbose ) ;
+
+    DataFrame<double> Simplex( std::string pathIn, std::string dataFile, 
+                            std::string pathOut, std::string predictFile,
+                            std::string lib, std::string pred,
+                            int E, int Tp, int knn, int tau, int exclusionRadius,
+                            std::string columns, std::string target,
+                            bool embedded, bool const_predict, bool verbose ) ;
+
 
 } 
 

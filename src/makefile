@@ -1,10 +1,10 @@
 
 CC  = g++
-OBJ = Common.o Embed.o EDM.o Simplex.o EDM_Functions.o Parameter.o
+OBJ = Common.o Embed.o EDM.o Simplex.o EDM_Functions.o Parameter.o EDM_Helpers.o
 
 LIB = libEDM.a
 
-CFLAGS = -std=c++11 -O3 -Wreorder -M # -g -DDEBUG -DDEBUG_ALL
+CFLAGS = -std=c++11 -O3 -Wreorder -M  -g -DDEBUG -DDEBUG_ALL
 LFLAGS = -L./ -lstdc++ -lEDM -lpthread 
 
 all:	$(LIB)
@@ -31,6 +31,7 @@ depend:
 Common.o: Common.h DataFrame.h
 Parameter.o: Common.o
 Embed.o: Parameter.o
-EDM.o: Embed.o
+EDM_Helpers.o: Common.o
+EDM.o: Embed.o EDM_Helpers.o
 Simplex.o: EDM.o
 EDM_Functions.o: Simplex.o
