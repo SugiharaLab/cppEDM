@@ -125,8 +125,8 @@ std::list< DataFrame<double> > EDM::Project ( std::string lib, std::string pred,
         else {
             std::string originalName = colNames.size() ? colNames[0] : 
                                           "V" + std::to_string( colIndices[0] );
-            std::string tauSign = tau > 0 ? "+" : "";
-            targName = originalName+ "(t" + tauSign + std::to_string(tau) + ")";
+            char tauSign = tau > 0 ? '+' : '-';
+            targName = originalName+ "(t" + tauSign + "0)";
         }
 
         targetIn = embedding.VectorColumnName( targName );
