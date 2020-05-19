@@ -31,11 +31,8 @@ Parameters::Parameters(
     std::string blockFile,
     std::string derivatives_str,
     
-    double      svdSig,
-    double      tikhonov,
-    double      elasticNet,
-    
     int         multi,
+    bool        trainLib,
     std::string libSizes_str,
     int         sample,
     bool        random,
@@ -68,13 +65,10 @@ Parameters::Parameters(
     
     SmapOutputFile   ( SmapFile ),
     blockOutputFile  ( blockFile ),
-
     derivatives_str  ( derivatives_str ),
-    SVDSignificance  ( svdSig ),
-    TikhonovAlpha    ( tikhonov ),
-    ElasticNetAlpha  ( elasticNet ),
     
     MultiviewEnsemble( multi ),
+    MultiviewTrainLib( trainLib ),
     libSizes_str     ( libSizes_str ),
     subSamples       ( sample ),
     randomLib        ( random ),
@@ -84,7 +78,7 @@ Parameters::Parameters(
 
     // Set validated flag and instantiate Version
     validated        ( false ),
-    version          ( 1, 3, 5, "2020-04-16" )
+    version          ( 2, 0, 0, "2020-05-30" )
 {
     // Constructor code
     if ( method != Method::None ) {
@@ -363,7 +357,7 @@ void Parameters::Validate() {
         
         size_t N_lib = std::floor( (stop-start)/increment + 1/increment ) + 1;
 
-        if ( start < E ) {
+        if ( start < (size_t) E ) {
             std::stringstream errMsg;
             errMsg << "Parameters::Validate(): "
                    << "CCM librarySizes start < E = " << E << "\n";

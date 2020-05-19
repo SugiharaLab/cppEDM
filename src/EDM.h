@@ -24,14 +24,15 @@ class EDM {
 
     // The current embedding dimension (meaning may change when implementing
     // EmbedDimension) and tau
-    int E, tau;
+    int  E;
+    int  tau;
     bool embedded;
+    
+    std::string columns; // Timeseries to be embedded, or the embedding
+    std::string target;  // The dimension to be projected onto
 
-    // The dimension to be project onto
-    std::string targetName;
-
-    // Flag on whether to have no neighbor limit in neighbor search
-    bool noNeighborLimit = false;
+    bool noNeighborLimit;
+    bool verbose;
 
     public:
 
@@ -44,25 +45,35 @@ class EDM {
     //----------------------------------------------------------------
     // EDM() : Constructor
     //----------------------------------------------------------------
-    EDM ( DataFrame<double> & data, int E, int tau, 
-            std::string columns, std::string targetName, 
-            bool embedded, bool verbose  );
+    EDM ( DataFrame<double> & data,
+          int                 E,
+          int                 tau,
+          bool                embedded, 
+          std::string         columns,
+          std::string         target,
+          bool                noNeighborLimit,
+          bool                verbose );
 
     //----------------------------------------------------------------
-    // EDM() : ComputeNeighbors
+    // EDM() : FindNeighbors
     //----------------------------------------------------------------
-    Neighbors ComputeNeighbors (  
-            std::vector<size_t> libraryIndices, std::vector<size_t> predIndices,
-            int Tp, int knn, int exclusionRadius, bool verbose  );
+    Neighbors FindNeighbors ( std::vector<size_t> libraryIndices,
+                              std::vector<size_t> predIndices,
+                              int                 Tp,
+                              int                 knn,
+                              int                 exclusionRadius,
+                              bool                verbose );
 
 
     //----------------------------------------------------------------
     // EDM() : Project
     //----------------------------------------------------------------
-    std::list< DataFrame<double> > Project (std::string lib,std::string pred, 
-                                          std::string target, int Tp, int knn, 
-                                          int exclusionRadius, bool verbose );
-
+    std::list< DataFrame<double> > Project ( std::string lib,
+                                             std::string pred, 
+                                             std::string target,
+                                             int         Tp,
+                                             int         knn, 
+                                             int         exclusionRadius,
+                                             bool        verbose );
 };
-
 #endif

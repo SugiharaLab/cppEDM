@@ -110,6 +110,8 @@ DataFrame< double > MakeBlock( DataFrame< double >      dataFrame,
                                std::vector<std::string> columnNames,
                                bool                     verbose ) {
 
+    if ( verbose ){}
+
     if ( columnNames.size() != dataFrame.NColumns() ) {
         std::stringstream errMsg;
         errMsg << "MakeBlock: The number of columns in the dataFrame ("
@@ -132,7 +134,7 @@ DataFrame< double > MakeBlock( DataFrame< double >      dataFrame,
     std::vector< std::string > newColumnNames( NColOut );
     size_t newCol_i = 0;
     for ( size_t col = 0; col < columnNames.size(); col ++ ) {
-        for ( size_t e = 0; e < E; e++ ) {
+        for ( int e = 0; e < E; e++ ) {
             std::stringstream ss;
             if ( tau < 0 ) {
                 ss << columnNames[ col ] << "(t-" << e << ")";
@@ -163,7 +165,7 @@ DataFrame< double > MakeBlock( DataFrame< double >      dataFrame,
     // Shift column data and write to embedding data frame
     for ( size_t col = 0; col < dataFrame.NColumns(); col++ ) {
         // for each embedding dimension
-        for ( size_t e = 0; e < E; e++ ) {
+        for ( int e = 0; e < E; e++ ) {
 
             std::valarray< double > column = dataFrame.Column( col );
             

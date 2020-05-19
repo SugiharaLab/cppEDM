@@ -55,7 +55,8 @@ public:  // Not protected with accessors.
     double      ElasticNetAlpha;    // Initial alpha parameter
 
     int         MultiviewEnsemble; // Number of ensembles in multiview
-
+    bool        MultiviewTrainLib; // Use in sample prediction for k select
+    
     std::string libSizes_str;
     std::vector<size_t> librarySizes;// CCM library sizes to evaluate
     int         subSamples;       // CCM number of samples to draw
@@ -94,14 +95,11 @@ public:  // Not protected with accessors.
         bool        verbose       = false,
         
         std::string SmapFile        = "",
-        std::string blockFile       = "",        
+        std::string blockFile       = "",
         std::string derivatives_str = "",
         
-        double      svdSig       = 1E-5,
-        double      tikhonov     = 0,
-        double      elasticNet   = 0.1,
-        
         int         multi        = 0,
+        bool        trainLib     = true,
         std::string libSizes_str = "",
         int         sample       = 0,
         bool        random       = true,

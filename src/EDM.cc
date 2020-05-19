@@ -30,14 +30,21 @@ void PrintNeighbors( const EDM::Neighbors &neighbors );
 // verbose    : Verbose information flag
 // 
 //----------------------------------------------------------------
-EDM::EDM ( DataFrame<double> & data, int E, int tau, 
-           std::string columns, std::string targetName,  
-           bool embedded, bool verbose ): 
-    data(data), targetName( targetName ), E(E), tau(tau), embedded(embedded) {
+EDM::EDM ( DataFrame<double> & data,
+           int                 E,
+           int                 tau,
+           bool                embedded, 
+           std::string         columns,
+           std::string         target,
+           bool                noNeighborLimit,
+           bool                verbose ): 
+    data(data), E(E), tau(tau), embedded(embedded),
+    columns(columns), target(target), noNeighborLimit(noNeighborLimit),
+    verbose(verbose) {
 
-    /////////////////////////////////////////////
+    //-------------------------------------------------------------
     // Validate parameters and create embedding
-    /////////////////////////////////////////////
+    //-------------------------------------------------------------
 
     if ( not embedded and tau == 0 ) {
         std::string errMsg( "Parameters::Validate(): "
@@ -66,7 +73,6 @@ EDM::EDM ( DataFrame<double> & data, int E, int tau,
         // dataBlock will have tau * (E-1) fewer rows than dataIn
         embedding = Embed( data, E, tau, columns, verbose );
     }
-    
 }
 
 //----------------------------------------------------------------
@@ -74,22 +80,19 @@ EDM::EDM ( DataFrame<double> & data, int E, int tau,
 //              Finds neighbors, performs weighting on neighbors, and
 //              projects onto pred range.
 //
-// targetName : Dimension to project onto for prediction
+// target     : Dimension to project onto for prediction
 //
 // data       : Input dataframe containing the time series to model.
-//              tau is probably what you intend to use; positive tau yields
+//              -tau is probably what you intend to use; positive tau yields
 //              an embedding (E_t,E_t+tau...) (future forward embedding).
 //----------------------------------------------------------------
-std::list< DataFrame<double> > EDM::Project ( std::string lib, std::string pred, 
-                                          std::string target, int Tp, int knn, 
-                                          int exclusionRadius, bool verbose ){
-
-    // Validate Tp
-    if ( Tp < 0 ) {
-        std::string errMsg( "Parameters::Validate(): "
-                            "Tp must be positive.\n" );
-        throw std::runtime_error( errMsg );
-    }
+std::list< DataFrame<double> > EDM::Project ( std::string lib,
+                                              std::string pred, 
+                                              std::string target,
+                                              int         Tp,
+                                              int         knn, 
+                                              int         exclusionRadius,
+                                              bool        verbose ) {
 
     // Parse lib and pred range strings
     std::vector<size_t> libIndices  = ParseRangeStr( lib );
@@ -153,7 +156,7 @@ std::list< DataFrame<double> > EDM::Project ( std::string lib, std::string pred,
     }
 
     // Find neighbors
-    ComputeNeighbors(libIndices, predIndices, Tp, knn, exclusionRadius, verbose);
+    FindNeighbors( libIndices, predIndices, Tp, knn, exclusionRadius, verbose );
 
     // Weight neighbors
 
@@ -163,7 +166,7 @@ std::list< DataFrame<double> > EDM::Project ( std::string lib, std::string pred,
 }
 
 //----------------------------------------------------------------
-// EDM()      : ComputeNeighbors
+// EDM()      : FindNeighbors
 //              Computes neighbors for every prediction index
 // lib, pred  : Library and prediction ranges
 // verbose    : Verbose information flag
@@ -171,9 +174,12 @@ std::list< DataFrame<double> > EDM::Project ( std::string lib, std::string pred,
 // return     : List of DF where first element is neighbors, second is distances
 // 
 //----------------------------------------------------------------
-EDM::Neighbors EDM::ComputeNeighbors ( 
-        std::vector<size_t> libraryIndices, std::vector<size_t> predIndices,
-        int Tp, int knn, int exclusionRadius, bool verbose  ){
+EDM::Neighbors EDM::FindNeighbors ( std::vector<size_t> libraryIndices,
+                                    std::vector<size_t> predIndices,
+                                    int                 Tp,
+                                    int                 knn,
+                                    int                 exclusionRadius,
+                                    bool                verbose  ) {
     
     //-------------------------------------------------------------------------
     // Check/Set knn. Note that SMap should set knn to -1 for full library
@@ -223,7 +229,8 @@ EDM::Neighbors EDM::ComputeNeighbors (
     // For each prediction vector (row in prediction DataFrame) find the
     // list of library indices that are within k_NN points
     //-------------------------------------------------------------------
-    for ( size_t pred_row_idx = 0; pred_row_idx < predIndices.size(); pred_row_idx++ ) {
+    for ( size_t pred_row_idx = 0; pred_row_idx < predIndices.size();
+          pred_row_idx++ ) {
 
 
         // Get the current query/pred row
@@ -231,7 +238,7 @@ EDM::Neighbors EDM::ComputeNeighbors (
         std::valarray<double> pred_vec = embedding.Row( pred_row );
         
         // Reset the neighbor and distance vectors for this pred row
-        for ( size_t i = 0; i < knn; i++ ) {
+        for ( int i = 0; i < knn; i++ ) {
             k_NN_neighbors[ i ] = 0;
             // JP: Used to avoid sort()
             k_NN_distances[ i ] = EDM_Neighbors::DistanceMax;
@@ -312,7 +319,7 @@ EDM::Neighbors EDM::ComputeNeighbors (
                                end  ( k_NN_neighborCopy ) );
         
         if ( std::distance( begin( k_NN_neighborCopy ), ui ) !=
-             k_NN_neighborCopy.size() ) {
+             (long int) k_NN_neighborCopy.size() ) {
             std::cout << "WARNING: FindNeighbors(): Degenerate neighbors./n";
         }
 
