@@ -1,0 +1,8 @@
+#!/bin/bash
+tput reset
+echo "------- Building -------------------------------------------"
+g++ Test.cc -o Test -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack -O3
+echo "------- Test -----------------------------------------------"
+./Test
+echo "------- PlotTest -------------------------------------------"
+Rscript PlotTest.R

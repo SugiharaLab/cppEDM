@@ -1,0 +1,27 @@
+#!/bin/bash
+tput reset
+echo "------- Building -------------------------------------------"
+g++ edm.cc -o edm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
+g++ embed.cc -o embed -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
+g++ ccm.cc -o ccm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -lpthread
+g++ mview.cc -o mview -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+g++ eval.cc -o eval -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+echo "------- Embed ----------------------------------------------"
+./embed
+# head embed_out.csv -n 4
+echo "------- Simplex ---------------------------------------------"
+./edm
+# head out.csv -n 3
+# tail out.csv -n 2
+echo "------- CCM -------------------------------------------------"
+./ccm ../data/sardine_anchovy_sst.csv anchovy np_sst ccm-out.csv 3 0 "10 75 5" 100 y n n
+head ccm-out.csv -n 2
+tail ccm-out.csv -n 2
+echo "------- Multiview -------------------------------------------"
+./mview ../data/block_3sp.csv "1 100" "101 195" "x_t y_t z_t" x_t mview-out.csv 0 3 1 0 0 n n 1
+echo "------- EmbedDimension --------------------------------------"
+./eval E ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
+./eval Tp ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
+./eval theta ../data/TentMapNoise_rEDM.csv "1 100" "201 500" TentMap TentMap
+
+rm -f eval mview ccm edm embed *.csv

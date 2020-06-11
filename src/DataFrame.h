@@ -2,8 +2,8 @@
 #define DATAFRAME_H
 
 // NOTE: This header deviates from the desired class implementation
-// where *.h provides declarations, *.cc methods.  This is solely to
-// accomodate the OSX XCode environment which seems unable to deal
+// where *.h provides declarations, *.cc implementation. This is solely
+// to accomodate the OSX XCode environment which seems unable to deal
 // with c++11 standard template implemenations.
 // A possible solution is to link against libc++ on OSX.
 // See ../etc/Notes, ../etc/libstdc++_Notes.txt.
@@ -12,23 +12,13 @@
 #include <fstream>
 #include <iterator>
 
-#include "Common.h"
-
-// Since #include DataFrame.h is in Common.h, need forward declarations
-bool OnlyDigits( std::string str, bool integerOnly );
-
-std::vector<std::string> SplitString( std::string inString, 
-                                      std::string delimeters = "," );
+// Common.cc
+extern std::vector<std::string> SplitString( std::string inString, 
+                                             std::string delimeters = "," );
+extern bool OnlyDigits( std::string str, bool integerOnly );
 
 // Type definition for CSV NamedData to pair column names & column data
 typedef std::vector<std::pair<std::string, std::vector<double>>> NamedData;
-
-// Container for parsed data file returned by ReadData()
-struct ParsedData {
-    std::vector< std::string > time;
-    std::string                timeName;
-    NamedData                  namedData;
-};
 
 //----------------------------------------------------------------
 // DataFrame class
@@ -39,49 +29,51 @@ struct ParsedData {
 //----------------------------------------------------------------
 template <class T>
 class DataFrame {
-    
+
     size_t           n_rows;
     size_t           n_columns;
     std::valarray<T> elements;
-    
+
     std::vector< std::string >      columnNames;
     std::map< std::string, size_t > columnNameToIndex;
 
     std::vector< std::string > time;
     std::string                timeName;
-    
+    NamedData                  namedData;
+
     size_t maxRowPrint;
     bool   noTime;
     bool   partialDataRowsDeleted;
-    
+
 public:
     //-----------------------------------------------------------------
     // Destructor
     //-----------------------------------------------------------------
     ~DataFrame() {}
-    
+
     //-----------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------
-    DataFrame() {}
-    
+    DataFrame() : n_rows(0), n_columns(0), noTime( false ),
+                  partialDataRowsDeleted( false ) {}
+
     //-----------------------------------------------------------------
     // Load data from CSV file path/fileName, populate DataFrame
     //-----------------------------------------------------------------
     DataFrame( std::string path, std::string fileName, bool noTime = false ):
         maxRowPrint( 10 ), noTime( noTime ), partialDataRowsDeleted( false )
     {
-        ParsedData parsedData = ReadData( path, fileName );
-        SetupDataFrame( parsedData ); // Process parsedData into a DataFrame
+        ReadData( path, fileName );
+        SetupDataFrame(); // Process parsedData into a DataFrame
     }
-    
+
     //-----------------------------------------------------------------
     // Empty DataFrame of size (row, columns), no column names
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
         maxRowPrint( 10 ), partialDataRowsDeleted( false ) {}
-    
+
     //-----------------------------------------------------------------
     // Empty DataFrame of size (rows, columns) with column names in a
     // single whitespace delimited string. 
@@ -93,7 +85,7 @@ public:
     {
         BuildColumnNameIndex( colNames );
     }
-    
+
     //-----------------------------------------------------------------
     // Empty DataFrame of size (rows, columns) with column names in a
     // string vector.
@@ -106,7 +98,7 @@ public:
     {
         BuildColumnNameIndex();
     }
-   
+
     //-----------------------------------------------------------------
     // Fortran style element access operators M(row,col)
     //-----------------------------------------------------------------
@@ -123,19 +115,19 @@ public:
     size_t NColumns() const { return n_columns;          }
     size_t NRows()    const { return n_rows;             }
     size_t size()     const { return n_rows * n_columns; }
-    
+
     std::valarray<T>  Elements() const { return elements; }
     std::valarray<T> &Elements()       { return elements; }
-    
+
     std::vector< std::string >  Time() const { return time; }
     std::vector< std::string > &Time()       { return time; }
-    
+
     std::string  TimeName() const { return timeName; }
     std::string &TimeName()       { return timeName; }
-    
+
     std::vector< std::string >  ColumnNames() const { return columnNames; }
     std::vector< std::string > &ColumnNames()       { return columnNames; }
-    
+
     std::map< std::string, size_t > ColumnNameToIndex() const {
         return columnNameToIndex;
     }
@@ -145,10 +137,10 @@ public:
 
     size_t  MaxRowPrint() const { return maxRowPrint; }
     size_t &MaxRowPrint()       { return maxRowPrint; }
-    
+
     bool  PartialDataRowsDeleted() const { return partialDataRowsDeleted; }
     bool &PartialDataRowsDeleted()       { return partialDataRowsDeleted; }
-    
+
     //-----------------------------------------------------------------
     // Return column from index col
     //-----------------------------------------------------------------
@@ -184,11 +176,11 @@ public:
             } errMsg << "]" << std::endl;
             throw std::runtime_error( errMsg.str() );
         }
-        
+
         size_t col_i = std::distance( columnNames.begin(), ci );
-        
-        std::valarray<double> vec = Column( col_i );
-        
+
+        std::valarray< double > vec = Column( col_i );
+
         return vec;
     }
 
@@ -196,11 +188,11 @@ public:
     // Return (sub)DataFrame of specified column indices
     //-----------------------------------------------------------------
     DataFrame<double> DataFrameFromColumnIndex( std::vector<size_t> column_i ) {
-        
+
         DataFrame<double> M = DataFrame( n_rows, column_i.size() );
 
-        size_t col_j = 0;
-        
+        // Can't use slice since column_i are not structured
+        size_t col_j = 0;      
         for ( size_t i = 0; i < column_i.size(); i++ ) {
             size_t col_i = column_i[ i ];
 
@@ -211,13 +203,13 @@ public:
                        << col_i << ") exceeds the data frame domain.\n";
                 throw std::runtime_error( errMsg.str() );
             }
-            
-            std::valarray<double> column_vec_i = Column( col_i );
+
+            std::valarray< double > column_vec_i = Column( col_i );
 
             M.WriteColumn( col_j, column_vec_i );
             col_j++;
         }
-        
+
         // Add time vector if present
         if ( time.size() ) {
             M.Time()     = time;
@@ -232,7 +224,7 @@ public:
             M.ColumnNames() = colNames;
             M.BuildColumnNameIndex();
         }
-        
+
         return M;
     }
 
@@ -244,18 +236,18 @@ public:
         std::vector<std::string> colNames ) {
 
         // vector of column indices for DataFrameFromColumnIndex()
-        std::vector<size_t> col_i_vec;
-        
+        std::vector< size_t > col_i_vec;
+
         // Map column names to indices
-        std::vector<std::string>::iterator si;
+        std::vector< std::string >::iterator si;
         for ( auto ci = colNames.begin(); ci != colNames.end(); ++ci ) {
             auto si = find( columnNames.begin(), columnNames.end(), *ci );
-            
+
             if ( si != columnNames.end() ) {
                 col_i_vec.push_back( std::distance( columnNames.begin(), si ) );
             }
         }
-        
+
         // Validation
         if ( col_i_vec.size() != colNames.size() ) {
             std::stringstream errMsg;
@@ -270,16 +262,58 @@ public:
             } errMsg << "]" << std::endl;
             throw std::runtime_error( errMsg.str() );
         }
-        
-        DataFrame<double> M_col = DataFrameFromColumnIndex( col_i_vec );
-        
+
+        DataFrame< double > M_col = DataFrameFromColumnIndex( col_i_vec );
+
         // Insert columnNames if not already present
         if ( not M_col.ColumnNames().size() ) {
             M_col.ColumnNames() = colNames;
             M_col.BuildColumnNameIndex();
         }
-        
+
         return M_col;
+    }
+
+    //-----------------------------------------------------------------
+    // Return (sub)DataFrame of specified row indices
+    //-----------------------------------------------------------------
+    DataFrame<double> DataFrameFromRowIndex( std::vector<size_t> row_index ) {
+
+        DataFrame< double > M = DataFrame( row_index.size(), n_columns );
+
+        // Can't use slice since row_index_i are not structured
+        size_t row_j = 0;
+        for ( size_t row_i : row_index ) {
+            if ( row_i >= n_rows ) {
+                std::stringstream errMsg;
+                errMsg << "DataFrame::DataFrameFromRowIndex(): "
+                       << "A row index ("
+                       << row_i << ") exceeds the data frame domain.\n";
+                throw std::runtime_error( errMsg.str() );
+            }
+            
+            std::valarray<double> row_vec_i = Row( row_i );
+
+            M.WriteRow( row_j, row_vec_i );
+            row_j++;
+        }
+        
+        // Add time vector if present
+        if ( time.size() ) {
+            std::vector< std::string > timeRow( row_index.size() );
+            for ( size_t i = 0; i < row_index.size(); i++ ) {
+                timeRow[ i ] = time[ row_index[ i ] ];
+            }
+            M.Time()     = timeRow;
+            M.TimeName() = timeName;
+        }
+        // Add columnNames if present
+        if ( columnNames.size() ) {
+            M.ColumnNames() = columnNames;
+            M.BuildColumnNameIndex();
+        }
+        
+        return M;
     }
 
     //-----------------------------------------------------------------
@@ -288,7 +322,7 @@ public:
     std::valarray<T> ColumnMajorData() const {
 
         std::valarray<T> colMajorElements( elements.size() );
-        
+
         for ( size_t col = 0; col < n_columns; col++ ) {
             // slice( size_t start, size_t length, size_t stride )
             colMajorElements[ std::slice( col * n_rows, n_rows, 1 ) ] =
@@ -303,7 +337,7 @@ public:
     //-----------------------------------------------------------------
     void WriteRow( size_t row, std::valarray<T> array ) {
         size_t N = array.size();
-    
+
         if ( N != n_columns ) {
             std::stringstream errMsg;
             errMsg << "DataFrame::WriteRow(): array must have "
@@ -357,7 +391,7 @@ public:
                          "already been deleted." << std::endl;
             return;
         }
-        
+
         partialDataRowsDeleted = true;
 
         if ( nrows > n_rows ) {
@@ -367,7 +401,7 @@ public:
                    << "NRows (" << n_rows << ")" << std::endl;
             throw( std::runtime_error( errMsg.str() ) );
         }
-        
+
         // Update n_rows
         n_rows = n_rows - nrows;
 
@@ -381,7 +415,7 @@ public:
 
         // Copy elements into data
         std::valarray< double > data( elements );
-        
+
         // Resize elements
         size_t n_elements = elements.size() - nrows * n_columns;
         elements.resize( n_elements );
@@ -399,7 +433,7 @@ public:
         elements[ std::slice( 0, n_elements, 1 ) ] =
             ( std::valarray< double > ) data[ elements_i ];
     }
-    
+
     //-----------------------------------------------------------------
     // Build Column Name Index( std::string colNames )
     //-----------------------------------------------------------------
@@ -440,7 +474,7 @@ public:
             columnNameToIndex[ columnNames[i] ] = i;
         }
     }
-    
+
     //------------------------------------------------------------------
     // Stream DataFrame to ostream
     //------------------------------------------------------------------
@@ -449,23 +483,23 @@ public:
         os.precision( 4 );
         os.fill( ' ' );
         os.setf( std::ios::fixed, std::ios::floatfield );
-        
+
         os << "DataFrame: -----------------------------------\n";
         os << D.NRows() << " rows, " << D.NColumns() << " columns.\n";
         os << "---------------- First " << D.MaxRowPrint()
            << " rows ---------------\n";
-        
+
         // print names of columns
         if ( D.timeName.size() ) {
             os << std::setw(10) << D.timeName;
         }
-        
+
         for ( size_t i = 0; i < D.ColumnNames().size(); i++ ) {
             os << std::setw(13) << D.ColumnNames()[i];
         } os << std::endl;
-        
+
         os << "----------------------------------------------\n";
- 
+
         // print vec data up to maxRowPrint points
         for ( size_t row = 0; row < D.NRows() and
                               row < D.MaxRowPrint(); row++ ) {
@@ -474,7 +508,7 @@ public:
             if ( D.time.size() ) {
                 os << std::setw(10) << D.time[ row ];
             }
-            
+
             // print data points from each col
             for ( size_t col = 0; col < D.NColumns(); col++ ) {
                 os << std::setw(13) << D( row, col );
@@ -490,7 +524,7 @@ public:
     //  Write contents to file
     //------------------------------------------------------------------
     void WriteData( std::string outputFilePath, std::string outputFileName ) {
-        
+
         // Vector of strings to hold image of DataFrame for file output
         std::vector< std::string > fileLines;
 
@@ -520,7 +554,7 @@ public:
         if ( TimeName().size() ) {
             lineStr << TimeName() << ",";
         }
-        
+
         // Push column name from each column into the string stream
         for ( size_t colIdx = 0; colIdx < n_columns; colIdx++ ) {
             lineStr << ColumnNames()[ colIdx ];
@@ -559,9 +593,9 @@ public:
 
         // Write contents to file
         std::ofstream outputFile( outputFilePath + outputFileName );
-    
+
         if ( outputFile.is_open() ) {
-            
+
             std::copy( fileLines.begin(), fileLines.end(),
                        std::ostream_iterator<std::string>(outputFile,"\n") );
 
@@ -580,9 +614,7 @@ private:
     //------------------------------------------------------------------
     // Process parsedData from ReadData() to populate DataFrame
     //------------------------------------------------------------------
-    void SetupDataFrame( ParsedData parsedData ) {
-
-        NamedData namedData = parsedData.namedData;
+    void SetupDataFrame() {
 
         // Setup column names in same order as dataFrame
         std::vector< std::string > colNames;
@@ -590,14 +622,12 @@ private:
               iterate != namedData.end(); iterate++ ) {
             colNames.push_back( iterate->first );
         }
-        
+
         // Initialize DataFrame members and storage
         n_rows      = namedData.begin()->second.size();
         n_columns   = namedData.size();
         elements    = std::valarray <T>( n_rows * n_columns );
         columnNames = colNames;
-        time        = parsedData.time;
-        timeName    = parsedData.timeName;
 
         BuildColumnNameIndex();
 
@@ -606,7 +636,7 @@ private:
         // NamedData is : pair< string, vector<double> >
         for ( NamedData::iterator iterate  = namedData.begin(); 
                                   iterate != namedData.end(); iterate++ ) {
-            
+
             size_t colIdx = std::distance( namedData.begin(), iterate );
 
             for ( size_t rowIdx = 0; rowIdx < n_rows; rowIdx++ ) {
@@ -614,15 +644,15 @@ private:
             }
         }
     }
-    
+
     //------------------------------------------------------------------
     // Read disk file. Parse into a NamedData container and time vector.
     //------------------------------------------------------------------
-    ParsedData ReadData( std::string path, std::string fileName ) {
-        
+    void ReadData( std::string path, std::string fileName ) {
+
         // Create input file stream and open file for input
         std::ifstream dataStrm( path + fileName );
-        
+
         // Ensure file access is good before reading
         if ( not dataStrm.is_open() ) {
             std::stringstream errMsg;
@@ -636,16 +666,16 @@ private:
                    << " is not ready for reading." << std::endl;
             throw std::runtime_error( errMsg.str() );
         }
-        
+
         // Read into a vector of strings, one line per string
         std::vector< std::string > dataLines;
         std::string tmp;
-        
+
         while( getline( dataStrm, tmp ) ) {
             dataLines.push_back( tmp );
         }
         dataStrm.close();
-        
+
 #ifdef DEBUG_ALL
         std::cout << "------- ReadData() Contents of file "
                   << fileName << " -------" << std::endl;
@@ -655,20 +685,13 @@ private:
         }
 #endif
 
-        // Vector of times
-        std::vector< std::string > time;
-        std::string                timeName;
-        
-        // Container of data name : vector pairs
-        NamedData namedData; // vector< pair< string, vector< double >> >;
-        
         // Container of column names in the same order as in csv file
         std::vector< std::string > colNames;
 
         // Check first line to see if it's only numeric digits, or a header
         bool onlyDigits = true;
         std::vector<std::string> firstLineWords = SplitString( dataLines[0] );
-        
+
         for ( auto si =  firstLineWords.begin();
                    si != firstLineWords.end(); ++si ){
 
@@ -694,7 +717,7 @@ private:
         if ( not noTime ) {
             timeName = colNames[ 0 ];
         }
-        
+
         // Setup each col in namedData with new vec to insert numerical data
         // If noTime true then first column is data
         size_t startCol_i = noTime ? 0 : 1;
@@ -703,7 +726,7 @@ private:
                                            std::vector<double>() );
             namedData.push_back( colPair );
         }
-        
+
         // Process each line in dataLines to fill in data vectors and time
         for ( size_t lineIdx = 0; lineIdx < dataLines.size(); lineIdx++ ) {
             
@@ -722,7 +745,7 @@ private:
             if ( not noTime ) {
                 time.push_back( words[ 0 ] );
             }
-            
+
             try {
                 // Convert data columns to double, add to namedData
                 for ( size_t colIdx = startCol_i;
@@ -760,13 +783,6 @@ private:
             } std::cout << std::endl;
         }
 #endif
-
-        ParsedData parsedData;
-        parsedData.time      = time;
-        parsedData.timeName  = timeName;
-        parsedData.namedData = namedData;
-        
-        return parsedData;
     }
 };
 #endif

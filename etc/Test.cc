@@ -2,9 +2,7 @@
 // g++ Test.cc -o Test -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack -O3
 // -g -DDEBUG
 
-#include "Common.h"
-#include "Neighbors.h"
-#include "Embed.h"
+#include "API.h"
 
 //----------------------------------------------------------------
 // Suite of tests for API functionality
@@ -248,7 +246,7 @@ int main( int argc, char *argv[] ) {
             CCM( "../data/",                // pathIn
                  "sardine_anchovy_sst.csv", // dataFile
                  "./",                      // pathOut
-                 "ccm.csv",                 // predictFile
+                 "ccm-out.csv",             // predictFile
                  3,                         // E
                  0,                         // Tp
                  0,                         // knn

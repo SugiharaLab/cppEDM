@@ -14,15 +14,15 @@
 
 void check_increment_correct( std::string date_str_1, std::string date_str_2, 
         std::string correct_incremented, int tp ) {
-    std::string output = increment_datetime_str( date_str_1, date_str_2, tp ); 
+    std::string output = IncrementDatetime( date_str_1, date_str_2, tp ); 
     if ( output == correct_incremented ) 
         std::cout <<"Correct."<<std::endl;
     else 
         std::cout << "BAD:"<<std::endl
-        <<"datetimes are :"<<date_str_1<<" and "<<date_str_2
-        <<", increment of tp "<<tp<<" is "<<std::endl
-        <<output <<"vs"<<correct_incremented<<"end"<<std::endl
-        <<"_______________"<<std::endl;
+        << "datetimes are :" << date_str_1 << " and " <<date_str_2
+        << ", increment of tp " << tp << " is " << std::endl
+        << output << "vs" << correct_incremented << "end" << std::endl
+        << "_______________"<<std::endl;
 }
 
 int main() {
