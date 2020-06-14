@@ -54,8 +54,9 @@ public:
     //-----------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------
-    DataFrame() : n_rows(0), n_columns(0), noTime( false ),
-                  partialDataRowsDeleted( false ) {}
+    DataFrame():
+        n_rows( 0 ), n_columns( 0 ), elements( 0 ),
+        maxRowPrint( 10 ), noTime( false ), partialDataRowsDeleted( false ) {}
 
     //-----------------------------------------------------------------
     // Load data from CSV file path/fileName, populate DataFrame
@@ -72,7 +73,7 @@ public:
     //-----------------------------------------------------------------
     DataFrame( size_t rows, size_t columns ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
-        maxRowPrint( 10 ), partialDataRowsDeleted( false ) {}
+        maxRowPrint( 10 ), noTime( false ), partialDataRowsDeleted( false ) {}
 
     //-----------------------------------------------------------------
     // Empty DataFrame of size (rows, columns) with column names in a
@@ -81,7 +82,7 @@ public:
     DataFrame( size_t rows, size_t columns, std::string colNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
         columnNames( std::vector<std::string>(columns) ), maxRowPrint( 10 ),
-        partialDataRowsDeleted( false )
+        noTime( false ), partialDataRowsDeleted( false )
     {
         BuildColumnNameIndex( colNames );
     }
@@ -94,7 +95,7 @@ public:
                std::vector< std::string > columnNames ):
         n_rows( rows ), n_columns( columns ), elements( columns * rows ),
         columnNames( columnNames ), maxRowPrint( 10 ),
-        partialDataRowsDeleted( false ) 
+        noTime( false ), partialDataRowsDeleted( false ) 
     {
         BuildColumnNameIndex();
     }
