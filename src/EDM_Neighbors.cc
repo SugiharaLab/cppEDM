@@ -22,8 +22,7 @@ namespace EDM_Neighbors_Lock {
 //       dataBlock.  The target vector is also reduced.
 //
 // NOTE: If rows are deleted, then the library and prediction
-//       vectors in Parameters are updated to reflect this. 
-// 
+//       vectors in Parameters are updated to reflect this.
 //----------------------------------------------------------------
 void EDM::PrepareEmbedding( bool checkDataRows ) {
 
@@ -33,7 +32,7 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
 
     // Embed
     if ( parameters.embedded ) {
-        // dataIn is a multivariable block, no embedding needed
+        // data is a multivariable block, no embedding needed
         // Select the specified columns into embedding
         if ( parameters.columnNames.size() ) {
             embedding = data.DataFrameFromColumnNames( parameters.columnNames );
@@ -47,8 +46,8 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
         }
     }
     else {
-        // embedded = false: Create the embedding dataBlock via EmbedData()
-        // dataBlock will have tau * (E-1) fewer rows than dataIn
+        // embedded = false: Create embedding via EmbedData()
+        // embedding will have tau * (E-1) fewer rows than data
         EmbedData();
     }
 
@@ -65,7 +64,7 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
     }
 
     //------------------------------------------------------------
-    // embedded = false: Embed() was called on dataIn
+    // embedded = false: Embed() was called on data
     // Remove target, data rows as needed
     // Adjust parameters.library and parameters.prediction indices
     //------------------------------------------------------------
@@ -73,15 +72,16 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
 
         if ( parameters.E < 1 ) {
             std::stringstream errMsg;
-            errMsg << "EmbedNN(): E = " << parameters.E << " is invalid.\n" ;
+            errMsg << "PreparEmbedding(): E = " << parameters.E
+                   << " is invalid.\n" ;
             throw std::runtime_error( errMsg.str() );
         }
-        
+
         size_t shift = abs( parameters.tau ) * ( parameters.E - 1 );
 
         // Copy targetIn excluding partial data into targetEmbed
         std::valarray< double > targetEmbed( data.NRows() - shift );
-        
+
         // Bogus cast to ( std::valarray<double> ) for MSVC
         // as it doesn't export its own slice_array applied to []
         if ( parameters.tau < 0 ) {
@@ -92,10 +92,10 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
             targetEmbed = ( std::valarray< double > )
                 target[ std::slice( 0, target.size() - shift, 1 ) ];
         }
-        
+
         // Resize target to ignore partial data rows
         target.resize( targetEmbed.size() );
-        
+
         // Copy target without partial data into resized targetIn
         std::slice targetEmbed_i  = std::slice( 0, targetEmbed.size(), 1 );
         target[ targetEmbed_i ] = ( std::valarray< double > )
@@ -179,7 +179,7 @@ void EDM::FindNeighbors() {
         }
     }
 
-    // allLibrows are the lib row indices, 1 row x lib columns
+    // allLibRows are the library row indices, 1 row x lib columns
     std::valarray< size_t > rowLib = allLibRows.Row( 0 );
 
     // Pair the distances and library row indices for sort on distance
@@ -225,13 +225,18 @@ void EDM::FindNeighbors() {
     // For each prediction vector (row in prediction DataFrame) find the
     // list of library indices that are within k_NN points
     //-------------------------------------------------------------------
-    for ( size_t pred_row = 0; pred_row < predPairs.size(); pred_row++ ) {
+    for ( size_t predPair_i = 0; predPair_i < predPairs.size(); predPair_i++ ) {
+
+        // The actual prediction row specified by user (zero offset)
+        size_t predictionRow = parameters.prediction[ predPair_i ];
 
         // rowPair is a vector of pairs of length library rows
         // Get the rowPair for this prediction row
-        std::vector< std::pair<double, size_t> > rowPair = predPairs[ pred_row ];
+        std::vector< std::pair<double, size_t> > rowPair = predPairs[predPair_i];
 
-        // sort < distance, lib_row > pairs for this pred_row
+        int rowPairSize = (int) rowPair.size();
+
+        // sort < distance, lib_row > pairs for this predPair_i
         // distance must be .first
         std::sort( rowPair.begin(), rowPair.end(), DistanceCompare );
 
@@ -242,13 +247,25 @@ void EDM::FindNeighbors() {
         int lib_row_i = 0;
         int k         = 0;
         while ( k < parameters.knn ) {
+            if ( lib_row_i >= rowPairSize ) {
+                std::stringstream errMsg;
+                errMsg << "FindNeighbors(): knn search failed. "
+                       << k << " out of " << parameters.knn
+                       << " neighbors were found in the library.\n" ;
+                throw std::runtime_error( errMsg.str() );
+            }
+
             double distance = rowPair[ lib_row_i ].first;
-            int    lib_row  = rowPair[ lib_row_i ].second;
+            size_t lib_row  = rowPair[ lib_row_i ].second;
+
+            if ( lib_row == predictionRow ) {
+                continue; // degenerate pred : lib, ignore
+            }
 
             if ( not parameters.noNeighborLimit ) {
                 // Reach exceeding grasp : forecast point is outside library
-                if ( lib_row + parameters.Tp > max_lib_index or
-                     lib_row + parameters.Tp < 0 ) {
+                if ( (int) lib_row + parameters.Tp > max_lib_index or
+                     (int) lib_row + parameters.Tp < 0 ) {
                     lib_row_i++;
                     continue; // keep looking 
                 }
@@ -256,7 +273,7 @@ void EDM::FindNeighbors() {
 
             // Exclusion radius: units are data rows, not time
             if ( parameters.exclusionRadius ) {
-                int xrad = (int) lib_row - (int) pred_row;
+                int xrad = (int) lib_row - (int) predPair_i;
                 if ( std::abs( xrad ) <= parameters.exclusionRadius ) {
                     lib_row_i++;
                     continue; // skip this neighbor
@@ -269,8 +286,8 @@ void EDM::FindNeighbors() {
             k++;
         }
 
-        knn_distances.WriteRow( pred_row, knnDistances );
-        knn_neighbors.WriteRow( pred_row, knnLibRows   );
+        knn_distances.WriteRow( predPair_i, knnDistances );
+        knn_neighbors.WriteRow( predPair_i, knnLibRows   );
 
         // Check for ties. 1.18e−38 is float 32-bit min
         if ( k < (int) rowPair.size() ) {
@@ -280,9 +297,9 @@ void EDM::FindNeighbors() {
 
                 while( k < (int) rowPair.size() and rowPair[ k ].first > 0 and
                        rowPair[ k ].first <= rowPair[ k-1 ].first ) {
-                    
+
                     // Set flag in ties and store tie pairs in tiePairs
-                    ties[ pred_row ] = true;
+                    ties[ predPair_i ] = true;
                     
                     rowTiePairs.push_back(std::make_pair( rowPair[ k ].first,
                                                           rowPair[ k ].second ));
@@ -291,11 +308,11 @@ void EDM::FindNeighbors() {
 
                 if ( find( ties.begin(), ties.end(), true ) != ties.end() ) {
                     anyTies = true;
-                    tiePairs[ pred_row ] = rowTiePairs;
+                    tiePairs[ predPair_i ] = rowTiePairs;
                 }
             }
         }
-    } // for ( pred_row = 0; pred_row < predPairs.size(); pred_row++ )
+    } // for ( predPair_i = 0; predPair_i < predPairs.size(); predPair_i++ )
 
 #ifdef DEBUG_ALL
     for ( size_t i = 0; i < ties.size(); i++ ) {
@@ -363,14 +380,14 @@ void EDM::Distances () {
 
     // Compute all prediction row : library row distances
     for ( size_t predRow = 0; predRow < Npred; predRow++ ) {
-        
+
         size_t predictionRow = parameters.prediction[ predRow ];
-        
+
         // Get E-dimensional vector from this prediction row
         std::valarray< double > v1 = embedding.Row( predictionRow );
 
         for ( size_t libRow = 0; libRow < Nlib; libRow++ ) {
-            
+
             if ( predictionRow == parameters.library[ libRow ] ) {
                 continue;  // degenerate pred & lib
             }
