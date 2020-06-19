@@ -259,6 +259,7 @@ void EDM::FindNeighbors() {
             size_t lib_row  = rowPair[ lib_row_i ].second;
 
             if ( lib_row == predictionRow ) {
+                lib_row_i++;
                 continue; // degenerate pred : lib, ignore
             }
 
