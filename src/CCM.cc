@@ -108,7 +108,7 @@ void CrossMap( SimplexClass & S ) {
         errMsg << "CrossMap(): E = " << S.parameters.E << " is invalid.\n" ;
         throw std::runtime_error( errMsg.str() );
     }
-    
+
     //-----------------------------------------------------------------
     // Set number of samples
     //-----------------------------------------------------------------
@@ -135,7 +135,7 @@ void CrossMap( SimplexClass & S ) {
         }
     }
     std::default_random_engine DefaultRandomEngine( S.parameters.seed );
-    
+
     //----------------------------------------------------------
     // Predictions
     //----------------------------------------------------------
@@ -361,6 +361,9 @@ void CrossMap( SimplexClass & S ) {
 //-----------------------------------------------------------------
 void CCMClass::SetupParameters() {
 
+    { // JP Synchronization protection needed?
+    std::lock_guard<std::mutex> lck( EDM_CCM_Lock::mtx );
+        
     // Each thread has it's own copy of input data & parameters
     colToTargetCCM.dataCCM = data; // Copy
     targetToColCCM.dataCCM = data; // Copy
@@ -419,6 +422,7 @@ void CCMClass::SetupParameters() {
         colToTargetCCM.colToTarget.PredictStats = PredictionStats1;
         targetToColCCM.targetToCol.PredictStats = PredictionStats2;
     }
+    } // JP Synchronization protection needed?
 }
 
 //----------------------------------------------------------------
@@ -437,6 +441,9 @@ void CCMClass::CopyData () {
 // 
 //----------------------------------------------------------------
 void CCMClass::FormatOutput () {
+    { // JP Synchronization protection needed?
+    std::lock_guard<std::mutex> lck( EDM_CCM_Lock::mtx );
+    
     // Create unified column names of output DataFrame
     std::stringstream libRhoNames;
     libRhoNames << "LibSize "
@@ -450,6 +457,7 @@ void CCMClass::FormatOutput () {
     allLibStats.WriteColumn(0, colToTargetCCM.colToTarget.LibStats.Column( 0 ));
     allLibStats.WriteColumn(1, colToTargetCCM.colToTarget.LibStats.Column( 1 ));
     allLibStats.WriteColumn(2, targetToColCCM.targetToCol.LibStats.Column( 1 ));
+    } // JP Synchronization protection needed?
 }
 
 //----------------------------------------------------------------

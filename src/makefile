@@ -1,7 +1,7 @@
 
 .PHONY: all clean distclean depend 
 
-CC = g++
+CXX = g++
 
 HEADERS = API.h CCM.h Common.h DataFrame.h DateTime.h EDM.h EDM_Neighbors.h\
           Multiview.h Parameter.h Simplex.h SMap.h Version.h
@@ -31,7 +31,7 @@ $(LIB): $(OBJ)
 	ar -rcs $(LIB) $(OBJ)
 
 %.o : %.cc 
-	$(CC) $(CFLAGS) -c $<
+	$(CXX) $(CFLAGS) -c $<
 
 depend:
 	@echo ${SRCS}
