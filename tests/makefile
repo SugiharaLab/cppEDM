@@ -34,7 +34,8 @@ clean:
 	rm -f TestCommon.o $(OBJ) $(EXE)
 
 distclean:
-	rm -f TestCommon.o $(OBJ) $(EXE) *~ *.bak *.csv ./data/*_cppEDM.csv
+	rm -f TestCommon.o $(OBJ) $(EXE) *~ *.bak
+	rm -f *.csv ./data/*_cppEDM.csv ./data/Smap_circle_coef.csv
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`
 depend:
