@@ -9,7 +9,7 @@
 #define STR_LINE_SEP "-------------------------------------------------"
 #define TAB_CHAR     '\t'            
 
-const float EPSILON = .2;
+const float EPSILON = .01;
 
 //consts for different output color
 const std::string RED_TEXT   ("\033[0;31m");
