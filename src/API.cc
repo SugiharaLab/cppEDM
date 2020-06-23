@@ -10,12 +10,12 @@
 #include "API.h"
 
 //----------------------------------------------------------------
-// Embed with file path/file input
+// Embed from file path/file input
 //----------------------------------------------------------------
 DataFrame< double > Embed( std::string path,
                            std::string dataFile,
                            int         E,         // embedding dimension
-                           int         tau,       // time step delay
+                           int         tau,       // time step offset
                            std::string columns,   // column names or indices
                            bool        verbose ) {
 
@@ -26,7 +26,7 @@ DataFrame< double > Embed( std::string path,
 }
 
 //----------------------------------------------------------------
-// Embed with DataFrame input
+// Embed from DataFrame input
 //----------------------------------------------------------------
 DataFrame< double > Embed( DataFrame< double > & dataFrameIn,
                            int                 E,
@@ -453,8 +453,8 @@ CCMValues CCM( DataFrame< double > & DF,
 
     CCMValues values = CCMValues();
     values.AllLibStats = CCMModel.allLibStats;
-    values.CrossMap1   = CCMModel.colToTarget;
-    values.CrossMap2   = CCMModel.targetToCol;
+    values.CrossMap1   = CCMModel.colToTargetValues;
+    values.CrossMap2   = CCMModel.targetToColValues;
 
     return values;    
 }

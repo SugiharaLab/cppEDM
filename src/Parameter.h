@@ -59,7 +59,7 @@ public: // No need for protected or private
     bool        replacement;      // CCM random select with replacement if true
     unsigned    seed;             // CCM random selection RNG seed
     bool        includeData;      // CCM include all simplex projection results
-    bool        colToTargetFlag;  // CCM thread flag to select output objects
+    //bool        colToTargetFlag;  // CCM thread flag to select output objects
 
     bool        noNeighborLimit;  // Strictly forbid neighbors outside library
     bool        validated;
@@ -106,7 +106,6 @@ public: // No need for protected or private
         bool        replacement       = false,
         unsigned    seed              = 0,  // 0: Generate random seed in CCM
         bool        includeData       = false,
-        bool        colToTargetFlag   = true,
         bool        noNeighborLimit   = false
     );
 

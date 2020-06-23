@@ -234,8 +234,3 @@ void SimplexClass::WriteOutput () {
                               parameters.predictOutputFile );
     }
 }
-
-//----------------------------------------------------------------
-// Implemented in CCMClass
-//----------------------------------------------------------------
-void SimplexClass::CopyData () {}

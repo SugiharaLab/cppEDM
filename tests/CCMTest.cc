@@ -4,6 +4,8 @@
 
 int main () {
 
+#ifdef JP_REMOVE 
+#endif
     // Declare DataFrame to hold the valid output
     DataFrame< double > cppOutput;
     DataFrame< double > output;
@@ -41,7 +43,7 @@ int main () {
     
     // comparison
     MakeTest ( "CCM sardine_anchovy_sst test", cppOutput, output );
-    
+
     //------------------------------------------------------------------
     // Thrips
     // Create the ccm matrix of the rEDM-tutorial.Rmd vignette
@@ -104,6 +106,7 @@ int main () {
         ccmMatrix( rows2[ i ], cols2[ i ] ) = rho2;
     }
 
+    std::cout << ccmMatrix;
     // ccmMatrix.WriteData( "./data", "Thrips_CMmatrix_valid.csv" );
     
     //---------------------------------------------------------

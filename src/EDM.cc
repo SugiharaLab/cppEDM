@@ -13,10 +13,6 @@ EDM::EDM ( DataFrame< double > & data,
     data( data ), anyTies( false ), parameters( parameters ) {}
 
 //----------------------------------------------------------------
-// FindNeighbors : See EDM_Neighbors.cc
-//----------------------------------------------------------------
-
-//----------------------------------------------------------------
 // Project : Implemented in sub-class
 //----------------------------------------------------------------
 void EDM::Project () {}

@@ -42,7 +42,6 @@ Parameters::Parameters(
     bool        replacement,
     unsigned    seed,
     bool        includeData,
-    bool        colToTargetFlag,
     bool        noNeighborLimit
     ) :
     // Variable initialization from Parameters arguments
@@ -83,7 +82,6 @@ Parameters::Parameters(
     replacement      ( replacement ),
     seed             ( seed ),
     includeData      ( includeData ),
-    colToTargetFlag  ( colToTargetFlag ),
     noNeighborLimit  ( noNeighborLimit ),
 
     // Set validated flag and instantiate Version

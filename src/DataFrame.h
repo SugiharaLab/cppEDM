@@ -385,16 +385,8 @@ public:
     //-----------------------------------------------------------------
     void DeletePartialDataRows( size_t nrows, int tau ) {
 
-        // NOTE : Not thread safe
-
-        if ( partialDataRowsDeleted ) {
-            std::cout << "DeletePartialDataRows(): Partial data rows have "
-                         "already been deleted." << std::endl;
-            return;
-        }
-
-        partialDataRowsDeleted = true;
-
+        // NOTE : Not thread safe : Call needs mutex wrap
+        
         if ( nrows > n_rows ) {
             std::stringstream errMsg;
             errMsg << "DataFrame::DeletePartialDataRows() "

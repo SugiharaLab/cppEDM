@@ -12,7 +12,7 @@
 // Specific algorithm projection methods defined in sub-classes.
 //
 // NOTE JP: Tony recommends to explicitly define special members:
-// http://www.cplusplus.com/doc/tutorial/classes2/
+//          http://www.cplusplus.com/doc/tutorial/classes2/
 //---------------------------------------------------------------------
 class EDM {
 
@@ -28,10 +28,6 @@ public: // No need for private or protected
 
     DataFrame< double > projection;   // Simplex & SMap Output
     DataFrame< double > coefficients; // SMap Output
-
-    DataFrame< double > allLibStats;  // CCM unified libsize, rho, RMSE, MAE
-    CrossMapValues      colToTarget;  // CCM CrossMap() thread results
-    CrossMapValues      targetToCol;  // CCM CrossMap() thread results
 
     // Project() vectors to populate projection DataFrame in FormatData()
     // JP Can we do away with these and write directly to projection (+Tp)?
@@ -52,16 +48,21 @@ public: // No need for private or protected
     EDM ( DataFrame< double > & data, Parameters & parameters );
 
     // Method declarations
-    void CheckDataRows( std::string call );
+    // EDM.cc
+    void EmbedData();
+    void Project();  // Simplex.cc : SMap.cc : CCM.cc : Multiview.cc
+
+    // EDM_Neighbors.cc
     void PrepareEmbedding( bool checkDataRows = true );
     void Distances();
-    void EmbedData();
     void FindNeighbors();
-    void Project();
+
+    // EDM_Formatting.cc
+    void CheckDataRows( std::string call );
+    void RemovePartialData();
     void FormatOutput();
     void FillTimes( std::vector< std::string > & timeOut );
 
-    void PrintLibPred();    // ifdef DEBUG_ALL
-    void PrintNeighbors();  // ifdef DEBUG_ALL
+    void PrintNeighbors(); // EDM_Neighbors.cc #ifdef DEBUG_ALL
 };
 #endif
