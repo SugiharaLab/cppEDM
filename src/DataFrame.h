@@ -399,11 +399,13 @@ public:
         n_rows = n_rows - nrows;
 
         // Update time
-        if ( tau < 0 ) {
-            time.erase( time.begin(), time.begin() + nrows );
-        }
-        else {
-            time.erase( time.end() - nrows, time.end() );
+        if ( time.size() ) {
+            if ( tau < 0 ) {
+                time.erase( time.begin(), time.begin() + nrows );
+            }
+            else {
+                time.erase( time.end() - nrows, time.end() );
+            }
         }
 
         // Copy elements into data

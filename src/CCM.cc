@@ -286,13 +286,12 @@ void CrossMap( DataFrame< double > & data,
             parameters.prediction.resize( lib_i.size() );
             std::iota( parameters.prediction.begin(),
                        parameters.prediction.end(), 0 );
-    
+
             // Subset data to lib_i rows
-            DataFrame< double > dataLib_i =
-                data.DataFrameFromRowIndex( lib_i );
+            DataFrame< double > dataLib_i = data.DataFrameFromRowIndex( lib_i );
 
             SimplexClass S = SimplexClass( std::ref( dataLib_i ), parameters );
-            
+
             S.PrepareEmbedding( false ); // checkDataRows = false
             //S.PrepareEmbedding();
 

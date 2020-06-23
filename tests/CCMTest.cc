@@ -4,8 +4,6 @@
 
 int main () {
 
-#ifdef JP_REMOVE 
-#endif
     // Declare DataFrame to hold the valid output
     DataFrame< double > cppOutput;
     DataFrame< double > output;
