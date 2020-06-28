@@ -188,9 +188,9 @@ public:
     //-----------------------------------------------------------------
     // Return (sub)DataFrame of specified column indices
     //-----------------------------------------------------------------
-    DataFrame<double> DataFrameFromColumnIndex( std::vector<size_t> column_i ) {
+    DataFrame< T > DataFrameFromColumnIndex( std::vector<size_t> column_i ) {
 
-        DataFrame<double> M = DataFrame( n_rows, column_i.size() );
+        DataFrame< T > M = DataFrame( n_rows, column_i.size() );
 
         // Can't use slice since column_i are not structured
         size_t col_j = 0;      
@@ -205,7 +205,7 @@ public:
                 throw std::runtime_error( errMsg.str() );
             }
 
-            std::valarray< double > column_vec_i = Column( col_i );
+            std::valarray< T > column_vec_i = Column( col_i );
 
             M.WriteColumn( col_j, column_vec_i );
             col_j++;
@@ -233,7 +233,7 @@ public:
     // Return (sub)DataFrame selected by columnNames
     // columnNames converted to column indices for DataFrameFromColumnIndex()
     //------------------------------------------------------------------
-    DataFrame< double > DataFrameFromColumnNames(
+    DataFrame< T > DataFrameFromColumnNames(
         std::vector<std::string> colNames ) {
 
         // vector of column indices for DataFrameFromColumnIndex()
@@ -264,7 +264,7 @@ public:
             throw std::runtime_error( errMsg.str() );
         }
 
-        DataFrame< double > M_col = DataFrameFromColumnIndex( col_i_vec );
+        DataFrame< T > M_col = DataFrameFromColumnIndex( col_i_vec );
 
         // Insert columnNames if not already present
         if ( not M_col.ColumnNames().size() ) {
@@ -278,9 +278,9 @@ public:
     //-----------------------------------------------------------------
     // Return (sub)DataFrame of specified row indices
     //-----------------------------------------------------------------
-    DataFrame<double> DataFrameFromRowIndex( std::vector<size_t> row_index ) {
+    DataFrame< T > DataFrameFromRowIndex( std::vector<size_t> row_index ) {
 
-        DataFrame< double > M = DataFrame( row_index.size(), n_columns );
+        DataFrame< T > M = DataFrame( row_index.size(), n_columns );
 
         // Can't use slice since row_index_i are not structured
         size_t row_j = 0;
@@ -293,7 +293,7 @@ public:
                 throw std::runtime_error( errMsg.str() );
             }
             
-            std::valarray<double> row_vec_i = Row( row_i );
+            std::valarray< T > row_vec_i = Row( row_i );
 
             M.WriteRow( row_j, row_vec_i );
             row_j++;
@@ -320,9 +320,9 @@ public:
     //-----------------------------------------------------------------
     // Return Elements in Column Major order (Fortran)
     //-----------------------------------------------------------------
-    std::valarray<T> ColumnMajorData() const {
+    std::valarray< T > ColumnMajorData() const {
 
-        std::valarray<T> colMajorElements( elements.size() );
+        std::valarray< T > colMajorElements( elements.size() );
 
         for ( size_t col = 0; col < n_columns; col++ ) {
             // slice( size_t start, size_t length, size_t stride )
@@ -336,7 +336,7 @@ public:
     //-----------------------------------------------------------------
     // Write array to row
     //-----------------------------------------------------------------
-    void WriteRow( size_t row, std::valarray<T> array ) {
+    void WriteRow( size_t row, std::valarray< T > array ) {
         size_t N = array.size();
 
         if ( N != n_columns ) {
@@ -359,7 +359,7 @@ public:
     //-----------------------------------------------------------------
     // Write array to col
     //-----------------------------------------------------------------
-    void WriteColumn( size_t col, std::valarray<T> array ) {
+    void WriteColumn( size_t col, std::valarray< T > array ) {
         size_t N = array.size();
     
         if ( N != n_rows ) {
@@ -409,7 +409,7 @@ public:
         }
 
         // Copy elements into data
-        std::valarray< double > data( elements );
+        std::valarray< T > data( elements );
 
         // Resize elements
         size_t n_elements = elements.size() - nrows * n_columns;
@@ -426,7 +426,7 @@ public:
 
         // Bogus cast for MSVC 
         elements[ std::slice( 0, n_elements, 1 ) ] =
-            ( std::valarray< double > ) data[ elements_i ];
+            ( std::valarray< T > ) data[ elements_i ];
     }
 
     //-----------------------------------------------------------------

@@ -19,14 +19,14 @@
 class CCMClass : public SimplexClass {
 public:
     // CCM implements two Simplex objects for cross mapping
+    SimplexClass colToTarget;
+    SimplexClass targetToCol;
+
     // Cross mapping results are stored here
     DataFrame< double > allLibStats; // CCM unified libsize, rho, RMSE, MAE
     CrossMapValues      colToTargetValues; // CCM CrossMap() thread results
     CrossMapValues      targetToColValues; // CCM CrossMap() thread results
 
-    Parameters colToTargetParameters;
-    Parameters targetToColParameters;
-    
     // Constructor
     CCMClass ( DataFrame< double > & data,
                Parameters          & parameters );

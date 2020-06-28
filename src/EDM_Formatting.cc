@@ -17,33 +17,13 @@ void EDM::RemovePartialData()
 
     data.PartialDataRowsDeleted() = true;
 
-    size_t shift = abs( parameters.tau ) * ( parameters.E - 1 );
-
-    // Resize target : copy target excluding partial data into targetEmbed
-    std::valarray< double > targetEmbed( data.NRows() - shift );
-
-    // Bogus cast to ( std::valarray<double> ) for MSVC
-    // as it doesn't export its own slice_array applied to []
-    if ( parameters.tau < 0 ) {
-        targetEmbed = ( std::valarray< double > )
-            target[ std::slice( shift, target.size() - shift, 1 ) ];
-    }
-    else {
-        targetEmbed = ( std::valarray< double > )
-            target[ std::slice( 0, target.size() - shift, 1 ) ];
-    }
-
-    // Resize target to ignore partial data rows
-    target.resize( targetEmbed.size() );
-
-    // Copy target without partial data into resized targetIn
-    std::slice targetEmbed_i  = std::slice( 0, targetEmbed.size(), 1 );
-    target[ targetEmbed_i ] =
-        ( std::valarray< double > ) targetEmbed[ targetEmbed_i ];
-
+    int shift = abs( parameters.tau ) * ( parameters.E - 1 );
+    
     // Delete data rows corresponding to embedding partial data rows
     data.DeletePartialDataRows( shift, parameters.tau );
 
+    GetTarget();
+    
     // Adjust parameters.library and parameters.prediction vectors of indices
     if ( shift > 0 ) {
         parameters.DeleteLibPred();
@@ -88,6 +68,9 @@ void EDM::CheckDataRows( std::string call )
         throw std::runtime_error( errMsg.str() );
     }
 
+    // Tweak for CCM that sets lib = pred = [1, NRow]
+    if ( parameters.method == Method::CCM ) { shift = 0; }
+    
     if ( data.NRows() <= library_max_i + shift ) {
         std::stringstream errMsg;
         errMsg << "CheckDataRows(): " << call

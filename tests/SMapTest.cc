@@ -27,7 +27,7 @@ int main () {
     DataFrame < double > cppCoef   = smapVals.coefficients;
     
     // Comparison
-    MakeTest ( "circle.csv test", coefOutput, cppCoef );
+    MakeTest ( "SMap: circle test", coefOutput, cppCoef );
 
 
     //---------------------------------------------------------
@@ -46,5 +46,5 @@ int main () {
     cppOutput = smapVals.predictions;
     
     // Comparison
-    MakeTest ( "block_3sp test", pyOutput, cppOutput );    
+    MakeTest ( "SMap: block_3sp test", pyOutput, cppOutput );    
 }

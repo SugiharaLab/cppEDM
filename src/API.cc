@@ -412,7 +412,7 @@ CCMValues CCM( DataFrame< double > & DF,
                bool                includeData,
                bool                verbose )
 {
-    // Set library and prediction indices to entire library
+    // Set library and prediction indices to entire library (embedded)
     std::stringstream ss;
     ss << "1 " << DF.NRows();
 

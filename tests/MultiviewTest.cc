@@ -47,8 +47,8 @@ int main( int argc, char *argv[] ) {
     //          << "  MAE " << ve.MAE << "  RMSE " << ve.RMSE << std::endl;
 
     // comparison
-    MakeTest ("Multiview combos test",     validCppCombos,  combos );
-    MakeTest ("Multiview prediction test", validCppPredict, output );
+    MakeTest ("Multiview: combos test",     validCppCombos,  combos );
+    MakeTest ("Multiview: prediction test", validCppPredict, output );
     
     return 0;
 }

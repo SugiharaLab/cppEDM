@@ -49,6 +49,7 @@ public: // No need for private or protected
 
     // Method declarations
     // EDM.cc
+    void GetTarget();
     void EmbedData();
     void Project();  // Simplex.cc : SMap.cc : CCM.cc : Multiview.cc
 
@@ -63,6 +64,7 @@ public: // No need for private or protected
     void FormatOutput();
     void FillTimes( std::vector< std::string > & timeOut );
 
-    void PrintNeighbors(); // EDM_Neighbors.cc #ifdef DEBUG_ALL
+    void PrintDataFrameIn(); // EDM_Neighbors.cc #ifdef DEBUG_ALL
+    void PrintNeighbors();   // EDM_Neighbors.cc #ifdef DEBUG_ALL
 };
 #endif

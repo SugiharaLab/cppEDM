@@ -51,17 +51,7 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
         EmbedData();
     }
 
-    // Get target (library) vector
-    if ( parameters.targetIndex ) {
-        target = data.Column( parameters.targetIndex );
-    }
-    else if ( parameters.targetName.size() ) {
-        target = data.VectorColumnName( parameters.targetName );
-    }
-    else {
-        // Default to first column
-        target = data.Column( 0 );
-    }
+    GetTarget();
 
     //------------------------------------------------------------
     // embedded = false: Embed() was called on data
@@ -158,6 +148,7 @@ void EDM::FindNeighbors() {
         predPairs( N_prediction_rows );
 
     for ( size_t pred_row = 0; pred_row < N_prediction_rows; pred_row++ ) {
+
         std::valarray< double > rowDist = allDistances.Row( pred_row );
 
         std::vector< std::pair< double, size_t > > rowPairs( rowDist.size() );
@@ -209,19 +200,28 @@ void EDM::FindNeighbors() {
         // distance must be .first
         std::sort( rowPair.begin(), rowPair.end(), DistanceCompare );
 
+        //----------------------------------------------------------------
         // Insert knn distance / library row index into knn vectors
-        std::valarray< double > knnDistances( parameters.knn );
-        std::valarray< size_t > knnLibRows  ( parameters.knn );
+        //----------------------------------------------------------------
+        // JP: This is sneaky: knnDistances & knnLibRows are initialised
+        //     to nan, which translate to "quiet nan".  Following PEP 20,
+        //     generate WARNING if parameters.knn neighbors are not found.
+        std::valarray< double > knnDistances( nanf("knn"), parameters.knn );
+        std::valarray< size_t > knnLibRows  ( nanl("knn"), parameters.knn );
 
         int lib_row_i = 0;
         int k         = 0;
         while ( k < parameters.knn ) {
             if ( lib_row_i >= rowPairSize ) {
                 std::stringstream errMsg;
-                errMsg << "FindNeighbors(): knn search failed. "
+                errMsg << "WARNING: FindNeighbors(): knn search failed "
+                       << "at prediction row " << predictionRow << ". "
                        << k << " out of " << parameters.knn
-                       << " neighbors were found in the library.\n" ;
-                throw std::runtime_error( errMsg.str() );
+                       << " neighbors were found in the library.\n";
+                std::cout << errMsg.str();
+
+                k = (int) rowPair.size(); // Avoid tie check below
+                break;                    // Continue to next row
             }
 
             double distance = rowPair[ lib_row_i ].first;

@@ -18,6 +18,22 @@ EDM::EDM ( DataFrame< double > & data,
 void EDM::Project () {}
 
 //----------------------------------------------------------------
+// Set target (library) vector
+//----------------------------------------------------------------
+void EDM::GetTarget() {
+    if ( parameters.targetIndex ) {
+        target = data.Column( parameters.targetIndex );
+    }
+    else if ( parameters.targetName.size() ) {
+        target = data.VectorColumnName( parameters.targetName );
+    }
+    else {
+        // Default to first column
+        target = data.Column( 0 );
+    }
+}
+
+//----------------------------------------------------------------
 // Implemented as a wrapper for API MakeBlock()
 // Note: dataFrame must have the columnNameToIndex map
 //
