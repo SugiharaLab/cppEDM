@@ -10,8 +10,8 @@ namespace EDM_CCM_Lock {
 //----------------------------------------------------------------
 // forward declaration
 //----------------------------------------------------------------
-void CrossMap( SimplexClass   & S,
-               CrossMapValues & values );
+void CrossMap( SimplexClass   & S,         // input
+               CrossMapValues & values );  // output
 
 //----------------------------------------------------------------
 // Constructor
@@ -43,7 +43,7 @@ void CCMClass::Project () {
 
     colToTarget.Distances();        // allDistances, allLibRows
     targetToCol.Distances();        // allDistances, allLibRows
-        
+
     CCM();                          // FindNeighbors(), Simplex()
 
     FormatOutput();
@@ -92,7 +92,6 @@ void CCMClass::CCM () {
     }
 #else
     CrossMap( std::ref( colToTarget ), std::ref( colToTargetValues ) );
-    
     CrossMap( std::ref( targetToCol ), std::ref( targetToColValues ) );
 #endif
 }
@@ -237,6 +236,7 @@ void CrossMap( SimplexClass   & S,
 
                     lib_i = result; // Copy result to lib_i
                 }
+                // std::sort( lib_i.begin(), lib_i.end() ); // JP Why?
             }
             else {
                 // Not random samples, contiguous samples increasing size
@@ -300,7 +300,7 @@ void CrossMap( SimplexClass   & S,
                 S.allLibRows.DataFrameFromColumnIndex( lib_i );
             
             Simplex_.allDistances =
-                S.allDistances.DataFrameFromColumnIndex( lib_i );
+                S.allDistances.DataFrameFromColumnIndex( lib_i );            
 
             //----------------------------------------------------------
             // Cross mapping

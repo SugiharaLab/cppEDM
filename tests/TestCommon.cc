@@ -69,23 +69,17 @@ void MakeTest (std::string testName, DataFrame< double > data1,
 
     if ( badRows.empty() ) {
         std::cout << GREEN_TEXT; 
-        std::cout << TAB_CHAR << "TEST PASSED. All rows same.";
+        std::cout << TAB_CHAR << "PASSED. EPSILON: " << EPSILON;
     }
     else {
         int numBadRows =
             std::count_if( badRows.begin(), 
                            badRows.end(), [](int i){ return i != 0; } );
 
-        if ( numBadRows < 5 ) {
+        if ( numBadRows ) {
             std::cout << YELLOW_TEXT; 
-            std::cout << TAB_CHAR << "TEST MARGINALLY FAILED. " ;
+            std::cout << TAB_CHAR << "FAILED. EPSILON: " << EPSILON;
         }
-        else {
-            std::cout << RED_TEXT; 
-            std::cout << TAB_CHAR << "TEST FAILED. " ;
-        }
-        std::cout << numBadRows << " rows different ";
-        std::cout << std::endl;
 
 #ifdef PRINT_DIFFERENCE_IN_RESULTS
         std::cout << TAB_CHAR << TAB_CHAR << "Block 1 column names: ";
@@ -101,8 +95,8 @@ void MakeTest (std::string testName, DataFrame< double > data1,
 
         std::cout << TAB_CHAR << "first 10 different rows:" << std::endl;
         
-        for (auto iterate = badRows.begin(); 
-                iterate - badRows.begin() < 10 && iterate != badRows.end(); 
+        for (auto iterate  = badRows.begin();
+                  iterate != badRows.end(); 
                 ++iterate) {
 
             std::valarray< double > badRow1 = data1.Row( *iterate );
