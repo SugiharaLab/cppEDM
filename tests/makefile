@@ -5,6 +5,7 @@ EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest
 OBJ = $(EXE:=.o) TestCommon.o
 
 CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
+CFLAGS += -g
 LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread -llapack
 
 all:	$(EXE)
@@ -14,20 +15,23 @@ SimplexTest: SimplexTest.cc
 	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
-DateTimeTest: DateTimeTest.cc ../src/DateTimeUtil.cc
+DateTimeTest: DateTimeTest.cc ../src/DateTime.cc
 	$(CC) DateTimeTest.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 CCMTest: CCMTest.cc
+	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 TestCommonTest: TestCommonTest.cc
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 SMapTest: SMapTest.cc
+	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 MultiviewTest: MultiviewTest.cc
+	$(CC) TestCommon.cc -c $(CFLAGS) $(LFLAGS)
 	$(CC) $@.cc -o $@ $(CFLAGS) $(LFLAGS) TestCommon.o
 
 clean:

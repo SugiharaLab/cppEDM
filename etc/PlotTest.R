@@ -1,11 +1,37 @@
 
+## Run() and Clean() are executed at the bottom of this code.
+
+library(tcltk)
+
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 Run = function( path = './' ) {
+  prompt = "press to close"
+  extra  = ""
+  
+  X11()
+  par( mar = c(2, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
+       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(7, 1) )
   PlotSimplexSmap( path )
-  PlotSMapCircle ( path )
-  PlotCCM        ( path )
-  PlotEval       ( path )
+  capture = tk_messageBox(message = prompt, detail = extra)
+  
+  X11()
+  par( mar = c(2, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
+       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
+  PlotSMapCircle( path )
+  capture = tk_messageBox(message = prompt, detail = extra)
+  
+  X11()
+  par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
+       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(1, 1) )
+  PlotCCM( path )
+  capture = tk_messageBox(message = prompt, detail = extra)
+  
+  X11()
+  par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
+       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
+  PlotEval( path )
+  capture = tk_messageBox(message = prompt, detail = extra)
 }
 
 #---------------------------------------------------------------------
@@ -18,7 +44,7 @@ Clean = function( path = './' ) {
              "smap_3sp_coeff.csv",
              "smap_circ_coeff.csv",
              "smap_circle.csv",
-             "ccm.csv",
+             "ccm-out.csv",
              "EmbedDimOut.csv",
              "PredictIntervalOut.csv",
              "PredictNonlinearOut.csv",
@@ -134,7 +160,7 @@ PlotSMapCircle = function( path = './' ) {
 #---------------------------------------------------------------------
 PlotCCM = function(
   path     = './',
-  file     = 'ccm.csv',
+  file     = 'ccm-out.csv',
   col_i    = 2,
   target_i = 3
 ) {
@@ -184,3 +210,6 @@ PlotEval = function(
         xlab='Theta', ylab='rho', col = 'blue' )
 
 }
+
+Run()
+Clean()

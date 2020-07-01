@@ -3,11 +3,8 @@
 
 // #define PRINT_DIFFERENCE_IN_RESULTS
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <cmath>
-#include "Common.h"
+#include "API.h"
+#include "DateTime.h"
 
 #define STR_LINE_SEP "-------------------------------------------------"
 #define TAB_CHAR     '\t'            

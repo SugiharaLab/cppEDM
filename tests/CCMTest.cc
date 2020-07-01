@@ -14,15 +14,12 @@ int main () {
     cppOutput = DataFrame < double > ( "./data/",
                                        "CCM_anch_sst_cppEDM_valid.csv",
                                        true );  // noTime = true
-
-    //------------------------------------------------------------------
-    // anchovy : sst
+    
     // Generate new cpp output: sequential sampling for reproduceability
-    //------------------------------------------------------------------
     CCMValues ccmOut = CCM( "../data/",                // pathIn
                             "sardine_anchovy_sst.csv", // dataFile
                             "./data/",                 // pathOut
-                            "CCM_anch_sst_cppEDM.csv", //predictFile
+                            "CCM_anch_sst_cppEDM.csv", // predictFile
                             3,          // E
                             0,          // Tp
                             0,          // knn
@@ -41,10 +38,9 @@ int main () {
     output = DataFrame < double > ( "./data/",
                                     "CCM_anch_sst_cppEDM.csv",
                                     true );  // noTime = true
-    
     // comparison
-    MakeTest ( "CCM sardine_anchovy_sst test", cppOutput, output );
-    
+    MakeTest ( "CCM: sardine_anchovy_sst test", cppOutput, output );
+
     //------------------------------------------------------------------
     // Thrips
     // Create the ccm matrix of the rEDM-tutorial.Rmd vignette
@@ -107,7 +103,7 @@ int main () {
         ccmMatrix( rows2[ i ], cols2[ i ] ) = rho2;
     }
 
-    // ccmMatrix.WriteData( "./data", "Thrips_CMmatrix_valid.csv" );
+    // ccmMatrix.WriteData( "./data/", "Thrips_CMmatrix_valid.csv" );
     
     //---------------------------------------------------------
     // Load cppEDM valid output
@@ -116,8 +112,6 @@ int main () {
         DataFrame < double > ( "./data/",
                                "Thrips_CMmatrix_valid.csv",
                                true );  // noTime = true
-
     // comparison
-    MakeTest ( "CCM Thrips test", thripsValid, ccmMatrix );
-    // std::cout << ccmMatrix;
+    MakeTest ( "CCM: Thrips test", thripsValid, ccmMatrix );
 }

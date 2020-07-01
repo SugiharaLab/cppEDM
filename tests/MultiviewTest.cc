@@ -34,7 +34,7 @@ int main( int argc, char *argv[] ) {
                                     false,         // verbose,
                                     1 );           // nThreads
 
-    DataFrame< double > combos = MV.Combo_rho;
+    DataFrame< double > combos = MV.ComboRho;
     DataFrame< double > output = MV.Predictions;
 
     combos.WriteData( "./", "Multiview_combos.csv" );
@@ -47,8 +47,8 @@ int main( int argc, char *argv[] ) {
     //          << "  MAE " << ve.MAE << "  RMSE " << ve.RMSE << std::endl;
 
     // comparison
-    MakeTest ("Multiview combos test",     validCppCombos,  combos );
-    MakeTest ("Multiview prediction test", validCppPredict, output );
+    MakeTest ("Multiview: combos test",     validCppCombos,  combos );
+    MakeTest ("Multiview: prediction test", validCppPredict, output );
     
     return 0;
 }
