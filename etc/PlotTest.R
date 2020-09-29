@@ -72,7 +72,8 @@ PlotSimplexSmap = function( path = './' ) {
   df1 = read.csv( paste( path, f1, sep = '' ), na.string = 'nan' )
   df2 = read.csv( paste( path, f2, sep = '' ), na.string = 'nan' )
   df3 = read.csv( paste( path, f3, sep = '' ), na.string = 'nan' )
-  df4 = read.csv( paste( path, f4, sep = '' ), na.string = 'nan' )
+  df4 = read.csv( paste( path, f4, sep = '' ), na.string = 'nan',
+                  check.names = FALSE )
   df5 = read.csv( paste( path, f5, sep = '' ), na.string = 'nan', as.is = TRUE )
 
   # Simplex: cppBlock3sp_E3.csv
@@ -122,9 +123,9 @@ PlotSimplexSmap = function( path = './' ) {
   # SMap: smap_3sp_coeff.csv
   plot ( df4$time, df4$C0, type = 'l', lwd = 3, ylab = 'SMap C0' )
   abline( h = 0 )
-  plot ( df4$time, df4$C1, type = 'l', lwd = 3, ylab = 'SMap C1' )
+  plot ( df4$time, df4[,3], type = 'l', lwd = 3, ylab = names(df4)[3] )
   abline( h = 0 )
-  plot ( df4$time, df4$C2, type = 'l', lwd = 3, ylab = 'SMap C2' )
+  plot ( df4$time, df4[,4], type = 'l', lwd = 3, ylab = names(df4)[4] )
   abline( h = 0 )  
 } 
 
@@ -138,7 +139,8 @@ PlotSMapCircle = function( path = './' ) {
          cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
   }
 
-  c = read.csv( paste( path, 'smap_circ_coeff.csv', sep = '' ))
+  c = read.csv( paste( path, 'smap_circ_coeff.csv', sep = '' ),
+                check.names = FALSE )
   p = read.csv( paste( path, 'smap_circle.csv',     sep = '' ))
   
   plot ( p $ Time, p $ Observations, type='l', lwd=3, xlab='Time', ylab='x')
@@ -149,11 +151,12 @@ PlotSMapCircle = function( path = './' ) {
   plot( c $ Time, c $ C0, type = 'l', lwd = 3, xlab = 'Time', ylab = 'S Map C0')
   mtext( line = -2, "C0", cex = 1.6 )
   
-  plot( c $ Time, c $ C1, type = 'l', lwd = 3,
-        ylim = range( c $ C1, c $ C2, na.rm = TRUE ),
+  plot( c $ Time, c[,3], type = 'l', lwd = 3,
+        ylim = range( c[,3], c[,4], na.rm = TRUE ),
         col = 'red', xlab = 'Time' , ylab = 'S Map Coef' )
-  lines( c $ Time, c $ C2, lwd = 3, col = 'blue' )
-  legend( 'top', legend = c( 'C1', 'C2' ), fill = c('red', 'blue'), cex = 1.7 )
+  lines( c $ Time, c[,4], lwd = 3, col = 'blue' )
+  legend( 'top', legend = names( c )[3:4],
+          fill = c('red', 'blue'), cex = 1.7 )
 }
 
 #---------------------------------------------------------------------
@@ -201,13 +204,13 @@ PlotEval = function(
   
   #----------------------------------------------------
   plot( E.rho $ E, E.rho $ rho, type='l', lwd = 3,
-        xlab='E', ylab='rho', col = 'blue' )
+        xlab='E', ylab="Prediction Skill (\U03C1)", col = 'blue' )
 
   plot( Tp.rho $ Tp, Tp.rho $ rho, type='l', lwd = 3,
-        xlab='Tp', ylab='rho', col = 'blue' )
+        xlab='Tp', ylab="Prediction Skill (\U03C1)", col = 'blue' )
 
   plot( Theta.rho $ Theta, Theta.rho $ rho, type='l', lwd = 3,
-        xlab='Theta', ylab='rho', col = 'blue' )
+        xlab='Theta', ylab="Prediction Skill (\U03C1)", col = 'blue' )
 
 }
 

@@ -251,6 +251,7 @@ int main( int argc, char *argv[] ) {
                  0,                         // Tp
                  0,                         // knn
                  -1,                        // tau
+                 0,                         // exclusionRadius
                  "anchovy",                 // columns
                  "np_sst",                  // target
                  "10 70 10",                // libSizes_str

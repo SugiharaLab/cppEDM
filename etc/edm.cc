@@ -16,13 +16,14 @@ int main( int argc, char *argv[] ) {
     std::string fileOut    = "out.csv";
     int         E          = 3;
     int         Tp         = 1;
-    int         tau        = -1; 
+    int         tau        = -1;
+    int         knn        = 0;
+    int         exclusionRadius = 0;
     std::string method     = "simplex"; // or smap
     int         theta      = 2;
     bool        embedded   = false;     // 'y' = true
     bool        verbose    = false;     // 'y' = true
     bool        const_pred = false;     // 'y' = true
-    int         exclusionR = 0;
     
     if ( argc > 1 ) { dataFile   = argv[1]; }
     if ( argc > 2 ) { lib        = argv[2]; }
@@ -33,17 +34,19 @@ int main( int argc, char *argv[] ) {
     if ( argc > 7 ) { std::stringstream ss( argv[7] ); ss >> E;           }    
     if ( argc > 8 ) { std::stringstream ss( argv[8] ); ss >> Tp;          }
     if ( argc > 9 ) { std::stringstream ss( argv[9] ); ss >> tau;         }
-    if ( argc > 10 ) { method     = argv[10]; }    
-    if ( argc > 11 ){ std::stringstream ss( argv[11] ); ss >> theta;      }
-    if ( argc > 12 ){ embedded   = ( *argv[12] == 'y' ? true : false );   }
-    if ( argc > 13 ){ verbose    = ( *argv[13] == 'y' ? true : false );   }
-    if ( argc > 14 ){ const_pred = ( *argv[14] == 'y' ? true : false );   }
-    if ( argc > 15 ){ std::stringstream ss( argv[15] ); ss >> exclusionR; }
+    if ( argc > 10) { std::stringstream ss( argv[10]); ss >> knn;         }
+    if ( argc > 11) { std::stringstream ss( argv[11]); ss >> exclusionRadius; }
+    if ( argc > 12 ) { method    = argv[12]; }    
+    if ( argc > 13 ){ std::stringstream ss( argv[13] ); ss >> theta;      }
+    if ( argc > 14 ){ embedded   = ( *argv[14] == 'y' ? true : false );   }
+    if ( argc > 15 ){ verbose    = ( *argv[15] == 'y' ? true : false );   }
+    if ( argc > 16 ){ const_pred = ( *argv[16] == 'y' ? true : false );   }
 
     if ( verbose ) {
         std::cout << method << " " << dataFile << " lib " << lib << " pred "
                   << pred << " cols " << columns << " target " << target
                   << " E " << E << " Tp " << Tp << " tau " << tau
+                  << " knn " << knn << " exclusionRadius " << exclusionRadius
                   << " theta " << theta << std::endl;
     }
     
@@ -66,9 +69,9 @@ int main( int argc, char *argv[] ) {
                                  pred,       // pred
                                  E,          // E
                                  Tp,         // Tp
-                                 0,          // knn             <<<<< CONSTANT
+                                 knn,        // knn
                                  tau,        // tau
-                                 exclusionR, // exclusionRadius
+                                 exclusionRadius, // exclusionRadius
                                  columns,    // columns
                                  target,     // target
                                  embedded,   // embedded
@@ -84,10 +87,10 @@ int main( int argc, char *argv[] ) {
                                   pred,             // pred
                                   E,                // E
                                   Tp,               // Tp
-                                  0,                // knn      <<<<< CONSTANT
+                                  knn,              // knn
                                   tau,              // tau
                                   theta,            // theta
-                                  exclusionR,       // exclusionRadius
+                                  exclusionRadius,  // exclusionRadius
                                   columns,          // columns
                                   target,           // target
                                   "smap_coeff.csv", // smapFile
