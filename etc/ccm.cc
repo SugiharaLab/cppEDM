@@ -60,14 +60,24 @@ int main( int argc, char *argv[] ) {
                                 random,
                                 replacement,
                                 0,            // seed,
-                                false,        // includeData
+                                true,         // includeData
                                 verbose );
 
         DataFrame<double> dataFrame = ccmOut.AllLibStats;
         dataFrame.MaxRowPrint() = dataFrame.NRows();
 
+        DataFrame<double> predictStats = ccmOut.CrossMap1.PredictStats;
+        predictStats.MaxRowPrint() = 5;
+
+        std::forward_list< DataFrame< double > > predList =
+            ccmOut.CrossMap1.Predictions;
+        DataFrame<double> predResult = *predList.begin();
+        predResult.MaxRowPrint() = 5;
+
         if ( verbose ) {
             std::cout << dataFrame;
+            std::cout << predictStats;
+            std::cout << predResult;
         }
     }
     
