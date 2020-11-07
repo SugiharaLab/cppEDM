@@ -23,5 +23,6 @@ echo "------- EmbedDimension --------------------------------------"
 ./eval E ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
 ./eval Tp ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
 ./eval theta ../data/TentMapNoise_rEDM.csv "1 100" "201 500" TentMap TentMap
+./eval E ../data/TTFF_data.csv "521 2132" "1 520" Qout Qout
 
 rm -f eval mview ccm edm embed *.csv
