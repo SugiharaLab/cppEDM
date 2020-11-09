@@ -8,28 +8,32 @@ library(tcltk)
 Run = function( path = './' ) {
   prompt = "press to close"
   extra  = ""
-  
+
+  # PlotSimplexSmap
   X11()
   par( mar = c(2, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
        cex.axis = 1.5, cex.lab = 1.5, mfrow = c(7, 1) )
   PlotSimplexSmap( path )
   capture = tk_messageBox(message = prompt, detail = extra)
-  
+
+  # PlotSMapCircle
   X11()
   par( mar = c(2, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
        cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
   PlotSMapCircle( path )
   capture = tk_messageBox(message = prompt, detail = extra)
-  
+
+  # PlotCCM
   X11()
   par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
        cex.axis = 1.5, cex.lab = 1.5, mfrow = c(1, 1) )
   PlotCCM( path )
   capture = tk_messageBox(message = prompt, detail = extra)
-  
+
+  # PlotEval
   X11()
   par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
-       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
+       cex.axis = 1.5, cex.lab = 1.5, mfrow = c(2, 2) )
   PlotEval( path )
   capture = tk_messageBox(message = prompt, detail = extra)
 }
@@ -195,7 +199,7 @@ PlotEval = function(
   if ( is.null( dev.list() ) || length( dev.list() ) == 3 ) {
     dev.new()
     par( mar = c(3.5, 3.8, 0.5, 1), mgp = c(2.2, 0.8, 0), cex = 1.3, 
-         cex.axis = 1.5, cex.lab = 1.5, mfrow = c(3, 1) )
+         cex.axis = 1.5, cex.lab = 1.5, mfrow = c(2, 2) )
   }
 
   E.rho     = read.csv( paste( path, "EmbedDimOut.csv",         sep = '' ) )

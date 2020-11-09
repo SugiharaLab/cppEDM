@@ -24,6 +24,7 @@ int main () {
                             0,          // Tp
                             0,          // knn
                             -1,         // tau
+                            0,          // exclusionRadius
                             "anchovy",  // columns
                             "np_sst",   // target
                             "10 75 5",  // libSizes_str
@@ -79,19 +80,20 @@ int main () {
                                    "Thrips.csv", // dataFile
                                    "./data/",    // pathOut
                                    "",           //predictFile
-                                   8,          // E
-                                   0,          // Tp
-                                   0,          // knn
-                                   -1,         // tau
-                                   columns[ i ],// columns
-                                   targets[ i ],// target
-                                   "73 73 10", // libSizes_str
-                                   200,        // sample
-                                   true,       // random
-                                   false,      // replacement
-                                   0,          // seed
-                                   false,      // includeData
-                                   false );    // verbose
+                                   8,            // E
+                                   0,            // Tp
+                                   0,            // knn
+                                   -1,           // tau
+                                    0,           // exclusionRadius
+                                   columns[ i ], // columns
+                                   targets[ i ], // target
+                                   "73 73 10",   // libSizes_str
+                                   200,          // sample
+                                   true,         // random
+                                   false,        // replacement
+                                   0,            // seed
+                                   false,        // includeData
+                                   false );      // verbose
         
         // Load cppEDM output
         DataFrame< double > ccmThripsCSV = ccmThrips.AllLibStats;

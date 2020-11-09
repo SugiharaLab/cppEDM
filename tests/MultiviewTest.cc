@@ -31,6 +31,7 @@ int main( int argc, char *argv[] ) {
                                     0,             // multiview
                                     0,             // exclusionRadius
                                     true,          // trainLib
+                                    false,         // excludeTarget
                                     false,         // verbose,
                                     1 );           // nThreads
 

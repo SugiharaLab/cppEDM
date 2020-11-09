@@ -28,7 +28,7 @@
 // 
 //----------------------------------------------------------------
 int main( int argc, char *argv[] ) {
-    
+
     try {
 #ifdef EMBED_TEST
         //----------------------------------------------------------
@@ -37,7 +37,7 @@ int main( int argc, char *argv[] ) {
         DataFrame< double > EmbedFrame = Embed( "../data/", "block_3sp.csv",
                                                 2, -1, "x_t y_t z_t", true );
         std::cout << EmbedFrame;
-        
+
         //----------------------------------------------------------
         // Embedding of DataFrame object not read from disk
         // Load data into DataIO dataFrame, then subset dataFrame 
@@ -49,11 +49,11 @@ int main( int argc, char *argv[] ) {
                                        "1 100", "190 198", 2, 1, 4, 1, 0, 0,
                                        "x_t y_t z_t" );
         std::cout << param;
-        
+
         DataFrame< double > dio ( param.pathIn, param.dataFile );
         DataFrame< double > D =
             dio.DataFrameFromColumnNames( param.columnNames );
-        
+
         std::cout << "block_3sp.csv Embed():\n";
         std::cout << D;
 
@@ -92,9 +92,9 @@ int main( int argc, char *argv[] ) {
         std::cout << "Simplex embedded block_3sp.csv:\n";
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
                   << "  MAE " << ve.MAE << std::endl << std::endl;
-        
+
 #endif
-        
+
 #ifdef SIMPLEX_TEST2
         //----------------------------------------------------------
         // embedded = false : Simplex embeds data file columns to E
@@ -116,14 +116,14 @@ int main( int argc, char *argv[] ) {
                      false,                // embedded
                      false,                // const_predict
                      true );               // verbose 
-        
+
         dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
         std::cout << dataFrameEmbed;
 
         VectorError ve2 = ComputeError(
             dataFrameEmbed.VectorColumnName( "Observations" ),
             dataFrameEmbed.VectorColumnName( "Predictions"  ) );
-        
+
         std::cout << "Simplex E=3 block_3sp.csv:\n";
         std::cout << "rho " << ve2.rho << "  RMSE " << ve2.RMSE
                   << "  MAE " << ve2.MAE << std::endl << std::endl;
@@ -148,9 +148,10 @@ int main( int argc, char *argv[] ) {
                        0,             // multiview
                        0,             // exclusionRadius
                        true,          // trainLib
+                       false,         // excludeTarget
                        false,         // verbose,
                        1 );           // nThreads
-        
+
         DataFrame< double > MVPredictions = MV.Predictions;
         VectorError vemv =
             ComputeError( MVPredictions.VectorColumnName( "Observations" ),
@@ -188,7 +189,7 @@ int main( int argc, char *argv[] ) {
 
         DataFrame< double > predictions  = SMV.predictions;
         DataFrame< double > coefficients = SMV.coefficients;
-        
+
         std::cout << predictions;
 
         VectorError vesm = ComputeError(
@@ -205,20 +206,20 @@ int main( int argc, char *argv[] ) {
         // embedded = true : Circle 
         //----------------------------------------------------------
         SMapValues SMV2 = 
-            SMap( "../data/",        // pathIn
-                  "circle.csv",      // dataFile,
-                  "./",              // pathOut
-                  "smap_circle.csv", // predictFile
-                  "1 100",           // lib
-                  "101 198",         // pred
-                  2,                 // E
-                  1,                 // Tp
-                  0,                 // knn
-                  -1,                // tau
-                  4.,                // theta
-                  0,                 // exclusionRadius
-                  "x y",             // columns
-                  "x",               // target
+            SMap( "../data/",            // pathIn
+                  "circle.csv",          // dataFile,
+                  "./",                  // pathOut
+                  "smap_circle.csv",     // predictFile
+                  "1 100",               // lib
+                  "101 198",             // pred
+                  2,                     // E
+                  1,                     // Tp
+                  0,                     // knn
+                  -1,                    // tau
+                  4.,                    // theta
+                  0,                     // exclusionRadius
+                  "x y",                 // columns
+                  "x",                   // target
                   "smap_circ_coeff.csv", // smapFile
                   "",                    // derivatives
                   true,                  // embedded 
@@ -227,7 +228,7 @@ int main( int argc, char *argv[] ) {
 
         DataFrame< double > predictions2  = SMV2.predictions;
         DataFrame< double > coefficients2 = SMV2.coefficients;
-        
+
         std::cout << predictions2;
 
         VectorError vesm2 = ComputeError(
@@ -284,7 +285,7 @@ int main( int argc, char *argv[] ) {
                             false,              // embedded
                             false,              // verbose
                             4 );                // nThreads 
-                
+
         std::cout << "EmbedDimension TentMap_rEDM.csv:\n";
         std::cout << EMBD;
 #endif
@@ -307,7 +308,7 @@ int main( int argc, char *argv[] ) {
                              false,                  // embedded
                              false,                  // verbose
                              4 );                    // nThreads
-                
+
         std::cout << "PredictInterval TentMap_rEDM.csv:\n";
         std::cout << PD;
 #endif
@@ -339,7 +340,7 @@ int main( int argc, char *argv[] ) {
 #endif
 
     }
-    
+
     catch ( const std::exception& e ) {
  	std::cout << "Exception caught in main:\n";
         std::cout << e.what() << std::endl;
@@ -351,6 +352,6 @@ int main( int argc, char *argv[] ) {
     }
 
     std::cout << "normal termination\n";
-    
+
     return 0;
 }

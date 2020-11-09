@@ -18,7 +18,7 @@ echo "------- CCM -------------------------------------------------"
 head ccm-out.csv -n 2
 tail ccm-out.csv -n 2
 echo "------- Multiview -------------------------------------------"
-./mview ../data/block_3sp.csv "1 100" "101 195" "x_t y_t z_t" x_t mview-out.csv 0 3 1 0 0 n n 1
+./mview ../data/block_3sp.csv "1 100" "101 195" "x_t y_t z_t" x_t mview-out.csv 0 3 1 0 0 n n n 1
 echo "------- EmbedDimension --------------------------------------"
 ./eval E ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
 ./eval Tp ../data/TentMap_rEDM.csv "1 100" "201 500" TentMap TentMap
