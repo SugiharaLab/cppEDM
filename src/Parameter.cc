@@ -86,7 +86,7 @@ Parameters::Parameters(
 
     // Set validated flag and instantiate Version
     validated        ( false ),
-    version          ( 1, 7, 0, "2020-11-7" )
+    version          ( 1, 7, 1, "2020-11-19" )
 {
     // Constructor code
     if ( method != Method::None ) {
@@ -177,6 +177,50 @@ void Parameters::Validate() {
             for ( size_t li = thisPair.first; li <= thisPair.second; li++ ) {
                 library[ i ] = li - 1; // apply zero-offset
                 i++;
+            }
+        }
+
+        // if disjointLibrary create vector of disallowed library rows
+        if ( disjointLibrary ) {
+            int maxLibrary_i = (int) library.back();
+            int minLibrary_i = (int) library.front();
+            int allLibSize   = maxLibrary_i - minLibrary_i + 1;
+
+            // A "full" library with no missing values, for set difference
+            std::vector< size_t > allLibrary( allLibSize );
+
+            // Fill with indices 0, 1, ... allLibSize
+            i = 0;
+            for ( int lib_i = minLibrary_i; lib_i <= maxLibrary_i; lib_i++ ) {
+                allLibrary[ i ] = lib_i;
+                i++;
+            }
+
+            // Find library rows that are "gaps", not in library
+            disjointLibraryRows = std::vector< size_t > ( allLibSize );
+            std::vector< size_t >::iterator li;
+            li = std::set_difference ( allLibrary.begin(), allLibrary.end(),
+                                       library.begin(),    library.end(),
+                                       disjointLibraryRows.begin());
+
+            disjointLibraryRows.resize( li - disjointLibraryRows.begin() );
+
+            // Add rows that span gaps by virture of embedding
+            int shift = tau * ( E - 1 ); // default tau = -1
+            std::vector< size_t > disjointLibraryRowsCopy( disjointLibraryRows );
+            
+            for ( auto disjointLibRow : disjointLibraryRowsCopy ) {
+                int thisRow = (int) disjointLibRow;
+                int newRow  = embedded ? thisRow : thisRow - shift;
+
+                if ( newRow > 0 ) {
+                    li = std::find( disjointLibraryRowsCopy.begin(),
+                                    disjointLibraryRowsCopy.end(), newRow );
+                    if ( li == disjointLibraryRowsCopy.end() ) {
+                        // newRow not in disjointLibraryRows
+                        disjointLibraryRows.push_back( (size_t) newRow );
+                    }
+                }
             }
         }
     }
@@ -535,6 +579,17 @@ void Parameters::DeleteLibPred() {
         }
     }
 
+    bool deleteDisjointLibIndex = false;
+    for ( auto element  = deleted_lib_elements.begin();
+               element != deleted_lib_elements.end(); element++ ) {
+        it = std::find( disjointLibraryRows.begin(),
+                        disjointLibraryRows.end(), *element );
+        if ( it != prediction.end() ) {
+            deleteDisjointLibIndex = true;
+            break;
+        }
+    }
+
     bool deletePredIndex = false;
     for ( auto element  = deleted_pred_elements.begin();
                element != deleted_pred_elements.end(); element++ ) {
@@ -563,13 +618,27 @@ void Parameters::DeleteLibPred() {
     // Erase elements of row indices that were deleted
     if ( deleteLibIndex ) {
         for ( auto element  = deleted_lib_elements.begin();
-              element != deleted_lib_elements.end(); element++ ) {
+                   element != deleted_lib_elements.end(); element++ ) {
 
             std::vector< size_t >::iterator it;
             it = std::find( library.begin(), library.end(), *element );
             
             if ( it != library.end() ) {
                 library.erase( it );
+            }
+        }
+    }
+
+    if ( deleteDisjointLibIndex ) {
+        for ( auto element  = deleted_lib_elements.begin();
+                   element != deleted_lib_elements.end(); element++ ) {
+
+            std::vector< size_t >::iterator it;
+            it = std::find( disjointLibraryRows.begin(),
+                            disjointLibraryRows.end(), *element );
+            
+            if ( it != disjointLibraryRows.end() ) {
+                disjointLibraryRows.erase( it );
             }
         }
     }
@@ -593,6 +662,10 @@ void Parameters::DeleteLibPred() {
     // before the deletion/shift.
     if ( tau < 0 ) {
         for ( auto li = library.begin(); li != library.end(); li++ ) {
+            *li = *li - shift;
+        }
+        for ( auto li  = disjointLibraryRows.begin();
+                   li != disjointLibraryRows.end(); li++ ) {
             *li = *li - shift;
         }
         for ( auto pi = prediction.begin(); pi != prediction.end(); pi++ ) {
