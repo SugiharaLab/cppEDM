@@ -177,7 +177,7 @@ void EDM::FindNeighbors() {
 
     //-------------------------------------------------------------------
     // For each prediction vector (row in prediction DataFrame) find the
-    // list of library indices that are within k_NN points
+    // list of library indices that are within knn points
     //-------------------------------------------------------------------
     for ( size_t predPair_i = 0; predPair_i < predPairs.size(); predPair_i++ ) {
 
@@ -246,8 +246,8 @@ void EDM::FindNeighbors() {
             // Reach exceeding grasp : forecast point is outside library
             // libRowTp < 0 prevents libTarget in Simplex with i < 0
             if ( libRowTp > max_lib_index or libRowTp < 0 ) {
-                libRow_i++;
-                continue; // keep looking
+               libRow_i++;
+               continue; // keep looking
             }
 
             // If disjoint lib, grind through library to exclude
@@ -262,7 +262,7 @@ void EDM::FindNeighbors() {
                     libRow_i++;
                     continue;  // libRowTp in disjointLibraryRows keep looking
                 }
-            } // parameters.disjointLibrary
+            }
 
             // Exclusion radius: units are data rows, not time
             if ( parameters.exclusionRadius ) {

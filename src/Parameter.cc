@@ -86,7 +86,7 @@ Parameters::Parameters(
 
     // Set validated flag and instantiate Version
     validated        ( false ),
-    version          ( 1, 7, 1, "2020-11-19" )
+    version          ( 1, 7, 1, "2020-11-21" )
 {
     // Constructor code
     if ( method != Method::None ) {
@@ -180,7 +180,7 @@ void Parameters::Validate() {
             }
         }
 
-        // if disjointLibrary create vector of disallowed library rows
+        // If disjointLibrary create vector of disallowed library rows
         if ( disjointLibrary ) {
             int maxLibrary_i = (int) library.back();
             int minLibrary_i = (int) library.front();
@@ -189,7 +189,7 @@ void Parameters::Validate() {
             // A "full" library with no missing values, for set difference
             std::vector< size_t > allLibrary( allLibSize );
 
-            // Fill with indices 0, 1, ... allLibSize
+            // Fill with indices 0, 1, ... allLibSize - 1
             i = 0;
             for ( int lib_i = minLibrary_i; lib_i <= maxLibrary_i; lib_i++ ) {
                 allLibrary[ i ] = lib_i;
@@ -222,6 +222,38 @@ void Parameters::Validate() {
                     }
                 }
             }
+
+            // Remove from library
+            std::vector< size_t >::iterator dli;
+            for ( dli  = disjointLibraryRows.begin();
+                  dli != disjointLibraryRows.end(); dli++ ) {
+                
+                li = std::find( library.begin(), library.end(), *dli );
+                if ( li != library.end() ) {
+                    library.erase( li );
+                }   
+            }
+        } // disjointLibrary
+        
+        // Valid lib: E, tau, Tp combination
+        int vectorStart  = std::max( (E - 1) * tau, 0 );
+        vectorStart      = std::max( vectorStart, Tp );
+        int vectorEnd    = std::min( (E - 1) * tau, Tp );
+        vectorEnd        = std::min( vectorEnd, 0 );
+        int vectorLength = std::abs( vectorStart - vectorEnd ) + 1;
+        
+        int maxLibrarySegment = 0;
+        for ( auto thisPair : libPairs ) {
+            int libPairSpan = thisPair.second - thisPair.first + 1;
+            maxLibrarySegment = std::max( maxLibrarySegment, libPairSpan );
+        }
+        
+        if ( vectorLength > maxLibrarySegment ) {
+            std::stringstream errMsg;
+            errMsg << "Parameters::Validate() Combination of E = "
+                   << E << " Tp = " << Tp << " tau = " << tau
+                   << " is invalid.\n";
+            throw std::runtime_error( errMsg.str() );
         }
     }
 
@@ -319,7 +351,7 @@ void Parameters::Validate() {
     // If columns are purely integer, set vector<size_t> columnIndex
     // Otherwise fill in vector<string> columnNames
     //--------------------------------------------------------------
-   if ( columns_str.size() ) {
+    if ( columns_str.size() ) {
 
         std::vector<std::string> columns_vec = SplitString( columns_str,
                                                             " \t,\n" );
