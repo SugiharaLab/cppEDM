@@ -176,10 +176,6 @@ void EDM::FindNeighbors() {
             if ( libRowTp > max_lib_index ) {
                continue; // keep looking
             }
-            if ( libRowTp < 0 ) {
-                // libRowTp < 0 prevents Simplex target[-1...]
-                continue; // keep looking
-            }
 
             // If disjoint lib, grind through library to exclude
             if ( parameters.disjointLibrary ) {
@@ -384,7 +380,7 @@ void EDM::FindNeighbors() {
         std::vector< std::pair< double, size_t > > rowTiePairs = tiePairs[ i ];
 
         if ( rowTiePairs.size() ) {
-            std::cout << "Ties at pred_i " << i << " ";
+            std::cout << "Ties at pred_i " << i + 1 << " ";
             for ( size_t j = 0; j < rowTiePairs.size(); j++ ) {
                 double dist = rowTiePairs[ j ].first;
                 size_t prow = rowTiePairs[ j ].second;
@@ -545,13 +541,13 @@ void EDM::PrintDataFrameIn()
 }
 
 //----------------------------------------------------------------
-// 
+//
 //----------------------------------------------------------------
 void EDM::PrintNeighbors()
 {
     std::cout << "EDM::FindNeighbors(): neighbors:distances" << std::endl;
     for ( size_t i = 0; i < knn_neighbors.NRows(); i++ ) {
-        std::cout << "Row " << i << " | ";
+        std::cout << "Row " << i + 1 << " | ";
         for ( size_t j = 0; j < knn_neighbors.NColumns(); j++ ) {
             std::cout << knn_neighbors( i, j ) << " ";
         } std::cout << "   : ";
