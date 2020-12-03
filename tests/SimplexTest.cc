@@ -91,4 +91,43 @@ int main () {
                           "x y", "x", true, false, false );
     // Comparison
     MakeTest ( "Simplex: disjoint library", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex negative Tp 
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","ts_negTp_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "ts_negtp.csv",
+                          "./data/", "ts_negtp_cppEDM.csv",
+                          "1 100", "81 85", 2, -1, 0, -1, 0,
+                          "ts", "ts", false, false, false );
+    // Comparison
+    MakeTest ( "Simplex: negative Tp 1", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex negative Tp Takens embedded = false
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","negTp_takens_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "small_data.csv",
+                          "./data/", "negTp_takens_cppEDM.csv",
+                          "1 12", "1 12", 2, -1, 0, -1, 0,
+                          "x", "x", false, false, false );
+    // Comparison
+    MakeTest ( "Simplex: negative Tp Takens", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex negative Tp Takens embedded = true
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","negTp_embedded_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "small_data.csv",
+                          "./data/", "negTp_embedded_cppEDM.csv",
+                          "1 12", "1 12", 0, -1, 0, -1, 0,
+                          "x y", "x", true, false, false );
+    // Comparison
+    MakeTest ( "Simplex: negative Tp embedded", pyOutput, cppOutput );
 }
