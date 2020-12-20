@@ -387,49 +387,54 @@ void Parameters::Validate() {
         // Create library of indices
         library = std::vector< size_t >(); // Per thread
 
-        // JP : This +1 to the stop criteria enables embedded = true with
-        //      Tp > 0 to match 0.7.  It effectively adds another neighbor
-        //      beyond what it should according to DisjointLib.* codes...???
-        int stopOffset = embedded == true ? 1 : 0; // embedded Tp > 0 works
+        bool disjointLibrary = libPairs.size() > 1 ? true : false;
 
         if ( Tp >= 0 ) {
             // Multiple lib segments if libPairs.size() > 1
             for ( size_t i = 0; i < libPairs.size() - 1; i++ ) {
-                // Add library rows for segments, disallowing vectors
+                // Add rows for library segments, disallowing vectors
                 // in the "gap" accomodating E and Tp
                 std::pair< size_t, size_t > pair = libPairs[ i ];
 
-                int stop = (int) pair.second - (E-1) - Tp + stopOffset;
+                int stop = (int) pair.second - (E-1) - Tp + 1;
 
                 for ( int j = pair.first; j <= stop; j++ ) {
                     library.push_back( j - 1 ); // apply zero-offset
                 }
             }
 
-            // JP : Addding +1 to pair.first below allows some nn to be found
-            //      with embedded = false, but it is not consistent
-
-            // The last (or only) lib segment
+            // The last (or only) library segment
             std::pair< size_t, size_t > pair = libPairs.back();
-            for ( size_t j = pair.first; j <= pair.second; j++ ) {
+
+            int start = pair.first;
+            if ( not embedded and disjointLibrary ) { start += 1; }
+
+            for ( size_t j = start; j <= pair.second; j++ ) {
                 library.push_back( j - 1 ); // apply zero-offset
             }
         }
         else {  // Negative Tp
-            // Add lib points for the first N-1 pairs...
+            // Multiple lib segments if libPairs.size() > 1
             for ( size_t i = 0; i < libPairs.size() - 1; i++ ) {
+                // Add rows for library segments, disallowing vectors
+                // in the "gap" accomodating E and Tp
 
                 std::pair< size_t, size_t > pair = libPairs[ i ];
 
-                int stop = (int) pair.second + Tp;
+                int stop = (int) pair.second + Tp + 1;
+
                 for ( int j = pair.first; j <= stop; j++ ) {
                     library.push_back( j - 1 ); // apply zero-offset
                 }
             }
-            // Add lib points of the last pair
+
+            // The last (or only) library segment
             std::pair< size_t, size_t > pair = libPairs.back();
-            for ( size_t j = pair.first - Tp; j <= pair.second; j++ ) {
-                library.push_back( j - 1 );
+
+            int start = embedded ? pair.first : pair.first + 1;
+
+            for ( int j = start - (Tp + 1); j <= (int) pair.second; j++ ) {
+                library.push_back( j - 1 ); // apply zero-offset
             }
         }
 
@@ -524,6 +529,13 @@ void Parameters::Validate() {
                 throw std::runtime_error( errMsg.str() );
             }
         }
+        // Warn about disjoint prediction sets: not fully supported
+        if ( predPairs.size() > 1 ) {
+            std::stringstream msg;
+            msg << "WARNING: Validate(): Disjoint prediction sets "
+                << " are not fully supported. Use with caution." << std::endl;
+            std::cout << msg.str();
+        }
     }
 
     if ( method == Method::Simplex or method == Method::SMap ) {
@@ -540,7 +552,7 @@ void Parameters::Validate() {
 
         if ( method == Method::SMap ) {
             if ( knn == 0 ) { // default knn = 0, set knn value
-                knn = library.size() - E;
+                knn = library.size();
 
                 if ( verbose ) {
                     std::stringstream msg;
