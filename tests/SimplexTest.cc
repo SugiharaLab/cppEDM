@@ -80,19 +80,6 @@ int main () {
     MakeTest ( "Simplex: neighbor ties 2", pyOutput, cppOutput );
 
     //----------------------------------------------------------
-    // Simplex disjoint lib
-    //----------------------------------------------------------
-    pyOutput = DataFrame < double > ("./data/","Smplx_disjointLib_valid.csv");
-
-    // Generate cpp output
-    cppOutput = Simplex ( "./data/", "small_data.csv",
-                          "./data/", "Smplx_disjointLib_cppEDM.csv",
-                          "1 3 6 12", "1 12", 0, 1, 0, -1, 0,
-                          "x y", "x", true, false, false );
-    // Comparison
-    MakeTest ( "Simplex: disjoint library", pyOutput, cppOutput );
-
-    //----------------------------------------------------------
     // Simplex negative Tp 
     //----------------------------------------------------------
     pyOutput = DataFrame < double > ("./data/","ts_negTp_valid.csv");
@@ -130,4 +117,43 @@ int main () {
                           "x y", "x", true, false, false );
     // Comparison
     MakeTest ( "Simplex: negative Tp embedded", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex disjoint lib   embedded = true 
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","Smplx_disjointLib_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "small_data.csv",
+                          "./data/", "Smplx_disjointLib_cppEDM.csv",
+                          "1 3 6 12", "1 12", 0, 1, 0, -1, 0,
+                          "x y", "x", true, false, false );
+    // Comparison
+    MakeTest ( "Simplex: disjoint library", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex disjoint lib 2   embedded = true 
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","Smplx_disjointLib2_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "block_ts50.csv",
+                          "./data/", "Smplx_disjointLib2_cppEDM.csv",
+                          "1 20 31 50", "1 20", 0, 1, 0, -1, 0,
+                          "x_t x_tp", "x_t", true, false, false );
+    // Comparison
+    MakeTest ( "Simplex: disjoint library 2", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex disjoint lib 3   embedded = false
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","Smplx_disjointLib3_valid.csv");
+
+    // Generate cpp output
+    cppOutput = Simplex ( "./data/", "ts_gene_2.csv",
+                          "./data/", "Smplx_disjointLib3_cppEDM.csv",
+                          "1 57 58 108", "49 65", 5, 1, 0, -1, 0,
+                          "ts", "ts", false, false, false );
+    // Comparison
+    MakeTest ( "Simplex: disjoint library 3", pyOutput, cppOutput );
 }
