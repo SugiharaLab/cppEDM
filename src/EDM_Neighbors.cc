@@ -25,6 +25,9 @@ void EDM::PrepareEmbedding( bool checkDataRows ) {
 
     if ( checkDataRows ) {
         CheckDataRows( "PrepareEmbedding" );
+        if ( parameters.embeddingAssignments.size() ) {
+            CheckConditionalEmbeddings( "PrepareEmbedding" );
+        }
     }
 
     // 1) Extract or Embed() data into embedding
@@ -182,6 +185,31 @@ void EDM::FindNeighbors() {
                 if ( delta_i <= parameters.exclusionRadius ) {
                     continue; // keep looking
                 }
+            }
+
+            // Conditional embedding: library point not in embedding
+            if ( parameters.embeddingAssignments.size() ) {
+
+                auto embIdxs = parameters.embeddingAssignments[predictionRow];
+
+                bool validRow = true;
+
+                for ( auto embIdx : embIdxs ) {
+
+                    auto embedding = parameters.conditionalEmbeddings[embIdx];
+
+#ifdef DEBUG_ALL
+                    if ( not embedding[libRow] ) {
+                        std::cout<<"at pred row "<<predictionRow
+                                 <<"skipping lib row "<<libRow<<std::endl;
+                        validRow = false;
+                        break;
+                    }
+#endif
+                }
+
+                if (!validRow) continue;
+                    
             }
 
             // Add this distance, libRow (nn) to the rowPairs
