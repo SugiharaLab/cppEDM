@@ -1,5 +1,4 @@
-// Program to test the conditional embeddings functionality
-// No ground truth to test on, so just checking for valid functionality here
+// Test conditional embedding functionality
 
 #include <iostream>
 #include <string>
@@ -11,83 +10,89 @@ int main() {
 
     size_t num_rows = circleData.NRows();
 
+    //-------------------------------------------------------------------
     // Test of CE validLib as all true... should be no change
+    //-------------------------------------------------------------------
     std::vector<bool> valid_lib( num_rows, true );
 
-    auto fullLib = Simplex ( "../data/", "block_3sp.csv",
-                             "./data/", "",
+    auto fullLib = Simplex ( "../data/", "block_3sp.csv", "./data/", "",
                              "1 99","100 198", 3, 1, 0, -1, 0,
                              "x_t y_t z_t", "x_t", true, false, false );
 
-    auto CELib = Simplex ( "../data/", "block_3sp.csv",
-                           "./data/", "",
-                           "1 99","100 198", 3, 1, 0, -1, 0,
-                           "x_t y_t z_t", "x_t", true, false, false,
-                           valid_lib );
+    auto CELib   = Simplex ( "../data/", "block_3sp.csv", "./data/", "",
+                             "1 99","100 198", 3, 1, 0, -1, 0,
+                             "x_t y_t z_t", "x_t", true, false, false,
+                             valid_lib );
 
     // Should PASS
     MakeTest ( "Simplex: CE full valid", fullLib, CELib );
 
-    SMapValues fullSMap = SMap ( circleData,
-                                 "./data/", "",
-                                 " 1 100 ", "101 198", 2, 1, 0, -1, 4, 0,
-                                 "x y", "x", "FullLib_Smap_circle_coef.csv", "",
+    // Test of CE validLib as all true... should be no change
+    SMapValues fullSMap = SMap ( circleData, "./data/", "",
+                                 "1 100", "101 198", 2, 1, 0, -1, 4, 0,
+                                 "x y", "x", "", "",
                                  true, false, false );
 
-    SMapValues CESMap = SMap ( circleData,
-                               "./data/", "",
-                               " 1 100 ", "101 198", 2, 1, 0, -1, 4, 0,
-                               "x y", "x", "", "",
-                               true, false, false, valid_lib );
+    SMapValues CESMap   = SMap ( circleData, "./data/", "",
+                                 "1 100", "101 198", 2, 1, 0, -1, 4, 0,
+                                 "x y", "x", "", "",
+                                 true, false, false, valid_lib );
 
     // Should PASS
     MakeTest ( "SMap: CE full valid", fullSMap.predictions, CESMap.predictions );
 
-    // Remove validLib rows
-    for( int i = 10; i < 189; i++ ) {
+    //-------------------------------------------------------------------
+    // Remove validLib rows.  valid_lib [0:9] = true
+    //-------------------------------------------------------------------
+    for( int i = 10; i < num_rows; i++ ) {
         valid_lib[i] = false;
     }
 
-    CELib = Simplex ( "../data/", "block_3sp.csv",
-                      "./data/", "",
+    //-------------------------------------------------------------------
+    // Limit lib to the same as valid_lib *** NOTE: lib = "1 11" works
+    //-------------------------------------------------------------------
+    auto partLib = Simplex ( "../data/", "block_3sp.csv", "./data/", "",
+                             "1 10","100 198", 3, 1, 0, -1, 0,
+                             "x_t y_t z_t", "x_t", true, false, false );
+
+    // Run with valid_lib that is 0-9
+    CELib = Simplex ( "../data/", "block_3sp.csv", "./data/", "",
                       "1 99","100 198", 3, 1, 0, -1, 0,
                       "x_t y_t z_t", "x_t", true, false, false,
                       valid_lib );
 
-    // Should be differences in prediction
-    std::valarray< double > predictions =
-        fullLib.VectorColumnName( "Predictions" );
+    // Should PASS
+    MakeTest ( "Simplex: Part valid", CELib, partLib );
     
-    std::valarray< double > CEpredictions =
-        CELib.VectorColumnName( "Predictions" );
-    
-    std::cout << std::endl << "Simplex: Full library predictions:\n\t";
-    for ( auto i = 0; i < 9; i++ ) {
-        std::cout << predictions[ i ] << " ";
-    }
-    std::cout << std::endl << "Simplex: CE library predictions:\n\t";
-    for ( auto i = 0; i < 9; i++ ) {
-        std::cout << CEpredictions[ i ] << " ";
-    } std::cout << std::endl;
+    //-------------------------------------------------------------
+    // CE SMap  *** NOTE: lib = "1 11" works
+    //-------------------------------------------------------------
+    SMapValues SMapPart = SMap ( circleData, "./data/", "",
+                                 "1 10", "101 198", 2, 1, 0, -1, 4, 0,
+                                 "x y", "x", "", "",
+                                 true, false, false, valid_lib );
 
-    // CE SMap 
-    CESMap = SMap ( circleData,
-                    "./data/", "",
-                    " 1 100 ", "101 198", 2, 1, 0, -1, 4, 0,
+    // Run with valid_lib that is 0-9
+    CESMap = SMap ( circleData, "./data/", "",
+                    "1 100", "101 198", 2, 1, 0, -1, 4, 0,
                     "x y", "x", "CELib_Smap_circle_coef.csv", "",
                     true, false, false, valid_lib );
 
-    // Should be differences in prediction
-    predictions   = fullSMap.predictions.VectorColumnName( "Predictions" );
-    CEpredictions = CESMap.predictions.VectorColumnName  ( "Predictions" );
+    // Should PASS
+    MakeTest ( "SMap: Part valid", CELib, partLib );
     
-    std::cout << std::endl << "SMap: Full library predictions:\n\t";
+#ifdef RUN_ALL
+    // Should be no differences in coefficients
+    auto coefficients1 = SMapPart.coefficients.VectorColumnName( "C0" );
+    auto coefficients2 = CESMap.coefficients.VectorColumnName  ( "C0" );
+    
+    std::cout << std::endl << "SMap: Partial library coefficients C0:\n\t";
     for ( auto i = 90; i < 99; i++ ) {
-        std::cout << predictions[ i ] << " ";
+        std::cout << coefficients1[ i ] << " ";
     }
-    std::cout << std::endl << "SMap: CE library predictions:\n\t";
+    std::cout << std::endl << "SMap: CE library coefficients C0:\n\t";
     for ( auto i = 90; i < 99; i++ ) {
-        std::cout << CEpredictions[ i ] << " ";
+        std::cout << coefficients2[ i ] << " ";
     } std::cout << std::endl;
-
+#endif
 }
