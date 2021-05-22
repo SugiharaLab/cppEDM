@@ -49,10 +49,12 @@ int main() {
     }
 
     //-------------------------------------------------------------------
-    // Limit lib to the same as valid_lib *** NOTE: lib = "1 11" works
+    // Limit lib to the same as valid_lib *** NOTE: lib = "1 11"
+    // since valid_lib [0:9] equates to lib = "1 10", but... Tp = 1
+    // means the 10th lib row is skipped. 
     //-------------------------------------------------------------------
     auto partLib = Simplex ( "../data/", "block_3sp.csv", "./data/", "",
-                             "1 10","100 198", 3, 1, 0, -1, 0,
+                             "1 11","100 198", 3, 1, 0, -1, 0,
                              "x_t y_t z_t", "x_t", true, false, false );
 
     // Run with valid_lib that is 0-9
@@ -62,13 +64,13 @@ int main() {
                       valid_lib );
 
     // Should PASS
-    MakeTest ( "Simplex: Part valid", CELib, partLib );
+    MakeTest ( "Simplex: CE partial valid", CELib, partLib );
     
     //-------------------------------------------------------------
-    // CE SMap  *** NOTE: lib = "1 11" works
+    // CE SMap  *** NOTE: lib = "1 11" for Tp = 1, valid_lib [0:9] 
     //-------------------------------------------------------------
     SMapValues SMapPart = SMap ( circleData, "./data/", "",
-                                 "1 10", "101 198", 2, 1, 0, -1, 4, 0,
+                                 "1 11", "101 198", 2, 1, 0, -1, 4, 0,
                                  "x y", "x", "", "",
                                  true, false, false, valid_lib );
 
@@ -79,7 +81,7 @@ int main() {
                     true, false, false, valid_lib );
 
     // Should PASS
-    MakeTest ( "SMap: Part valid", CELib, partLib );
+    MakeTest ( "SMap: CE partial valid", CELib, partLib );
     
 #ifdef RUN_ALL
     // Should be no differences in coefficients
