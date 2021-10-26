@@ -14,6 +14,7 @@ int main( int argc, char *argv[] ) {
     std::string fileOut         = "ccm-out.csv";
     int         E               = 3;
     int         Tp              = 0;
+    int         tau             = -1;
     int         exclusionRadius = 0;
     std::string libSizes        = "10 75 5";
     int         sample          = 0;
@@ -27,16 +28,17 @@ int main( int argc, char *argv[] ) {
     if ( argc > 4 ) { fileOut    = argv[4]; }
     if ( argc > 5 ) { std::stringstream ss( argv[5] ); ss >> E;          }
     if ( argc > 6 ) { std::stringstream ss( argv[6] ); ss >> Tp;         }
-    if ( argc > 7 ) { std::stringstream ss( argv[7] ); ss >> exclusionRadius; }
-    if ( argc > 8 ) { libSizes   = argv[8];                              }
-    if ( argc > 9 ) { std::stringstream ss( argv[9] ); ss >> sample;     }
-    if ( argc > 10 ){ random      = ( *argv[10] == 'y' ? true : false ); }
-    if ( argc > 11 ){ replacement = ( *argv[11] == 'y' ? true : false ); }
-    if ( argc > 12 ){ verbose     = ( *argv[12] == 'y' ? true : false ); }
+    if ( argc > 7 ) { std::stringstream ss( argv[7] ); ss >> tau;        }
+    if ( argc > 8 ) { std::stringstream ss( argv[8] ); ss >> exclusionRadius; }
+    if ( argc > 9 ) { libSizes   = argv[9];                              }
+    if ( argc > 10 ){ std::stringstream ss( argv[10] ); ss >> sample;    }
+    if ( argc > 11 ){ random      = ( *argv[11] == 'y' ? true : false ); }
+    if ( argc > 12 ){ replacement = ( *argv[12] == 'y' ? true : false ); }
+    if ( argc > 13 ){ verbose     = ( *argv[13] == 'y' ? true : false ); }
 
     if ( verbose ) {
         std::cout << dataFile << " " << columns << " " << target
-                  << " E " << E << " Tp " << Tp
+                  << " E " << E << " Tp " << Tp << " tau " << tau
                   << " exclusionRadius " << exclusionRadius 
                   << " libSizes " << libSizes
                   << " sample " << sample << " random " << random
@@ -51,7 +53,7 @@ int main( int argc, char *argv[] ) {
                                 E,
                                 Tp,
                                 0,            // knn,
-                                -1,           // tau,
+                                tau,          // tau,
                                 exclusionRadius,
                                 columns,
                                 target,
@@ -72,12 +74,14 @@ int main( int argc, char *argv[] ) {
         std::forward_list< DataFrame< double > > predList =
             ccmOut.CrossMap1.Predictions;
         DataFrame<double> predResult = *predList.begin();
-        predResult.MaxRowPrint() = 5;
+        predResult.MaxRowPrint() = predResult.NRows();
 
         if ( verbose ) {
             std::cout << dataFrame;
             std::cout << predictStats;
             std::cout << predResult;
+
+            predictStats.WriteData( "./", "ccm-stats-out.csv" );
         }
     }
     
