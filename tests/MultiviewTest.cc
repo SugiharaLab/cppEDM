@@ -32,6 +32,7 @@ int main( int argc, char *argv[] ) {
                                     0,             // exclusionRadius
                                     true,          // trainLib
                                     false,         // excludeTarget
+                                    false,         // parameterList
                                     false,         // verbose,
                                     1 );           // nThreads
 

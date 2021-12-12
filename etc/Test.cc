@@ -66,7 +66,7 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         // embedded = true : data file is multivariable embedding
         //----------------------------------------------------------
-        DataFrame<double> dataFrame = 
+        SimplexValues S = 
             Simplex( "../data/",           // pathIn
                      "block_3sp.csv",      // dataFile
                      "./",                 // pathOut
@@ -83,11 +83,11 @@ int main( int argc, char *argv[] ) {
                      true,                 // embedded
                      false,                // const_predict
                      true );               // verbose 
-        std::cout << dataFrame;
+        std::cout << S.predictions;
 
         VectorError ve = ComputeError(
-            dataFrame.VectorColumnName( "Observations" ),
-            dataFrame.VectorColumnName( "Predictions"  ) );
+            S.predictions.VectorColumnName( "Observations" ),
+            S.predictions.VectorColumnName( "Predictions"  ) );
 
         std::cout << "Simplex embedded block_3sp.csv:\n";
         std::cout << "rho " << ve.rho << "  RMSE " << ve.RMSE
@@ -99,7 +99,7 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         // embedded = false : Simplex embeds data file columns to E
         //----------------------------------------------------------
-        DataFrame<double> dataFrameEmbed = 
+        SimplexValues S2 = 
             Simplex( "../data/",           // pathIn
                      "block_3sp.csv",      // dataFile
                      "./",                 // pathOut
@@ -117,12 +117,12 @@ int main( int argc, char *argv[] ) {
                      false,                // const_predict
                      true );               // verbose 
 
-        dataFrameEmbed.MaxRowPrint() = 12; // Set number of rows to print
-        std::cout << dataFrameEmbed;
+        S2.predictions.MaxRowPrint() = 12; // Set number of rows to print
+        std::cout << S.predictions;
 
         VectorError ve2 = ComputeError(
-            dataFrameEmbed.VectorColumnName( "Observations" ),
-            dataFrameEmbed.VectorColumnName( "Predictions"  ) );
+            S2.predictions.VectorColumnName( "Observations" ),
+            S2.predictions.VectorColumnName( "Predictions"  ) );
 
         std::cout << "Simplex E=3 block_3sp.csv:\n";
         std::cout << "rho " << ve2.rho << "  RMSE " << ve2.RMSE

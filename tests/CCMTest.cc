@@ -33,6 +33,7 @@ int main () {
                             false,      // replacement
                             0,          // seed
                             false,      // includeData
+                            false,      // parameterList
                             false );    // verbose
     
     // Load cppEDM output
@@ -93,6 +94,7 @@ int main () {
                                    false,        // replacement
                                    0,            // seed
                                    false,        // includeData
+                                   false,        // parameterList
                                    false );      // verbose
         
         // Load cppEDM output

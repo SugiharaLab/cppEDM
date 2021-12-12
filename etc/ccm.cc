@@ -21,20 +21,22 @@ int main( int argc, char *argv[] ) {
     bool        random          = false;     // 'y' = true
     bool        replacement     = false;     // 'y' = true
     bool        verbose         = false;     // 'y' = true
-    
+    bool        parameterList   = false;     // 'y' = true
+
     if ( argc > 1 ) { dataFile   = argv[1]; }
     if ( argc > 2 ) { columns    = argv[2]; }
     if ( argc > 3 ) { target     = argv[3]; }
     if ( argc > 4 ) { fileOut    = argv[4]; }
-    if ( argc > 5 ) { std::stringstream ss( argv[5] ); ss >> E;          }
-    if ( argc > 6 ) { std::stringstream ss( argv[6] ); ss >> Tp;         }
-    if ( argc > 7 ) { std::stringstream ss( argv[7] ); ss >> tau;        }
+    if ( argc > 5 ) { std::stringstream ss( argv[5] ); ss >> E;            }
+    if ( argc > 6 ) { std::stringstream ss( argv[6] ); ss >> Tp;           }
+    if ( argc > 7 ) { std::stringstream ss( argv[7] ); ss >> tau;          }
     if ( argc > 8 ) { std::stringstream ss( argv[8] ); ss >> exclusionRadius; }
-    if ( argc > 9 ) { libSizes   = argv[9];                              }
-    if ( argc > 10 ){ std::stringstream ss( argv[10] ); ss >> sample;    }
-    if ( argc > 11 ){ random      = ( *argv[11] == 'y' ? true : false ); }
-    if ( argc > 12 ){ replacement = ( *argv[12] == 'y' ? true : false ); }
-    if ( argc > 13 ){ verbose     = ( *argv[13] == 'y' ? true : false ); }
+    if ( argc > 9 ) { libSizes   = argv[9];                                }
+    if ( argc > 10 ){ std::stringstream ss( argv[10] ); ss >> sample;      }
+    if ( argc > 11 ){ random        = ( *argv[11] == 'y' ? true : false ); }
+    if ( argc > 12 ){ replacement   = ( *argv[12] == 'y' ? true : false ); }
+    if ( argc > 13 ){ verbose       = ( *argv[13] == 'y' ? true : false ); }
+    if ( argc > 14 ){ parameterList = ( *argv[14] == 'y' ? true : false ); }
 
     if ( verbose ) {
         std::cout << dataFile << " " << columns << " " << target
@@ -42,9 +44,10 @@ int main( int argc, char *argv[] ) {
                   << " exclusionRadius " << exclusionRadius 
                   << " libSizes " << libSizes
                   << " sample " << sample << " random " << random
-                  << " replacement " << replacement << std::endl;
+                  << " replacement " << replacement
+                  << " parameterList " << parameterList << std::endl;
     }
-    
+
     try {        
         CCMValues ccmOut = CCM( "./",         // pathIn,
                                 dataFile,
@@ -63,6 +66,7 @@ int main( int argc, char *argv[] ) {
                                 replacement,
                                 0,            // seed,
                                 true,         // includeData
+                                parameterList,
                                 verbose );
 
         DataFrame<double> dataFrame = ccmOut.AllLibStats;

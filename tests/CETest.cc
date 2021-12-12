@@ -25,7 +25,8 @@ int main() {
                              valid_lib );
 
     // Should PASS
-    MakeTest ( "Simplex: CE full valid", fullLib, CELib );
+    MakeTest ( "Simplex: CE full valid",
+               fullLib.predictions, CELib.predictions );
 
     // Test of CE validLib as all true... should be no change
     SMapValues fullSMap = SMap ( circleData, "./data/", "",
@@ -64,7 +65,8 @@ int main() {
                       valid_lib );
 
     // Should PASS
-    MakeTest ( "Simplex: CE partial valid", CELib, partLib );
+    MakeTest ( "Simplex: CE partial valid",
+               CELib.predictions, partLib.predictions );
     
     //-------------------------------------------------------------
     // CE SMap  *** NOTE: lib = "1 11" for Tp = 1, valid_lib [0:9] 
@@ -81,7 +83,8 @@ int main() {
                     true, false, false, valid_lib );
 
     // Should PASS
-    MakeTest ( "SMap: CE partial valid", CELib, partLib );
+    MakeTest ( "SMap: CE partial valid",
+               CELib.predictions, partLib.predictions );
     
 #ifdef RUN_ALL
     // Should be no differences in coefficients

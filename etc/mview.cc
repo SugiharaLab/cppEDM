@@ -22,6 +22,7 @@ int main( int argc, char *argv[] ) {
     bool        trainLib      = false; // 'y' = true
     bool        excludeTarget = false; // 'y' = true
     bool        verbose       = true;  // 'y' = true
+    bool        parameterList = false; // 'y' = true
     int         nThreads      = 1;
 
     if ( argc > 1 ) { dataFile            = argv[1]; }
@@ -38,7 +39,8 @@ int main( int argc, char *argv[] ) {
     if ( argc > 12) { trainLib      = ( *argv[12] == 'y' ? true : false ); }
     if ( argc > 13) { excludeTarget = ( *argv[13] == 'y' ? true : false ); }
     if ( argc > 14) { verbose       = ( *argv[14] == 'y' ? true : false ); }
-    if ( argc > 15) { std::stringstream ss( argv[15] ); ss >> nThreads;    }
+    if ( argc > 15) { parameterList = ( *argv[15] == 'y' ? true : false ); }
+    if ( argc > 16) { std::stringstream ss( argv[16] ); ss >> nThreads;    }
 
     if ( verbose ) {
         std::cout << dataFile << "  lib: " << lib << "  pred: " << pred
@@ -47,7 +49,8 @@ int main( int argc, char *argv[] ) {
                   << "  multiview: " << multiview
                   << "  exclusionR: " << exclusionR
                   << "  trainLib: " << trainLib
-                  << "  excludeTarget: " << excludeTarget << std::endl;
+                  << "  excludeTarget: " << excludeTarget
+                  << "  parameterList: " << parameterList << std::endl;
     }
 
     try {
@@ -72,7 +75,8 @@ int main( int argc, char *argv[] ) {
                        exclusionR,    // exclusionRadius
                        trainLib,      // trainLib
                        excludeTarget, // excludeTarget
-                       false,         // verbose,
+                       parameterList, // parameterList
+                       false,         // verbose
                        nThreads );    // nThreads
 
         DataFrame< double > MVPredictions = MV.Predictions;
