@@ -547,7 +547,10 @@ std::valarray< double > Lapack_SVD( int     m, // rows in matrix
 
     if ( info ) {
         std::stringstream errMsg;
-        errMsg << "Lapack_SVD(): dgelss failed. Info: " << info;
+        errMsg << "Lapack_SVD(): dgelss failed. Info: " << info << std::endl
+               << "The algorithm for computing the SVD failed to converge. "
+               << info << " off-diagonal elements of an intermediate "
+               << "bidiagonal form did not converge to zero.\n";
         throw std::runtime_error( errMsg.str() );
     }
 
