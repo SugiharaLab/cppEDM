@@ -61,10 +61,12 @@ int main( int argc, char *argv[] ) {
                                 10,            // maxE       <<<<< CONSTANT
                                 Tp,            // Tp
                                 -1,            // tau        <<<<< CONSTANT
+                                exclusionR,    // exclusionRadius
                                 columns,       // colNames
                                 target,        // targetName
                                 embedded,      // embedded
                                 verbose,       // verbose
+                                std::vector<bool>(), // validLib
                                 nThreads );    // nThreads
 
             std::cout << "EmbedDimension:\n";
@@ -86,10 +88,12 @@ int main( int argc, char *argv[] ) {
                                  10,            // maxTp      <<<<< CONSTANT
                                  E,             // E
                                  -1,            // tau        <<<<< CONSTANT
+                                 exclusionR,    // exclusionRadius
                                  columns,       // colNames
                                  target,        // targetName
                                  embedded,      // embedded
                                  verbose,       // verbose
+                                 std::vector<bool>(), // validLib
                                  nThreads );    // nThreads
 
             std::cout << "PredictInterval:\n";
@@ -113,10 +117,12 @@ int main( int argc, char *argv[] ) {
                                   Tp,            // Tp
                                   0,             // knn
                                   -1,            // tau         <<<<< CONSTANT
+                                  exclusionR,    // exclusionRadius
                                   columns,       // colNames
                                   target,        // targetName
                                   embedded,      // embedded
                                   verbose,       // verbose
+                                  std::vector<bool>(), // validLib
                                   nThreads );    // nThreads
 
             NL.MaxRowPrint() = 15;

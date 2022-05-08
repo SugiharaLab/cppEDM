@@ -280,10 +280,12 @@ int main( int argc, char *argv[] ) {
                             10,                 // maxE
                             1,                  // Tp
                             -1,                 // tau
+                            0,                  // exclusionRadius
                             "TentMap",          // colNames
                             "",                 // targetName
                             false,              // embedded
                             false,              // verbose
+                            std::vector<bool>(),// validLib
                             4 );                // nThreads 
 
         std::cout << "EmbedDimension TentMap_rEDM.csv:\n";
@@ -303,10 +305,12 @@ int main( int argc, char *argv[] ) {
                              10,                     // maxTp
                              2,                      // E
                              -1,                     // tau
+                             0,                      // exclusionRadius
                              "TentMap",              // colNames
                              "",                     // targetName,
                              false,                  // embedded
                              false,                  // verbose
+                             std::vector<bool>(),    // validLib
                              4 );                    // nThreads
 
         std::cout << "PredictInterval TentMap_rEDM.csv:\n";
@@ -317,22 +321,24 @@ int main( int argc, char *argv[] ) {
         //----------------------------------------------------------
         //----------------------------------------------------------
         DataFrame< double > NL =
-            PredictNonlinear( "../data/",  // pathIn,
+            PredictNonlinear( "../data/",                // pathIn,
                               "TentMapNoise_rEDM.csv",   // dataFile,
-                              "./",        // pathOut,
+                              "./",                      // pathOut,
                               "PredictNonlinearOut.csv", // predictFile,
-                              "1 100",     // lib,
-                              "201 500",   // pred,
-                              "",          // theta,
-                              2,           // E,
-                              1,           // Tp,
-                              0,           // knn,
-                              -1,          // tau,
-                              "TentMap",   // colNames,
-                              "",          // targetName,
-                              false,       // embedded,
-                              false,       // verbose,
-                              4 );         // nThreads
+                              "1 100",             // lib,
+                              "201 500",           // pred,
+                              "",                  // theta,
+                              2,                   // E,
+                              1,                   // Tp,
+                              0,                   // knn,
+                              -1,                  // tau,
+                              0,                   // exclusionRadius
+                              "TentMap",           // colNames,
+                              "",                  // targetName,
+                              false,               // embedded,
+                              false,               // verbose,
+                              std::vector<bool>(), // validLib
+                              4 );                 // nThreads
 
         NL.MaxRowPrint() = 15;
         std::cout << "PredictNonlinear TentMapNoise_rEDM.csv:\n";
