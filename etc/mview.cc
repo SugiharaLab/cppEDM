@@ -90,12 +90,22 @@ int main( int argc, char *argv[] ) {
                   << "  RMSE " << vemv.RMSE << std::endl;
 
         if ( verbose ) {
-            // Table of columns, names, rho, MAE RMSE
+            // Columns, rho, MAE RMSE
+            std::cout << MV.ComboRho;
             std::cout << std::endl;
-            std::vector< std::string > table = MV.ComboRhoTable;
-            for ( size_t row = 0; row < table.size(); row++ ) {
-                std::cout << table[ row ] << std::endl;
-            }
+
+            std::map< std::string, std::vector< std::string > >
+                colNames = MV.ColumnNames;
+
+            for ( auto cit = colNames.begin(); cit != colNames.end(); ++cit ){
+                std::cout << cit->first << ": ";
+                std::vector< std::string > columnNames = cit->second;
+                for ( auto nit  = columnNames.begin();
+                      nit != columnNames.end(); ++nit ) {
+                    std::cout << *nit << " ";
+                }
+                std::cout << std::endl;
+            }   std::cout << std::endl;
         }
     }
 
