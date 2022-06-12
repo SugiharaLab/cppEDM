@@ -218,13 +218,13 @@ void EDM::FillTimes( std::vector< std::string > & timeOut )
 
             // Now, generate future times
             // Try to parse the last time vector string as a date or datetime
-            // if dtinfo.unrecognized_fmt = true; it is not a date or datetime
-            datetime_info dtinfo = ParseDatetime( data.Time()[ max_pred_i ] );
+            // if dtinfo.unrecognized = true; it is not a date or datetime
+            DatetimeInfo dtinfo = ParseDatetime( data.Time()[ max_pred_i ] );
 
             for ( int i = 0; i < parameters.Tp; i++ ) {
                 std::stringstream tss;
 
-                if ( dtinfo.unrecognized_fmt ) {
+                if ( dtinfo.unrecognized ) {
                     // Numeric so add Tp
                     double time_delta = std::stof( allTime[ 1 ] ) -
                                         std::stof( allTime[ 0 ] );
@@ -283,13 +283,13 @@ void EDM::FillTimes( std::vector< std::string > & timeOut )
 
             // Now, generate past times
             // Try to parse the first time vector string as a date or datetime
-            // if dtinfo.unrecognized_fmt = true; it is not a date or datetime
-            datetime_info dtinfo = ParseDatetime( data.Time()[ 0 ] );
+            // if dtinfo.unrecognized = true; it is not a date or datetime
+            DatetimeInfo dtinfo = ParseDatetime( data.Time()[ 0 ] );
 
             for ( int i = (int) TpMagnitude; i > 0; i-- ) {
                 std::stringstream tss;
 
-                if ( dtinfo.unrecognized_fmt ) {
+                if ( dtinfo.unrecognized ) {
                     // Numeric so subtract i * Tp
                     double time_delta = std::stof( allTime[ 1 ] ) -
                                         std::stof( allTime[ 0 ] );
