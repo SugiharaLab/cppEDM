@@ -14,7 +14,7 @@ echo "------- Simplex ---------------------------------------------"
 # head out.csv -n 3
 # tail out.csv -n 2
 echo "------- CCM -------------------------------------------------"
-./ccm ../data/sardine_anchovy_sst.csv anchovy np_sst ccm-out.csv 3 0 -1 0 "10 75 5" 100 y n n n
+./ccm ../data/sardine_anchovy_sst.csv anchovy np_sst ccm-out.csv 3 0 -1 0 "10 75 5" 100 n y n n n
 head ccm-out.csv -n 2
 tail ccm-out.csv -n 2
 echo "------- Multiview -------------------------------------------"

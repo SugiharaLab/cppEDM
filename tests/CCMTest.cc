@@ -7,14 +7,14 @@ int main () {
     // Declare DataFrame to hold the valid output
     DataFrame< double > cppOutput;
     DataFrame< double > output;
-    
+
     //---------------------------------------------------------
     // Load cppEDM valid output
     //---------------------------------------------------------
     cppOutput = DataFrame < double > ( "./data/",
                                        "CCM_anch_sst_cppEDM_valid.csv",
                                        true );  // noTime = true
-    
+
     // Generate new cpp output: sequential sampling for reproduceability
     CCMValues ccmOut = CCM( "../data/",                // pathIn
                             "sardine_anchovy_sst.csv", // dataFile
@@ -32,10 +32,11 @@ int main () {
                             false,      // random
                             false,      // replacement
                             0,          // seed
+                            false,      // embedded
                             false,      // includeData
                             false,      // parameterList
                             false );    // verbose
-    
+
     // Load cppEDM output
     output = DataFrame < double > ( "./data/",
                                     "CCM_anch_sst_cppEDM.csv",
@@ -49,22 +50,22 @@ int main () {
     //------------------------------------------------------------------
     std::vector< std::string > columns;
     std::vector< std::string > targets;
-    
+
     columns.push_back( "Thrips_imaginis" );
     targets.push_back( "maxT_degC"       );
-    
+
     columns.push_back( "Thrips_imaginis" );
     targets.push_back( "Rain_mm"         );
-    
+
     columns.push_back( "Thrips_imaginis" );
     targets.push_back( "Season"          );
-    
+
     columns.push_back( "maxT_degC" );
     targets.push_back( "Rain_mm"   );
-    
+
     columns.push_back( "maxT_degC" );
     targets.push_back( "Season"    );
-    
+
     columns.push_back( "Rain_mm" );
     targets.push_back( "Season"  );
 
@@ -72,7 +73,7 @@ int main () {
     std::vector< size_t > cols1( { 0, 0, 0, 1, 1, 2 } );
     std::vector< size_t > rows2( { 0, 0, 0, 1, 1, 2 } );
     std::vector< size_t > cols2( { 1, 2, 3, 2, 3, 3 } );
-    
+
     DataFrame< double > ccmMatrix( 4, 4,
                                    "Thrips_imaginis maxT_degC Rain_mm Season" );
 
@@ -93,6 +94,7 @@ int main () {
                                    true,         // random
                                    false,        // replacement
                                    0,            // seed
+                                   false,        // embedded
                                    false,        // includeData
                                    false,        // parameterList
                                    false );      // verbose
@@ -108,7 +110,7 @@ int main () {
     }
 
     // ccmMatrix.WriteData( "./data/", "Thrips_CMmatrix_valid.csv" );
-    
+
     //---------------------------------------------------------
     // Load cppEDM valid output
     //---------------------------------------------------------

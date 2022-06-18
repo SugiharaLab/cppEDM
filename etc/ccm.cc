@@ -18,6 +18,7 @@ int main( int argc, char *argv[] ) {
     int         exclusionRadius = 0;
     std::string libSizes        = "10 75 5";
     int         sample          = 0;
+    bool        embedded        = false;     // 'y' = true
     bool        random          = false;     // 'y' = true
     bool        replacement     = false;     // 'y' = true
     bool        verbose         = false;     // 'y' = true
@@ -33,18 +34,19 @@ int main( int argc, char *argv[] ) {
     if ( argc > 8 ) { std::stringstream ss( argv[8] ); ss >> exclusionRadius; }
     if ( argc > 9 ) { libSizes   = argv[9];                                }
     if ( argc > 10 ){ std::stringstream ss( argv[10] ); ss >> sample;      }
-    if ( argc > 11 ){ random        = ( *argv[11] == 'y' ? true : false ); }
-    if ( argc > 12 ){ replacement   = ( *argv[12] == 'y' ? true : false ); }
-    if ( argc > 13 ){ verbose       = ( *argv[13] == 'y' ? true : false ); }
-    if ( argc > 14 ){ parameterList = ( *argv[14] == 'y' ? true : false ); }
+    if ( argc > 11 ){ embedded      = ( *argv[11] == 'y' ? true : false ); }
+    if ( argc > 12 ){ random        = ( *argv[12] == 'y' ? true : false ); }
+    if ( argc > 13 ){ replacement   = ( *argv[13] == 'y' ? true : false ); }
+    if ( argc > 14 ){ verbose       = ( *argv[14] == 'y' ? true : false ); }
+    if ( argc > 15 ){ parameterList = ( *argv[15] == 'y' ? true : false ); }
 
     if ( verbose ) {
         std::cout << dataFile << " " << columns << " " << target
                   << " E " << E << " Tp " << Tp << " tau " << tau
                   << " exclusionRadius " << exclusionRadius 
                   << " libSizes " << libSizes
-                  << " sample " << sample << " random " << random
-                  << " replacement " << replacement
+                  << " sample " << sample << " embedded " << embedded
+                  << " random " << random << " replacement " << replacement
                   << " parameterList " << parameterList << std::endl;
     }
 
@@ -56,15 +58,16 @@ int main( int argc, char *argv[] ) {
                                 E,
                                 Tp,
                                 0,            // knn,
-                                tau,          // tau,
+                                tau,
                                 exclusionRadius,
                                 columns,
                                 target,
-                                libSizes,     // libSizes_str,
+                                libSizes,
                                 sample,
                                 random,
                                 replacement,
                                 0,            // seed,
+                                embedded,
                                 true,         // includeData
                                 parameterList,
                                 verbose );
@@ -78,12 +81,12 @@ int main( int argc, char *argv[] ) {
         std::forward_list< DataFrame< double > > predList =
             ccmOut.CrossMap1.Predictions;
         DataFrame<double> predResult = *predList.begin();
-        predResult.MaxRowPrint() = predResult.NRows();
+        predResult.MaxRowPrint() = 5; // predResult.NRows();
 
         if ( verbose ) {
             std::cout << dataFrame;
-            std::cout << predictStats;
-            std::cout << predResult;
+            //std::cout << predictStats;
+            //std::cout << predResult;
 
             predictStats.WriteData( "./", "ccm-stats-out.csv" );
         }

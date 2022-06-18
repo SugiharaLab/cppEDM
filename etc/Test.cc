@@ -260,6 +260,7 @@ int main( int argc, char *argv[] ) {
                  true,                      // random
                  false,                     // replacement
                  0,                         // seed
+                 false,                     // embedded
                  false,                     // includeData
                  true );                    // verbose
 
