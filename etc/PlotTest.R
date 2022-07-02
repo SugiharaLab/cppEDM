@@ -49,6 +49,7 @@ Clean = function( path = './' ) {
              "smap_circ_coeff.csv",
              "smap_circle.csv",
              "ccm-out.csv",
+             "Lorenz_MVE_CCM.csv",
              "EmbedDimOut.csv",
              "PredictIntervalOut.csv",
              "PredictNonlinearOut.csv",

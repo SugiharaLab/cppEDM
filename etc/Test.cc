@@ -13,13 +13,14 @@
 //    > Run()
 //    > Clean() 
 //----------------------------------------------------------------
-//#define EMBED_TEST
+#define EMBED_TEST
 #define SIMPLEX_TEST1
 #define SIMPLEX_TEST2
 #define MULTIVIEW_TEST
 #define SMAP_TEST1
 #define SMAP_TEST2
-#define CCM_TEST
+#define CCM_TEST1
+#define CCM_TEST2
 #define EMBED_DIMENSION
 #define PREDICT_INTERVAL
 #define PREDICT_NONLINEAR
@@ -44,10 +45,20 @@ int main( int argc, char *argv[] ) {
         // based on column names in Parameters, then pass to Embed.
         // Could bypass Parameters and select dataFrame with explicit colNames
         //----------------------------------------------------------
-        Parameters param = Parameters( Method::Simplex,
-                                       "../data/", "block_3sp.csv", "", "",
-                                       "1 100", "190 198", 2, 1, 4, 1, 0, 0,
-                                       "x_t y_t z_t" );
+        Parameters param = Parameters( Method::Simplex,  // method
+                                       "../data/",       // pathIn
+                                       "block_3sp.csv",  // dataFile
+                                       "",               // pathOut
+                                       "",               // predictOutputFile
+                                       "1 100",          // lib_str
+                                       "190 198",        // pred_str
+                                       2,                // E
+                                       1,                // Tp
+                                       0,                // knn
+                                       -1,               // tau
+                                       0,                // theta
+                                       0,                // exclusionRadius
+                                       "x_t y_t z_t" );  // columns_str
         std::cout << param;
 
         DataFrame< double > dio ( param.pathIn, param.dataFile );
@@ -240,10 +251,10 @@ int main( int argc, char *argv[] ) {
                   << "  MAE " << vesm2.MAE << std::endl << std::endl;
 #endif
 
-#ifdef CCM_TEST
+#ifdef CCM_TEST1
         //----------------------------------------------------------
         //----------------------------------------------------------
-        CCMValues CCMVals = 
+        CCMValues CCMVals1 = 
             CCM( "../data/",                // pathIn
                  "sardine_anchovy_sst.csv", // dataFile
                  "./",                      // pathOut
@@ -265,7 +276,35 @@ int main( int argc, char *argv[] ) {
                  true );                    // verbose
 
         std::cout << "CCM sardine_anchovy_sst.csv:\n";
-        std::cout << CCMVals.AllLibStats;
+        std::cout << CCMVals1.AllLibStats;
+#endif
+
+#ifdef CCM_TEST2
+        //----------------------------------------------------------
+        //----------------------------------------------------------
+        CCMValues CCMVals2 = 
+            CCM( "../data/",                // pathIn
+                 "LorenzData1000.csv",      // dataFile
+                 "./",                      // pathOut
+                 "Lorenz_MVE_CCM.csv",      // predictFile
+                 3,                         // E
+                 0,                         // Tp
+                 0,                         // knn
+                 -1,                        // tau
+                 0,                         // exclusionRadius
+                 "V1 V2 V3",                // columns
+                 "V5 V4",                   // target
+                 "20 50 100 500 950",       // libSizes_str
+                 5,                         // sample
+                 true,                      // random
+                 false,                     // replacement
+                 0,                         // seed
+                 false,                     // embedded
+                 false,                     // includeData
+                 true );                    // verbose
+
+        std::cout << "Lorenz_MVE_CCM.csv:\n";
+        std::cout << CCMVals2.AllLibStats;
 #endif
 
 #ifdef EMBED_DIMENSION

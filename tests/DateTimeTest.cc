@@ -1,67 +1,111 @@
-//file to test the parsing and incrementing of some datetime std::strings
+// Test parsing and incrementing of datetime std::strings
 
 #include <iostream>
 #include <string>
 #include "TestCommon.h" 
 
-/*
-   TIME FORMATS NEED TO TEST ON:
-   YYYY-MM-DD
-   HH:MM:SS
-   YYYY-MM-DDTHH:MM:SS   (2019-06-30T10:26:10)
-   hh:mm:ss.sss
-*/
+//-----------------------------------------------------
+// FORMATS TESTED:
+//   YYYY-MM-DD
+//   HH:MM:SS
+//   YYYY-MM-DD HH:MM:SS  (2019-06-30 10:26:10)
+//   YYYY-MM-DDTHH:MM:SS  (2019-06-30T10:26:10)
+//
+//   #ifdef SUBSECOND_SUPPORTED hh:mm:ss.sss
+//-----------------------------------------------------
 
-void check_increment_correct( std::string date_str_1, std::string date_str_2, 
-        std::string correct_incremented, int tp ) {
-    std::string output = IncrementDatetime( date_str_1, date_str_2, tp ); 
-    if ( output == correct_incremented ) 
-        std::cout <<"Correct."<<std::endl;
+//-----------------------------------------------------
+// Compare IncrementDatetime() output to correct value
+//-----------------------------------------------------
+void Validate( std::string format,
+               std::string date_str_1,
+               std::string date_str_2, 
+               std::string correct_incremented,
+               int         tp ) {
+
+    std::cout << '\t' << format << ": " << std::flush;
+
+    std::string output = IncrementDatetime( date_str_1, date_str_2, tp );
+
+    if ( output == correct_incremented )
+        std::cout << GREEN_TEXT << "PASSED." << RESET_TEXT << std::endl;
     else 
-        std::cout << "BAD:"<<std::endl
-        << "datetimes are :" << date_str_1 << " and " <<date_str_2
-        << ", increment of tp " << tp << " is " << std::endl
-        << output << "vs" << correct_incremented << "end" << std::endl
-        << "_______________"<<std::endl;
+        std::cout << RED_TEXT << "FAIL. " << RESET_TEXT << std::endl
+                  << "Datetimes:" << date_str_1 << " and " << date_str_2
+                  << ", tp increment: " << tp << std::endl
+                  << "output: " << output
+                  << " expected: " << correct_incremented << std::endl;
 }
 
+//-----------------------------------------------------
 int main() {
 
     std::string date_str_1;
     std::string date_str_2;
 
-    //////////////////testing YYYY-MM-DD//////////////////
-    //difference in a month's unit. note won't be clean in months w date on 
-    //same day cus different num days in months
-    date_str_1 = "2019-01-30";
-    date_str_2 = "2019-02-30";
-    check_increment_correct( date_str_1, date_str_2, "2019-04-02",1 );
-    //differnce in 7 days
+    std::cout << "-------------------------------------------------\n"
+              << "Test: DateTime\n"
+              << "-------------------------------------------------"
+              << std::endl;
+
+    //---------------------------------------------
+    // YYYY-MM-DD
+    //---------------------------------------------
+    // Note different number of days in months
+    // 31 day difference
+    date_str_1 = "2019-01-15";
+    date_str_2 = "2019-02-15";
+    Validate( "YYYY-MM-DD", date_str_1, date_str_2,
+              "2019-03-18", 1 );
+    // 7 day differnce
     date_str_1 = "2019-11-18";
     date_str_2 = "2019-11-25";
-    check_increment_correct( date_str_1, date_str_2, "2019-12-02",1 );
-    //differnce in days - mult of 3 tp of 2
+    Validate( "YYYY-MM-DD", date_str_1, date_str_2,
+              "2019-12-02", 1 );
+    // 3 day difference, tp of 2
     date_str_1 = "2019-01-24";
     date_str_2 = "2019-01-27";
-    check_increment_correct( date_str_1, date_str_2, "2019-02-02",2 );
+    Validate(  "YYYY-MM-DD", date_str_1, date_str_2,
+               "2019-02-02", 2 );
 
-    //////////////////testing HH:MM:SS//////////////////
+    //---------------------------------------------
+    // HH:MM:SS
+    //---------------------------------------------
     date_str_1 = "05:30:20";
     date_str_2 = "05:31:20";
-    check_increment_correct( date_str_1, date_str_2, "05:32:20",1 );
+    Validate( "HH:MM:SS", date_str_1, date_str_2,
+                             "05:32:20", 1 );
+    
     date_str_1 = "12:59:58";
     date_str_2 = "12:59:59";
-    check_increment_correct( date_str_1, date_str_2, "13:00:01",2 );
+    Validate( "HH:MM:SS", date_str_1, date_str_2,
+              "13:00:01", 2 );
 
-    //////////////////testing YYYY-MM-DDTHH:MM:SS///////
+    //---------------------------------------------
+    // YYYY-MM-DD HH:MM:SS
+    //---------------------------------------------
+    date_str_1 = "2019-06-30 23:59:58";
+    date_str_2 = "2019-06-30 23:59:59";
+    Validate( "YYYY-MM-DD HH:MM:SS", date_str_1, date_str_2,
+              "2019-07-01 00:00:00", 1 );
+
+    //---------------------------------------------
+    // YYYY-MM-DDTHH:MM:SS
+    //---------------------------------------------
     date_str_1 = "2019-06-30T23:59:58";
     date_str_2 = "2019-06-30T23:59:59";
-    check_increment_correct( date_str_1, date_str_2, "2019-07-01T00:00:00",1 );
+    Validate( "YYYY-MM-DDTHH:MM:SS", date_str_1, date_str_2,
+              "2019-07-01T00:00:00", 1 );
 
-    //////////////////testing YYYY-MM-DDTHH:MM:SS///////
+#ifdef SUBSECOND_SUPPORTED
+    //---------------------------------------------
+    // hh:mm:ss.sss
+    //---------------------------------------------
     date_str_1 = "05:30:20.444";
     date_str_2 = "05:30:20.555";
-    check_increment_correct( date_str_1, date_str_2, "05:30:21",1 );
+    Validate( "hh:mm:ss.sss", date_str_1, date_str_2,
+              "05:30:21", 1 );
+#endif
 
     return 0;
 }
