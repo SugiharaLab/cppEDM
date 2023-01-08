@@ -22,6 +22,7 @@ int main( int argc, char *argv[] ) {
     std::string method          = "simplex"; // or smap
     int         theta           = 2;
     int         generateSteps   = 0;
+    bool        generateLibrary = false;
     bool        embedded        = false;     // 'y' = true
     bool        verbose         = false;     // 'y' = true
     bool        const_pred      = false;     // 'y' = true
@@ -41,10 +42,11 @@ int main( int argc, char *argv[] ) {
     if ( argc > 12 ){ method     = argv[12]; }    
     if ( argc > 13 ){ std::stringstream ss( argv[13] ); ss >> theta;         }
     if ( argc > 14 ){ std::stringstream ss( argv[14] ); ss >> generateSteps; }
-    if ( argc > 15 ){ embedded      = ( *argv[15] == 'y' ? true : false );   }
-    if ( argc > 16 ){ verbose       = ( *argv[16] == 'y' ? true : false );   }
-    if ( argc > 17 ){ const_pred    = ( *argv[17] == 'y' ? true : false );   }
-    if ( argc > 18 ){ parameterList = ( *argv[18] == 'y' ? true : false );   }
+    if ( argc > 15 ){ generateLibrary = ( *argv[15] == 'y' ? true : false ); }
+    if ( argc > 16 ){ embedded        = ( *argv[16] == 'y' ? true : false ); }
+    if ( argc > 17 ){ verbose         = ( *argv[17] == 'y' ? true : false ); }
+    if ( argc > 18 ){ const_pred      = ( *argv[18] == 'y' ? true : false ); }
+    if ( argc > 19 ){ parameterList   = ( *argv[19] == 'y' ? true : false ); }
 
     if ( verbose ) {
         std::cout << method << " " << dataFile << " lib " << lib << " pred "
@@ -52,7 +54,8 @@ int main( int argc, char *argv[] ) {
                   << " E " << E << " Tp " << Tp << " tau " << tau
                   << " knn " << knn << " exclusionRadius " << exclusionRadius
                   << " theta " << theta
-                  << " generateSteps " << generateSteps << std::endl;
+                  << " generateSteps " << generateSteps
+                  << " generateLibrary " << generateLibrary << std::endl;
     }
     
     try {
@@ -85,6 +88,7 @@ int main( int argc, char *argv[] ) {
                                        verbose,         // verbose
                                        std::vector<bool>(), // validLib
                                        generateSteps,   // generateSteps
+                                       generateLibrary, // generateLibrary
                                        parameterList ); // parameterList
             
             dataFrame    = S.predictions;
@@ -112,6 +116,7 @@ int main( int argc, char *argv[] ) {
                                   verbose,          // verbose
                                   std::vector<bool>(), // validLib
                                   generateSteps,    // generateSteps
+                                  generateLibrary,  // generateLibrary
                                   parameterList );  // parameterList
 
 
