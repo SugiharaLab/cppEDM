@@ -1,11 +1,11 @@
 #!/bin/bash
 tput reset
 echo "------- Building -------------------------------------------"
-g++ edm.cc -o edm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
-g++ embed.cc -o embed -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
-g++ ccm.cc -o ccm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -lpthread
-g++ mview.cc -o mview -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
-g++ eval.cc -o eval -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+g++ edm.cc -o edm -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
+g++ embed.cc -o embed -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
+g++ ccm.cc -o ccm -g -I../src -L../lib -lstdc++ -lEDM -llapack -lpthread
+g++ mview.cc -o mview -g -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+g++ eval.cc -o eval -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
 echo "------- Embed ----------------------------------------------"
 ./embed
 # head embed_out.csv -n 4

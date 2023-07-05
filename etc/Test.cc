@@ -1,5 +1,5 @@
 
-// g++ Test.cc -o Test -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack -O3
+// g++ Test.cc -o Test -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack -O3
 // -g -DDEBUG
 
 #include "API.h"

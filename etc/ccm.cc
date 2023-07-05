@@ -1,5 +1,5 @@
 
-// g++ ccm.cc -o ccm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -lpthread
+// g++ ccm.cc -o ccm -g -I../src -L../lib -lstdc++ -lEDM -llapack -lpthread
 
 #include "API.h"
 

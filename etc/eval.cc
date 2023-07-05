@@ -1,5 +1,5 @@
 
-// g++ eval.cc -o eval -std=c++11 -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+// g++ eval.cc -o eval -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
 
 #include "API.h"
 

@@ -4,7 +4,7 @@ CC  = g++
 EXE =  SimplexTest TestCommonTest SMapTest CCMTest MultiviewTest DateTimeTest CETest 
 OBJ = $(EXE:=.o) TestCommon.o
 
-CFLAGS = -std=c++11 -D PRINT_DIFFERENCE_IN_RESULTS
+CFLAGS = -D PRINT_DIFFERENCE_IN_RESULTS
 CFLAGS += -g
 LFLAGS = -lstdc++ -L../lib/ -I../src/ -lEDM -lpthread -llapack
 

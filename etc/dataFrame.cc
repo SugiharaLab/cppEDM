@@ -1,5 +1,5 @@
 
-// g++ dataFrame.cc -o dataFrame -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM
+// g++ dataFrame.cc -o dataFrame -g -I../src -L../lib -lstdc++ -lEDM
 
 #include "API.h"
 #include "DataFrame.h"

@@ -1,5 +1,5 @@
 
-// g++ mview.cc -o mview -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
+// g++ mview.cc -o mview -g -I../src -L../lib -lstdc++ -lEDM -lpthread -llapack
 
 #include "API.h"
 

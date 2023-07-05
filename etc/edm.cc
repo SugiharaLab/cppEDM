@@ -1,5 +1,5 @@
 
-// g++ edm.cc -o edm -std=c++11 -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
+// g++ edm.cc -o edm -g -I../src -L../lib -lstdc++ -lEDM -llapack -pthread
 
 #include "API.h"
 
