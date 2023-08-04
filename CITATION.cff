@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: cppEDM
+message: >-
+  If you use this software please cite. Licensed by the
+  University of California for educational, research and
+  non-profit purposes.
+type: software
+authors:
+  - given-names: Joseph
+    family-names: Park
+    email: josephpark@ieee.org
+    orcid: 'https://orcid.org/0000-0001-5411-1409'
+  - given-names: Cameron
+    family-names: Smith
+    orcid: 'https://orcid.org/0000-0003-0020-5607'
+    email: omid.smith.cameron@gmail.com
+  - {}
+identifiers:
+  - type: url
+    value: 'https://github.com/SugiharaLab/cppEDM'
+repository-code: 'https://github.com/SugiharaLab/cppEDM'
+url: 'https://github.com/SugiharaLab/cppEDM#readme'
+abstract: >-
+  C++ implementation of EDM tools. UCSD Scripps Institution
+  of Oceanography, Sugihara Lab.
