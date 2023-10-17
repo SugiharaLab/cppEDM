@@ -43,7 +43,9 @@ clean:
 
 distclean:
 	rm -f TestCommon.o $(OBJ) $(EXE) *~ *.bak
-	rm -f *.csv ./data/*_cppEDM.csv ./data/Smap_circle_coef.csv
+	rm -f *.csv ./data/*_cppEDM.csv
+	rm -f ./data/Smap_circle_coef.csv ./data/Smap_circle_SV.csv
+	rm -f ./data/Smap_nan_circle_*.csv
 	rm -f ./data/CELib_Smap_circle_coef.csv
 
 SRCS = `echo ${OBJ} | sed -e 's/.o /.cc /g'`

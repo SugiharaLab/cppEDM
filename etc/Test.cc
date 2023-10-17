@@ -192,8 +192,8 @@ int main( int argc, char *argv[] ) {
                   0,                    // exclusionRadius
                   "x_t",                // columns
                   "x_t",                // target
-                  "smap_3sp_coeff.csv", // smapFile
-                  "",                   // derivatives
+                  "smap_3sp_coeff.csv", // smapCoefFile
+                  "",                   // smapSVFile
                   false,                // embedded
                   false,                // const_predict
                   true );               // verbose
@@ -231,8 +231,8 @@ int main( int argc, char *argv[] ) {
                   0,                     // exclusionRadius
                   "x y",                 // columns
                   "x",                   // target
-                  "smap_circ_coeff.csv", // smapFile
-                  "",                    // derivatives
+                  "smap_circ_coeff.csv", // smapCoefFile
+                  "",                    // smapSVFile
                   true,                  // embedded 
                   false,                 // const_predict
                   true );                // verbose 
