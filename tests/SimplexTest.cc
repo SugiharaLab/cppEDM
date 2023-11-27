@@ -190,4 +190,21 @@ int main () {
 
     // Comparison
     MakeTest ( "Simplex: disjoint library 3", pyOutput, cppOutput );
+
+    //----------------------------------------------------------
+    // Simplex column names with spaces
+    // NOTE: ',' in columns or target ignores whitespace
+    //----------------------------------------------------------
+    pyOutput = DataFrame < double > ("./data/","columnNameSpace_valid.csv");
+
+    // Generate cpp output
+    S = Simplex ( "./data/", "columnNameSpace.csv",
+                  "./data/", "columnNameSpace_cppEDM.csv",
+                  "1 80", "81 100", 5, 1, 0, -1, 0,
+                  "Var 5 1,", "Var 2,", false, false, false );
+
+    cppOutput = S.predictions;
+
+    // Comparison
+    MakeTest ( "Simplex: column name space", pyOutput, cppOutput );
 }
