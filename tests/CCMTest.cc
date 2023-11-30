@@ -9,6 +9,8 @@ int main () {
     DataFrame< double > output;
 
     //---------------------------------------------------------
+    // Test 1
+    //---------------------------------------------------------
     // Load cppEDM valid output
     //---------------------------------------------------------
     cppOutput = DataFrame < double > ( "./data/",
@@ -44,6 +46,8 @@ int main () {
     // comparison
     MakeTest ( "CCM: sardine_anchovy_sst test", cppOutput, output );
 
+    //---------------------------------------------------------
+    // Test 2
     //------------------------------------------------------------------
     // Thrips
     // Create the ccm matrix of the rEDM-tutorial.Rmd vignette
@@ -120,4 +124,43 @@ int main () {
                                true );  // noTime = true
     // comparison
     MakeTest ( "CCM: Thrips test", thripsValid, ccmMatrix );
+
+    //---------------------------------------------------------
+    // Test 3
+    //---------------------------------------------------------
+    // CCM Multiple columns with spaces in column names
+    // NOTE: Column names with spaces have to use ',' delimiter
+    //---------------------------------------------------------
+    cppOutput = DataFrame < double > ( "./data/",
+                                       "columnSpaceCCM_cppEDM_valid.csv",
+                                       true );  // noTime = true
+
+    // Generate new cpp output: sequential sampling for reproduceability
+    CCMValues ccmOut2 = CCM( "./data/",              // pathIn
+                             "columnNameSpace.csv",  // dataFile
+                             "./data/",              // pathOut
+                             "CCM_columnNameSpace_cppEDM.csv", // predictFile
+                             5,          // E
+                             0,          // Tp
+                             0,          // knn
+                             -1,         // tau
+                             0,          // exclusionRadius
+                             "Var 1,Var3,Var 5 1", // columns
+                             "Var 2,Var 4 A",      // target
+                             "20 50 90", // libSizes_str
+                             1,          // sample
+                             false,      // random
+                             false,      // replacement
+                             0,          // seed
+                             false,      // embedded
+                             false,      // includeData
+                             false,      // parameterList
+                             false );    // verbose
+
+    // Load cppEDM output
+    output = DataFrame < double > ( "./data/",
+                                    "CCM_columnNameSpace_cppEDM.csv",
+                                    true );  // noTime = true
+    // comparison
+    MakeTest ( "CCM: Multiple columns with spaces", cppOutput, output );
 }
